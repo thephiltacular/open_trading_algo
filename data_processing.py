@@ -47,6 +47,7 @@ class Model():
                     # print(name)
 
         self.data = self.data_dict["data"]
+        
         self.calculate_relative_volume_div_by()
         self.calculate_d_relative_volume_up_or_down()
         self.calculate_ADX_filtered_RSI()
@@ -57,7 +58,6 @@ class Model():
         self.calculate_UO_overbought()
         self.calculate_price_high_low_div_atr()
         self.calculate_CMF_trend_d()
-        #need to calculate EMA avgs
         self.calculate_EMA_avgs()
         self.calculate_d_n_high_low()
         self.calculate_d_exp_ma()
@@ -66,9 +66,12 @@ class Model():
         self.calculate_trend_u()
         self.calculate_n_div_price()
         self.calculate_fibonacci_min()
+
+        # Exporting all calculated data in correct order to CSV by day
+        self.export_calculated_data()
         
         ###################################### End __init__
-
+        
 
     def calculate_EMA_avgs(self):
         print("Calculating EMA avgs...")
@@ -109,7 +112,7 @@ class Model():
             ]
         for day, df in self.data.items():
             for r3, r2, r1, p, s1, s2, s3 in inputs:
-                self.data[day]["Fibonacci Minimum","Closest D-Pivot", "Current Pivot Level"] = df.apply(
+                self.data[day][["Fibonacci Minimum", "Closest D-Pivot", "Current Pivot Level"]] = df.apply(
                             lambda row: self.fib_selection_lambda(row[r3],
                                                                   row[r2],
                                                                   row[r1],
@@ -118,8 +121,8 @@ class Model():
                                                                   row[s2],
                                                                   row[s3],
                                                                   row["Description"]),
-                            axis=1)
-            print(self.data[day]["Fibonacci Minimum","Closest D-Pivot", "Current Pivot Level"].head())
+                            axis=1, result_type="expand")
+            print(self.data[day][["Fibonacci Minimum","Closest D-Pivot", "Current Pivot Level"]].head())
 
         print("Done!")
         
@@ -134,7 +137,6 @@ class Model():
             elif minimum == r2:
                 closest = "D-Pivot Fibonacci R2"
                 pivot_level = 2
-            
             elif minimum == r1:
                 closest = "D-Pivot Fibonacci R1"
                 pivot_level = 1
@@ -150,9 +152,15 @@ class Model():
             else:
                 closest = "D-Pivot Fibonacci S3"
                 pivot_level = -3
-            print(minimum, closest, pivot_level)
+            # print(minimum, closest, pivot_level)
+            # row["Fibonacci Minimum"] = minimum
+            # row["Closest D-Pivot"] = closest
+            # row["Current Pivot Level"] = pivot_level
             return minimum, closest, pivot_level
         else:
+            # row["Fibonacci Minimum"] = 0
+            # row["Closest D-Pivot"] = ""
+            # row["Current Pivot Level"] = 0
             return 0, "", 0
             
 
@@ -170,7 +178,7 @@ class Model():
                 self.data[day][col_out] = df.apply(
                             lambda row: self.n_div_lambda(row[numerator], row[denominator], row["Description"]),
                             axis=1)
-            print(self.data[day][cols_to_print])
+            # print(self.data[day][cols_to_print])
         print("Done!")
 
     def n_div_lambda(self, numerator, denominator, description):
@@ -278,7 +286,7 @@ class Model():
                 self.data[day][col_out] = df.apply(
                             lambda row: self.trend_lambda(row[col], row["Description"]),
                             axis=1)
-            print(self.data[day][cols_to_print])
+            # print(self.data[day][cols_to_print])
         print("Done!")
 
     def trend_lambda(self, val, description):
@@ -298,7 +306,7 @@ class Model():
                 self.data[day][col_out] = df.apply(
                             lambda row: self.MACD_lambda(row[upper], row[lower], row["Description"]),
                             axis=1)
-                print(self.data[day][col_out])
+                # print(self.data[day][col_out])
         print("Done!")
         
     def MACD_lambda(self, upper, lower, description):
@@ -734,6 +742,238 @@ class Model():
         print("==========================================\n\n\n\n\n")
         print(self.data_dict)
 
+    def export_calculated_data(self):
+        print("Exporting all calculated columns to csv by day...")
+        cols_to_print = [
+            "Ticker",
+            "Hull Moving Average (9)",
+            "Ichimoku Leading Span A (9, 26, 52, 26)",
+            "Ichimoku Leading Span B (9, 26, 52, 26)",
+            "Parabolic SAR",
+            "Exponential Moving Average (5)",
+            "Exponential Moving Average (10)",
+            "Exponential Moving Average (20)",
+            "Exponential Moving Average (30)",
+            "Exponential Moving Average (50)",
+            "Exponential Moving Average (100)",
+            "Exponential Moving Average (200)",
+            "D-Hull Moving Average (9)",
+            "Ichimoku Span A/B-1",
+            "D-Ichimoku Leading Span A (9, 26, 52, 26)",
+            "D-Ichimoku Leading Span B (9, 26, 52, 26)",
+            "D-Ichimoku Leading Span A/B",
+            "D-Parabolic SAR",
+            "D-Exponential Moving Average (5)",
+            "D-Exponential Moving Average (10)",
+            "D-Exponential Moving Average (20)",
+            "D-Exponential Moving Average (30)",
+            "D-Exponential Moving Average (50)",
+            "D-Exponential Moving Average (100)",
+            "D-Exponential Moving Average (200)",
+            "Fast EMA Avg",
+            "Slow EMA Avg",
+            "EMA Gap Slow-Fast",
+            "D-Exponential Moving Average (5/10)",
+            "D-Exponential Moving Average (10/20)",
+            "D-Exponential Moving Average (20/30)",
+            "D-Exponential Moving Average (20/50)",
+            "D-Exponential Moving Average (50/100)",
+            "D-Exponential Moving Average (100/200)",
+            "Hull MA Trend U",
+            "Ichimoku Trend U",
+            "Parabolic Trend U",
+            "EMA (5) Trend U",
+            "EMA (10) Trend U",
+            "EMA (20) Trend U",
+            "EMA (30) Trend U",
+            "EMA (50) Trend U",
+            # "EMA (100 Trend U",
+            "EMA (200) Trend U",
+            "EMA Avg Trend U",
+            "MACD L>S Mom Up",
+            "CMF Trend U",
+            "MFI Trend U",
+            "Ichimoku Trend D",
+            "Hull MA Trend D",
+            "Parabolic Trend D",
+            "EMA (5) Trend D",
+            "EMA (10) Trend D",
+            "EMA (20) Trend D",
+            "EMA (30) Trend D",
+            "EMA (50) Trend D",
+            "EMA (100) Trend D",
+            "EMA (200) Trend D",
+            "EMA Avg Trend D",
+            "CMF Trend D",
+            "MFI Trend D",
+            # "Aroon Down (14)",
+            # "Aroon Up (14)",
+            "Average Directional Index (14)",
+            # "Positive Directional Indicator (14)",
+            # "Negative Directional Indicator (14)",
+            "Awesome Oscillator",
+            "Bull Bear Power",
+            "Commodity Channel Index (20)",
+            "Momentum (10)",
+            "MACD Level (12, 26)",
+            "MACD Signal (12, 26)",
+            "Rate Of Change (9)",
+            "Relative Strength Index (7)",
+            "Relative Strength Index (14)",
+            "Stochastic RSI Fast (3, 3, 14, 14)",
+            "Stochastic RSI Slow (3, 3, 14, 14)",
+            "Stochastic %K (14, 3, 3)",
+            "Stochastic %D (14, 3, 3)",
+            "Williams Percent Range (14)",
+            "Aroon Up-Down",
+            "D+/ADX",
+            "D-/ADX",
+            "Positive/Negative Directional Indicator (14)",
+            # "Aroon Mom Up",
+            # "ADX Mom Up",
+            # "AO Mom Up",
+            # "CCI Mom Up",
+            # "RSI (7) 50-70 Mom Up",
+            # "RSI (14) 50-70 Mom Up",
+            # "RSI 7/14 Mom Up",
+            # "MACD L Mom Up",
+            # "Aroon Mom Down",
+            # "ADX Mom Down",
+            # "AO Mom Down",
+            # "CCI Mom Down",
+            "RSI (14) 30-50 Mom Down",
+            "RSI (7) 30-50 Mom Down",
+            "RSI 7/14 Mom Down",
+            "MACD L Mom Down",
+            "MACD L<S Mom Down",
+            "Bollinger Price>Upper",
+            "Keltner CH Price>Upper",
+            # "RSI (7) Overbought",
+            # "RSI (14) Overbought",
+            "Stoch K% Overbought",
+            "Stoch D% Overbought",
+            "Willams% Overbought",
+            "CCI Overbought",
+            "CMF Overbought",
+            "MFI Overbought",
+            "Relative Volume Overbought",
+            "Bollinger Price<Lower",
+            "Keltner CH Price<Lower",
+            "RSI (7) Oversold",
+            "RSI (14) Oversold",
+            "Stoch K% Oversold",
+            "Stoch D% Oversold",
+            "Williams% Oversold",
+            "CCI Oversold",
+            "CMF Oversold",
+            "MFI Oversold",
+            "Reative Volume Oversold",
+            "MACD L Signal",
+            "MACD S Signal",
+            "AO Signal",
+            "CCI Signal",
+            "D-Ichimoku Leading Span A/B Signal",
+            "Bollinger Upper/Lower Band (20) Signal",
+            "Donchian CH Price/Lower-1 Signal",
+            "Donchian CH  (Price-Upper)/Upper Signal",
+            "Keltner CH Upper/Lower Band (20) Signal",
+            "Hull MA Signal",
+            "D-Pivot Fibonacci R3",
+            "D-Pivot Fibonacci R2",
+            "D-Pivot Fibonacci R1",
+            "D-Pivot Fibonacci P",
+            "D-Pivot Fibonacci S1",
+            "D-Pivot Fibonacci S2",
+            "D-Pivot Fibonacci S3",
+            "Fibonacci Minimum",
+            "Closest D-Pivot",
+            "Current Pivot Level",
+            "ATR/Price",
+            "ADR/Price",
+            "ADR/ATR (Price)",
+            "Price/VWAP",
+            "Price/VWMA (20)",
+            "D-1-Month Low",
+            "D-3-Month Low",
+            "D-6-Month Low",
+            "D-52 Week Low",
+            "D-1-Month High",
+            "D-3-Month High",
+            "D-6-Month High",
+            "D-52 Week High",
+            "D-1-Month Low/ATR",
+            "D-3-Month Low/ATR",
+            "D-6-Month Low/ATR",
+            "D-52 Week Low/ATR",
+            "D-1-Month High/ATR",
+            "D-3-Month High/ATR",
+            "D-6-Month High/ATR",
+            "D-52 Week High/ATR",
+            "Ultimate Oscillator (7, 14, 28)",
+            "UO Overbought",
+            "UO Trend U",
+            "UO Trend D",
+            "UO Oversold",
+            "Stochastic RSI Fast/Slow (3, 3, 14, 14)",
+            "Stochastic %K/%D (14, 3, 3)",
+            "ADX Filtered RSI (14)",
+            "ADX Filtered RSI (7)",
+            "ADX Filtered RSI (7/14)",
+            "Relative Strength Index (7/14)",
+            "Volatility Month",
+            "Volatility Week",
+            "Volatility",
+            "1-Year Beta",
+            "Bollinger Lower Band (20)",
+            "Bollinger Upper Band (20)",
+            "Donchian Channels Lower Band (20)",
+            "Donchian Channels Upper Band (20)",
+            "Keltner Channels Lower Band (20)",
+            "Keltner Channels Upper Band (20)",
+            "Volatility D/W",
+            "Volatility D/M",
+            "Volatility W/M",
+            "Bollinger Price/Upper-1",
+            "Bollinger Price/Lower-1",
+            "Bollinger Upper/Lower Band (20)",
+            "Keltner CH Price/Upper-1",
+            "Keltner CH Price/Lower-1",
+            "Keltner Channels Upper/Lower Band (20)",
+            "Donchian CH Price/Lower-1",
+            "Donchian CH Price/Upper-1",
+            "Chaikin Money Flow (20)",
+            "Money Flow (14)",
+            "Relative Volume",
+            "Volume",
+            "Average Volume (10 day)",
+            "Average Volume (30 day)",
+            "Average Volume (60 day)",
+            "Average Volume (90 day)",
+            "D-Relative Volume",
+            "Relative Volume/10",
+            "Relative Volume/30",
+            "Relative Volume/60",
+            "Relative Volume/90",
+            "Relative Volume 10/30",
+            "D-Relative Volume-Up",
+            "Relative Volume/10-Up",
+            "Relative Volume/30-Up",
+            "Relative Volume/60-Up",
+            "Relative Volume/90-Up",
+            "D-Relative Volume-Down",
+            "Relative Volume/10-Down",
+            "Relative Volume/30-Down",
+            "Relative Volume/60-Down",
+            "Relative Volume/90-Down",
+            ]
+        out_path = "data_out/"
+        for day, df in self.data.items():
+            # df[cols_to_print].to_csv(out_path + day + ".csv")
+            df.to_csv(out_path + day + ".csv")
+            
+        print("Done!")
+            
+        
 
 if __name__ == "__main__":
     try:
