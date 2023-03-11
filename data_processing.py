@@ -53,6 +53,113 @@ class Model():
         self.calculate_volatility()
         ###################################### End __init__
 
+    def calculate_price_high_low_div_atr(self):
+        print("Calculating Price D-## Week/ATR...")
+        inputs = [  # col_out, price, sub, denominator
+                ("D-52 Week High/ATR", "Price", "52 Week High", "Average True Range (14)"),
+                ("D-6-Month High/ATR", "Price", "6-Month High", "Average True Range (14)"),
+                ("D-3-Month High/ATR", "Price", "3-Month High", "Average True Range (14)"),
+                ("D-1-Month High/ATR", "Price", "1-Month High", "Average True Range (14)"),
+                ("D-52 Week Low/ATR", "Price", "52 Week Low", "Average True Range (14)"),
+                ("D-6-Month Low/ATR", "Price", "6-Month Low", "Average True Range (14)"),
+                ("D-3-Month Low/ATR", "Price", "3-Month Low", "Average True Range (14)"),
+                ("D-1-Month Low/ATR", "Price", "1-Month Low", "Average True Range (14)"),
+            ]
+        for day, df in self.data.items():
+            for col_out, price, sub, denominator in inputs:
+                df[col_out] = df.apply(
+                            lambda row: self.UO_trend_overbought_lambda(row[price], sub, denominator, row["Description"]),
+                            axis=1)
+            # print(df[cols_to_print])
+        print("Done!")
+
+    def price_high_low_div_art_lambda(self, price, sub, denominator, description):
+        if description is not None and denominator != 0:
+            return abs((price-sub)/denominator)
+        else:
+            return 0
+
+    
+    def calculate_UO_overbought(self):
+        print("Calculating UO overbought...")
+        inputs = [  # col_out, price, lower, upper
+                ("UO Trend D", "Ultimate Oscillator (7, 14, 28)", 70),
+            ]
+        for day, df in self.data.items():
+            for col_out, price, lower, upper in inputs:
+                df[col_out] = df.apply(
+                            lambda row: self.UO_trend_overbought_lambda(row[price], lower, upper, row["Description"]),
+                            axis=1)
+            # print(df[cols_to_print])
+        print("Done!")
+
+
+    def UO_trend_overbought_lambda(self, price, lower, description):
+        if description is not None and price >= lower:
+            return price
+        else:
+            return 0    
+
+    def calculate_UO_trend_U(self):
+        print("Calculating UO Trend U...")
+        inputs = [  # col_out, price, lower, upper
+                ("UO Trend D", "Ultimate Oscillator (7, 14, 28)", 50, 70),
+            ]
+        for day, df in self.data.items():
+            for col_out, price, lower, upper in inputs:
+                df[col_out] = df.apply(
+                            lambda row: self.UO_trend_u_lambda(row[price], lower, upper, row["Description"]),
+                            axis=1)
+            # print(df[cols_to_print])
+        print("Done!")
+
+
+    def UO_trend_u_lambda(self, price, lower, upper, description):
+        if description is not None and price > lower and price < upper:
+            return price
+        else:
+            return 0
+
+
+    def calculate_UO_trend_D(self):
+        print("Calculating UO Trend D...")
+        inputs = [  # col_out, price, lower, upper
+                ("UO Trend D", "Ultimate Oscillator (7, 14, 28)", 30, 50),
+            ]
+        for day, df in self.data.items():
+            for col_out, price, lower, upper in inputs:
+                df[col_out] = df.apply(
+                            lambda row: self.UO_trend_d_lambda(row[price], lower, upper, row["Description"]),
+                            axis=1)
+            # print(df[cols_to_print])
+        print("Done!")
+
+
+    def UO_trend_d_lambda(self, price, lower, upper, description):
+        if description is not None and price > lower and price <= upper:
+            return price
+        else:
+            return 0
+
+    def calculate_under_over_sold(self):
+        print("Calculating under or oversold columns...")
+        inputs = [  # col_out, price, value
+                ("UO Oversold", "Ultimate Oscillator (7, 14, 28)", 30),
+            ]
+        for day, df in self.data.items():
+            for col_out, price, val in inputs:
+                df[col_out] = df.apply(
+                            lambda row: self.under_over_sold_lambda(row[price], val, row["Description"]),
+                            axis=1)
+            # print(df[cols_to_print])
+        print("Done!")
+
+    def under_over_sold_lambda(self, price, value, description):
+        if description is not None and price <= value:
+            return price
+        else:
+            return 0
+   
     def calculate_ADX_filtered_RSI(self):
         print("Calculating ADX Filtered RSI columns...")
         cols_out = [
@@ -106,7 +213,10 @@ class Model():
                 "Donchian CH Price/Lower-1",
                 "Donchian CH Price/Upper-1"
                 "Relative Strength Index (7/14)",
-                "ADX Filtered RSI (7/14)"
+                "ADX Filtered RSI (7/14)",
+                "Stochastic %K/%D (14, 3, 3)", # SN
+                "Stochastic RSI Fast/Slow (3, 3, 14, 14)", # SM
+                
             ]
         print(cols_out)
         numerator_cols = [
@@ -123,6 +233,8 @@ class Model():
                 "Price",
                 "Relative Strength Index(7)",
                 "ADX Filtered RSI (7)",
+                "Stochastic %K (14, 3, 3)",
+                "Stochastic RSI Fast (3, 3, 14, 14)"
             ]
         denominator_cols = [
                 "Volatility Week",
@@ -137,7 +249,8 @@ class Model():
                 "Donchian Channels Lower Band (20)",
                 "Donchian Channels Upper Band (20)",
                 "Relative Strength Index(14)",
-                # "ADX Filtered RSI (14)",
+                "Stochastic %D (14, 3, 3)",
+                "Stochastic RSI Slow (3, 3, 14, 14)"
             ]
         cols_to_print = ["Ticker"]
         cols_to_print = cols_to_print + cols_out + numerator_cols + denominator_cols
@@ -152,6 +265,8 @@ class Model():
     def volatility_lambda(self, numerator, denominator, description):
         if description is not None and denominator != 0:
             return numerator/denominator - 1
+        else:
+            return 0
         
     def calculate_relative_volume_div_by(self):
         print("Calculating relative volume div columns...")
