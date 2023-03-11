@@ -57,16 +57,43 @@ class Model():
         self.calculate_UO_overbought()
         self.calculate_price_high_low_div_atr()
         self.calculate_CMF_trend_d()
+        #need to calculate EMA avgs
+        self.calculate_EMA_avgs()
+        self.calculate_d_n_high_low()
+        self.calculate_d_exp_ma()
         self.calculate_abs_trend_d()
         self.calculate_momentum_MACD()
         self.calculate_trend_u()
-        self.calculate_d_exp_ma()
-        self.calculate_d_n_high_low()
         self.calculate_n_div_price()
         self.calculate_fibonacci_min()
         
         ###################################### End __init__
-    
+
+
+    def calculate_EMA_avgs(self):
+        print("Calculating EMA avgs...")
+        inputs = [
+                ("Fast EMA Avg", "D-Exponential Moving Average (5)", "D-Exponential Moving Average (10)", "D-Exponential Moving Average (20)"),
+                ("Slow EMA Avg", "D-Exponential Moving Average (30)", "D-Exponential Moving Average (50)", "D-Exponential Moving Average (100)")
+            ]
+        cols_to_print = ["Ticker"]
+        for col_out, one, two, three in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, one, two, three in inputs:
+                self.data[day][col_out] = df.apply(
+                            lambda row: self.ema_avg_lambda(row[one], row[two], row[three], row["Description"]),
+                            axis=1)
+            # print(self.data[day][cols_to_print].head())
+
+        print("Done!")
+
+    def ema_avg_lambda(self, one, two, three, description):
+        if description is not None and one != 0 and two != 0 and three != 0:
+            return (one + two + three)/3.0
+        else:
+            return 0
 
     # col RJ
     def calculate_fibonacci_min(self):
@@ -166,7 +193,7 @@ class Model():
                 ("D-3-Month Low",   "Price", "3-Month Low"),
                 ("D-1-Month Low",   "Price", "1-Month Low"),
                 ("Price/VWMA (20)", "Price", "Volume Weighted Moving Average (20)"),
-                ("Price/VWMA",      "Price", "Volume Weighted Moving Average"),
+                ("Price/VWMA",      "Price", "Volume Weighted Average Price"),
                 ("D-Pivot Fibonacci S3", "Price", "Pivot Fibonacci S3"),
                 ("D-Pivot Fibonacci S2", "Price", "Pivot Fibonacci S2"),
                 ("D-Pivot Fibonacci S1", "Price", "Pivot Fibonacci S1"),
@@ -174,6 +201,11 @@ class Model():
                 ("D-Pivot Fibonacci R1", "Price", "Pivot Fibonacci R1"),
                 ("D-Pivot Fibonacci R2", "Price", "Pivot Fibonacci R2"),
                 ("D-Pivot Fibonacci R3", "Price", "Pivot Fibonacci R3"),
+                ("D-Hull Moving Average (9)", "Price", "Hull Moving Average (9)"),
+                ("D-Ichimoku Leading Span A (9, 26, 52, 26)", "Price", "Ichimoku Leading Span A (9, 26, 52, 26)"),
+                ("D-Ichimoku Leading Span B (9, 26, 52, 26)", "Price", "Ichimoku Leading Span B (9, 26, 52, 26)"),
+                ("Ichimoku Span A/B-1", "Ichimoku Leading Span A (9, 26, 52, 26)", "Ichimoku Leading Span B (9, 26, 52, 26)"),
+                ("D-Parabolic SAR", "Price", "Parabolic SAR")
                 
             ]
         cols_to_print = []
@@ -259,7 +291,7 @@ class Model():
     def calculate_momentum_MACD(self):
         print("Calculating MACD L>S Mom Up...")
         inputs = [ # col_out, lower, upper
-                ("MACD L>S Mom Up", "MACD Level (12, 16)", "MACD Signal (12, 16)")
+                ("MACD L>S Mom Up", "MACD Level (12, 26)", "MACD Signal (12, 26)")
             ]
         for day, df in self.data.items():
             for col_out, lower, upper in inputs:
@@ -509,6 +541,13 @@ class Model():
                 "ADX Filtered RSI (7/14)",
                 "Stochastic %K/%D (14, 3, 3)", # SN
                 "Stochastic RSI Fast/Slow (3, 3, 14, 14)", # SM
+                "D-Exponential Moving Average (5)",
+                "D-Exponential Moving Average (10)",
+                "D-Exponential Moving Average (20)",
+                "D-Exponential Moving Average (30)",
+                "D-Exponential Moving Average (50)",
+                "D-Exponential Moving Average (100)",
+                "D-Exponential Moving Average (200)",
                 
             ]
         print(cols_out)
@@ -527,7 +566,14 @@ class Model():
                 "Relative Strength Index (7)",
                 "ADX Filtered RSI (7)",
                 "Stochastic %K (14, 3, 3)",
-                "Stochastic RSI Fast (3, 3, 14, 14)"
+                "Stochastic RSI Fast (3, 3, 14, 14)",
+                "Price",
+                "Price",
+                "Price",
+                "Price",
+                "Price",
+                "Price",
+                "Price",
             ]
         denominator_cols = [
                 "Volatility Week",
@@ -543,7 +589,14 @@ class Model():
                 "Donchian Channels Upper Band (20)",
                 "Relative Strength Index (14)",
                 "Stochastic %D (14, 3, 3)",
-                "Stochastic RSI Slow (3, 3, 14, 14)"
+                "Stochastic RSI Slow (3, 3, 14, 14)",
+                "Exponential Moving Average (5)",
+                "Exponential Moving Average (10)",
+                "Exponential Moving Average (20)",
+                "Exponential Moving Average (30)",
+                "Exponential Moving Average (50)",
+                "Exponential Moving Average (100)",
+                "Exponential Moving Average (200)",
             ]
         cols_to_print = ["Ticker"]
         cols_to_print = cols_to_print + cols_out + numerator_cols + denominator_cols
