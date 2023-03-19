@@ -20,17 +20,13 @@ data_path = "23-03-07-TV-Data Input.csv"
 # generate a set of parameters based on model and store in time series
 # create regression model to optimize parameters for each day
 df = pd.read_csv(data_path,header=0)
-# print(df.head())
-# print(df.header_items())
-# print(self.data[day]["Ticker"].head())
-
 
 class Model():
     def __init__(self):
         data_folder = "data/"
-        self.data_dict = {"data": {},
-                    "alerts": {}}
-        # data = pd.DataFrame()
+        self.data_dict = {
+            "data": {},"alerts": {}
+        }
 
         print("Reading in all data and alerts in:", data_folder)
         with open("raw_data.txt") as files:
@@ -47,28 +43,42 @@ class Model():
                     # print(name)
 
         self.data = self.data_dict["data"]
-        
-        self.calculate_relative_volume_div_by()
-        self.calculate_d_relative_volume_up_or_down()
+        # calculations from v8 of model
+        self.calculate_volume_div()  # cols vm through vv
+        self.calculate_d_relative_volume_up_or_down()  # cols UJ through UT and VA through VL
+        self.calculate_avg_volume()  # cols UD through UI and UU through UZ
+        self.calculate_percent_rank_avg_volume()  # cols UW through UX, UF through UG
+        self.calculate_avg_pr()  # cols UD through UE, UU through UV
         self.calculate_ADX_filtered_RSI()
-        self.calculate_volatility()
-        self.calculate_under_over_sold()
-        self.calculate_UO_trend_D()
-        self.calculate_UO_trend_U()
-        self.calculate_UO_overbought()
-        self.calculate_price_high_low_div_atr()
-        self.calculate_CMF_trend_d()
-        self.calculate_EMA_avgs()
-        self.calculate_d_n_high_low()
-        self.calculate_d_exp_ma()
-        self.calculate_abs_trend_d()
-        self.calculate_momentum_MACD()
-        self.calculate_trend_u()
-        self.calculate_n_div_price()
-        self.calculate_fibonacci_min()
+        self.calculate_volatility()  # cols TK through TS
+        self.calculate_price_high_low_div_atr() # cols TB through TI
+        self.calculate_d_n_high_low()  # cols SJ through SP, ST through TA
+        self.calculate_fibonacci_min()  # col SQ through SS
+
+
+        
+        # calculation order from v7 of model
+        # self.calculate_relative_volume_div_by()
+        # self.calculate_d_relative_volume_up_or_down()
+        # self.calculate_ADX_filtered_RSI()
+        # self.calculate_volatility()
+        # self.calculate_under_over_sold()
+        # self.calculate_UO_trend_D()
+        # self.calculate_UO_trend_U()
+        # self.calculate_UO_overbought()
+        # self.calculate_price_high_low_div_atr()
+        # self.calculate_CMF_trend_d()
+        # self.calculate_EMA_avgs()
+        # self.calculate_d_n_high_low()
+        # self.calculate_d_exp_ma()
+        # self.calculate_abs_trend_d()
+        # self.calculate_momentum_MACD()
+        # self.calculate_trend_u()
+        # self.calculate_n_div_price()
+        # self.calculate_fibonacci_min()
 
         # Exporting all calculated data in correct order to CSV by day
-        self.export_calculated_data()
+        # self.export_calculated_data()
         
         ###################################### End __init__
         
@@ -98,7 +108,8 @@ class Model():
         else:
             return 0
 
-    # col RJ
+    ######################################### v8
+    # col SQ through SS
     def calculate_fibonacci_min(self):
         print("Calculating Fibonacci Minimum, Closest D-Pivot, and Current Pivot Level...")
         inputs = [ # r3, r2, r1, p, s1, s2, s3
@@ -122,7 +133,7 @@ class Model():
                                                                   row[s3],
                                                                   row["Description"]),
                             axis=1, result_type="expand")
-            print(self.data[day][["Fibonacci Minimum","Closest D-Pivot", "Current Pivot Level"]].head())
+            # print(self.data[day][["Fibonacci Minimum","Closest D-Pivot", "Current Pivot Level"]].head())
 
         print("Done!")
         
@@ -188,7 +199,7 @@ class Model():
             return 0
 
     
-    # cols RO through RY, RC through RI
+    # cols SJ through SP, ST through TA
     def calculate_d_n_high_low(self):
         print("Calculating the following columns...")
         inputs = [ # col_out, numerator, denominator
@@ -372,7 +383,8 @@ class Model():
         else:
             return 0
 
-    # cols RZ through SG
+    ######################################### v8
+    # cols TB through TI
     def calculate_price_high_low_div_atr(self):
         print("Calculating Price D-## Week/ATR...")
         inputs = [  # col_out, price, sub, denominator
@@ -530,97 +542,97 @@ class Model():
                 return right
         else:
             return 0
-    
+
+    ######################################### v8
+    # cols TK through TS, MN through MV
     def calculate_volatility(self):
-        print("Calculating volatility columns...")
-        cols_out = [
-                "Volatility D/W",
-                "Volatility D/M",
-                "Volatility W/M",
-                "Bollinger Price/Upper-1",
-                "Bollinger Price/Lower-1",	
-                "Bollinger Upper/Lower Band (20)",
-                "Keltner CH Price/Upper-1",
-                "Keltner CH Price/Lower-1",	
-                "Keltner Channels Upper/Lower Band (20)",
-                "Donchian CH Price/Lower-1",
-                "Donchian CH Price/Upper-1"
-                "Relative Strength Index (7/14)",
-                "ADX Filtered RSI (7/14)",
-                "Stochastic %K/%D (14, 3, 3)", # SN
-                "Stochastic RSI Fast/Slow (3, 3, 14, 14)", # SM
-                "D-Exponential Moving Average (5)",
-                "D-Exponential Moving Average (10)",
-                "D-Exponential Moving Average (20)",
-                "D-Exponential Moving Average (30)",
-                "D-Exponential Moving Average (50)",
-                "D-Exponential Moving Average (100)",
-                "D-Exponential Moving Average (200)",
-                
-            ]
-        print(cols_out)
-        numerator_cols = [
-                "Volatility",
-                "Volatility Week",
-                "Volatility Month",
-                "Price",
-                "Price",
-                "Bollinger Upper Band (20)",
-                "Price",
-                "Price",
-                "Keltner Channels Upper Band (20)",
-                "Price",
-                "Price",
-                "Relative Strength Index (7)",
-                "ADX Filtered RSI (7)",
-                "Stochastic %K (14, 3, 3)",
-                "Stochastic RSI Fast (3, 3, 14, 14)",
-                "Price",
-                "Price",
-                "Price",
-                "Price",
-                "Price",
-                "Price",
-                "Price",
-            ]
-        denominator_cols = [
-                "Volatility Week",
-                "Volatility Month",
-                "Volatility Month",
-                "Bollinger Upper Band (20)",
-                "Bollinger Lower Band (20)",
-                "Bollinger Lower Band (20)",
-                "Keltner Channels Upper Band (20)",
-                "Keltner Channels Lower Band (20)",
-                "Keltner Channels Lower Band (20)",
-                "Donchian Channels Lower Band (20)",
-                "Donchian Channels Upper Band (20)",
-                "Relative Strength Index (14)",
-                "Stochastic %D (14, 3, 3)",
-                "Stochastic RSI Slow (3, 3, 14, 14)",
-                "Exponential Moving Average (5)",
-                "Exponential Moving Average (10)",
-                "Exponential Moving Average (20)",
-                "Exponential Moving Average (30)",
-                "Exponential Moving Average (50)",
-                "Exponential Moving Average (100)",
-                "Exponential Moving Average (200)",
-            ]
+        print("Calculating the following volatility columns...")
+        inputs = [
+            ("Volatility D/W", "Volatility", "Volatility Week"),
+            ("Volatility D/W", "Volatility", "Volatility Week"),
+            ("Volatility D/M", "Volatility", "Volatility Month"),
+            ("Volatility W/M", "Volatility Week", "Volatility Month"),
+            ("Keltner CH Price/Upper-1", "Price", "Keltner Channels Upper Band (20)"),
+            ("Keltner CH Price/Lower-1",	"Price", "Keltner Channels Lower Band (20)"),
+            ("Keltner Upper/Lower Band", "Keltner Channels Upper Band (20)","Keltner Channels Lower Band (20)"),
+            ("Bollinger Upper/Lower Band", "Bollinger Upper Band (20)","Bollinger Lower Band (20)"),
+            ("Bollinger Price/Upper-1", "Price", "Bollinger Upper Band (20)"),
+            ("Bollinger Price/Lower-1", "Price", "Bollinger Lower Band (20)"),
+            ("Donchian CH Price/Lower-1", "Price", "Donchian Channels Lower Band (20)"),
+            ("Donchian CH Price/Upper-1", "Price", "Donchian Channels Upper Band (20)"),
+            ("Relative Strength Index (7/14)", "Relative Strength Index (7)","Relative Strength Index (14)"),
+            ("ADX Filtered RSI (7/14)", "ADX Filtered RSI (7)","Stochastic %D (14, 3, 3)"),
+            ("Stochastic %K/%D (14, 3, 3)", "Stochastic %K (14, 3, 3)","Stochastic RSI Slow (3, 3, 14, 14)"),
+            ("Stochastic RSI Fast/Slow (3, 3, 14, 14)", "Stochastic RSI Fast (3, 3, 14, 14)","Stochastic RSI Slow (3, 3, 14, 14)"),
+            ("D-Exponential Moving Average (5)",   "Price", "Exponential Moving Average (5)"),
+            ("D-Exponential Moving Average (10)",  "Price", "Exponential Moving Average (10)"),
+            ("D-Exponential Moving Average (20)",  "Price", "Exponential Moving Average (20)"),
+            ("D-Exponential Moving Average (30)",  "Price", "Exponential Moving Average (30)"),
+            ("D-Exponential Moving Average (50)",  "Price", "Exponential Moving Average (50)"),
+            ("D-Exponential Moving Average (100)", "Price", "Exponential Moving Average (100)"),
+            ("D-Exponential Moving Average (200)", "Price", "Exponential Moving Average (200)"),
+            ("D-Hull Moving Average (9)", "Price", "Hull Moving Average (9)"),
+        ]
         cols_to_print = ["Ticker"]
-        cols_to_print = cols_to_print + cols_out + numerator_cols + denominator_cols
+        for col_out, numerator, denominator in inputs:
+            cols_to_print += [col_out]
+            if numerator not in cols_to_print:
+                cols_to_print += [numerator]
+            if denominator not in cols_to_print:
+                cols_to_print += [denominator]
+        print(cols_to_print)
         for day, df in self.data.items():
-            for col_out, num_col, den_col in zip(cols_out, numerator_cols, denominator_cols):
+            for col_out, numerator, denominator in inputs:
+                # print(col_out, numerator, denominator)
                 self.data[day][col_out] = df.apply(
-                            lambda row: self.volatility_lambda(row[num_col], row[den_col], row["Description"]),
+                            lambda row: self.volatility_lambda(
+                                row[numerator], 
+                                row[denominator], 
+                                row["Description"]),
                             axis=1)
-            # print(self.data[day][cols_to_print])
+                # print(self.data[day][col_out])
+                # print(self.data[day][[col_out, numerator, denominator]])
         print("Done!")
 
+    # n/d - 1.0
     def volatility_lambda(self, numerator, denominator, description):
         if description is not None and denominator != 0:
             return numerator/denominator - 1.0
         else:
             return 0
+
+    ######################################### v8
+    # cols vm through vv
+    def calculate_volume_div(self):
+        print("Calculating the following columns...")
+        inputs = [ # col_out, numerator, denominator
+                ("Volume 60/90", "Average Volume (60 day)", "Average Volume (90 day)"),
+                ("Volume 30/90", "Average Volume (30 day)", "Average Volume (90 day)"),
+                ("Volume 30/60", "Average Volume (30 day)", "Average Volume (60 day)"),
+                ("Volume 10/90", "Average Volume (10 day)", "Average Volume (90 day)"),
+                ("Volume 10/30", "Average Volume (10 day)", "Average Volume (30 day)"),
+                ("Volume/90", "Volume", "Average Volume (90 day)"),
+                ("Volume/60", "Volume", "Average Volume (60 day)"),
+                ("Volume/30", "Volume", "Average Volume (30 day)"),
+                ("Volume/10", "Volume", "Average Volume (10 day)"),
+                
+            ]
+        cols_to_print = []
+        for col_out, numerator, denominator in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, numerator, denominator in inputs:
+                self.data[day][col_out] = df.apply(
+                            lambda row: self.volatility_lambda(row[numerator], row[denominator], row["Description"]),
+                            axis=1)
+            # print(self.data[day][cols_to_print])
+        print("Done!")
+    # End def calculate_volume_div
+
+
+    def relative_volume_div_lambda(self, relative_volume, div, description):
+        return relative_volume/div - 1.0 if description is not None else 0
         
     def calculate_relative_volume_div_by(self):
         print("Calculating relative volume div columns...")
@@ -661,31 +673,146 @@ class Model():
             # print(self.data[day][cols_to_print])
         print("Done!")
 
+    ######################################### v8
+    # cols UD through UE, UU through UV
+    def calculate_avg_pr(self):
+        print("Calculating average of Percent Rank for the following columns:")
+        inputs = [  # col_out, a, b
+            ("Avg-# VD", "PR-Avg VD", "PR-# VD"),
+            ("Avg-# VU", "PR-Avg VU", "PR-# VU"),
+        ]
+        cols_to_print = ["Ticker"]
+        for col_out, a, b in inputs:
+            cols_to_print += [col_out, a, b]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, a, b in inputs:
+                self.data[day][col_out] = df.apply(
+                    lambda row: self.avg_pr_lambda(
+                        row[a], 
+                        row[b], 
+                        description=row["Description"]),
+                    axis=1
+                )
+                # print(self.data[day][[col_out, a, b]])
+        print("Done!")        
+        
+    def avg_pr_lambda(self, *cols, description):
+        count = 0
+        sum = 0
+        if description is not None:
+            for col in cols:
+                if col > 0:
+                    count += 1.0
+                    sum += col
+            if count > 0:
+                return sum/count
+            else:
+                return 0
+        else:
+            return 0
+
+    ######################################### v8
+    # cols UW through UX, UF through UG
+    def calculate_percent_rank_avg_volume(self):
+        print("Calculating Percent Rank for the following columns:")
+        inputs = [  # col_out, col
+            ("PR-Avg VD", "Avg VD"),
+            ("PR-Avg VU", "Avg VU"),
+            ("PR-# VU", "# VU"),
+            ("PR-# VD", "# VD"),
+        ]
+        cols_to_print = ["Ticker"]
+        for col_out, col in inputs:
+            cols_to_print += [col_out, col]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, col in inputs:
+                self.data[day][col_out] = df[col].rank(pct=True)
+                # print(self.data[day][[col_out, col]])
+        print("Done!")        
+
+    ######################################### v8
+    # cols UD through UI and UU through UZ
+    def calculate_avg_volume(self):
+        print("Calculating avg volume for the following columns:")
+        inputs = [ # col_out_l, col_out_r, a, b, c, d, e, f, g, h, i, j, k
+            ("# VD", "Avg VD", "D-Relative Volume VD", "Volume 60/90 VD", "Volume 30/90 VD", "Volume 30/60 VD", "Volume 10/90 VD", "Volume 10/30 VD", "Volume/90 VD", "Volume/60 VD", "Volume/30 VD", "Volume/10 VD", "Volume/10 VD"),
+            ("# VU", "Avg VU", "D-Relative Volume VU", "Volume 60/90 VU", "Volume 30/90 VU", "Volume 30/60 VU", "Volume 10/90 VU", "Volume 10/30 VU", "Volume/90 VU", "Volume/60 VU", "Volume/30 VU", "Volume/10 VU", "Volume/10 VU")
+        ]
+        cols_to_print = ["Ticker"]
+        for col_out_l, col_out_r, a, b, c, d, e, f, g, h, i, j, k in inputs:
+            cols_to_print += [col_out_l, col_out_r, a, b, c, d, e, f, g, h, i, j, k]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            # cols_to_print = ["Ticker"]
+            # Calculate 
+            for col_out_l, col_out_r, a, b, c, d, e, f, g, h, i, j, k in inputs:
+                self.data[day][[col_out_l, col_out_r]] = df.apply(
+                    lambda row: self.calculate_avg_volume_lambda(
+                        row[a], 
+                        row[b], 
+                        row[c], 
+                        row[d], 
+                        row[e], 
+                        row[f], 
+                        row[g], 
+                        row[h], 
+                        row[i], 
+                        row[j], 
+                        row[k], 
+                        # row[l], 
+                        description=row["Description"]),
+                    axis=1, result_type="expand")
+                # self.data[day][percentile_rank_col] = self.data[day][col_out_name].rank(pct=True)
+            # print(self.data[day][cols_to_print])
+        print("Done!")
+
+    def calculate_avg_volume_lambda(self, *cols, description):
+        count = 0
+        sum = 0
+        # cols = [a, b, c, d, e, f, g, h, i, j, k]
+        if description is not None:
+            for col in cols:
+                if col != 0:
+                    count += 1.0
+                    sum += col
+            if count != 0:
+                return count, sum/count
+            else:
+                return count, 0     
+        else:
+            return 0, 0
+
+    ######################################### v8
+    # cols UJ through UT and VA through VL
     def calculate_d_relative_volume_up_or_down(self):
         print("Calculating d-relative volume up and down cols")
-        cols_out = [
-            "D-Relative Volume-Up",
-            "Relative Volume/10-Up",
-            "Relative Volume/30-Up",
-            "Relative Volume/60-Up",
-            "Relative Volume/90-Up",
-            "D-Relative Volume-Down",
-            "Relative Volume/10-Down",
-            "Relative Volume/30-Down",
-            "Relative Volume/60-Down",
-            "Relative Volume/90-Down"
+        inputs = [ # col_out, col
+            ("Volume 60/90 VD", "Volume 60/90"),
+            ("Volume 30/90 VD", "Volume 30/90"),
+            ("Volume 30/60 VD", "Volume 30/60"),
+            ("Volume 10/90 VD", "Volume 10/90"),
+            ("Volume 10/30 VD", "Volume 10/30"),
+            ("Volume/90 VD", "Volume/90"),
+            ("Volume/60 VD", "Volume/90"),
+            ("Volume/30 VD", "Volume/90"),
+            ("Volume/10 VD", "Volume/90"),    
+            ("Volume/10 VD", "Volume/90"),
+            ("D-Relative Volume VD", "D-Relative Volume"),
+            ("Volume 60/90 VU", "Volume 60/90"),
+            ("Volume 30/90 VU", "Volume 30/90"),
+            ("Volume 30/60 VU", "Volume 30/60"),
+            ("Volume 10/90 VU", "Volume 10/90"),
+            ("Volume 10/30 VU", "Volume 10/30"),
+            ("Volume/90 VU", "Volume/90"),
+            ("Volume/60 VU", "Volume/90"),
+            ("Volume/30 VU", "Volume/90"),
+            ("Volume/10 VU", "Volume/90"),    
+            ("Volume/10 VU", "Volume/90"),
+            ("D-Relative Volume VU", "D-Relative Volume"),    
         ]
-        cols = [
-            "D-Relative Volume",
-            "Average Volume (10 day)",
-            "Average Volume (30 day)",
-            "Average Volume (60 day)",
-            "Average Volume (90 day)",
-            "D-Relative Volume",   
-            "Average Volume (10 day)",
-            "Average Volume (30 day)",
-            "Average Volume (60 day)",
-            "Average Volume (90 day)"]
+
         for day, df in self.data.items():
             # print("=======================")
             # print(day)
@@ -696,11 +823,8 @@ class Model():
                     axis=1
                 )
             # Calculate 
-            for col_out, col in zip(cols_out, cols):
-                # col_out_name = "Relative Volume" + col_out
-                # up = True 
-                if "Up" in col_out:
-                    # up = False
+            for col_out, col in inputs:
+                if "VU" in col_out:
                     self.data[day][col_out] = df.apply(
                         lambda row: self.d_relative_volume_up(row[col], row["Description"]),
                         axis=1)
@@ -710,7 +834,6 @@ class Model():
                         axis=1)
                 cols_to_print += [col, col_out]
                 # print(self.data[day][percentile_rank_col].head())
-            
             # print(cols_to_print)
             # print(self.data[day][cols_to_print])
         print("Done!")
@@ -731,7 +854,7 @@ class Model():
             return 0
 
     def relative_volume_div(self, relative_volume, div, description):
-        return relative_volume/div -1 if description is not None else 0
+        return relative_volume/div - 1.0 if description is not None else 0
         
     def print_data_summary(self):
         for name, day in self.data_dict.items():
