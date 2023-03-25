@@ -95,6 +95,7 @@ class Model():
         self.calculate_trend_MD()  # cols PB through PE
         self.calculate_trend_MD_2()  # colds OX through PA
         self.calculate_avg_md()  # cols OP through OW
+        # 26:
         
         
     def calculate_all_model_v7(self): 
@@ -594,8 +595,8 @@ class Model():
             # print(self.data[day]["UO Oversold"])
         print("Done!")
 
-    def trend_ob_st_rsi_lambda(self, val, idx, upper, description):
-        if description is not None and val > upper and idx <= val:
+    def trend_ob_st_rsi_lambda(self, val, idx, upper, lower, description):
+        if description is not None and val > upper and idx <= lower:
             return val - upper
         else:
             return 0
