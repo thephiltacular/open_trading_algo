@@ -427,14 +427,14 @@ class Model():
         self.ps()
         print("Calculating avg PR of OB and final PR-OB....")
         inputs = [ # col_out, cols 1:2, col_out_pr,
-            "Avg-#OB"
+            "Avg-#OB",
             "PR-Avg OB",
             "PR-# OB",  # col_out with count of above 0
             "PR-OB",
         ]
 
         print("Using cols:")
-        for i in range(1,len(inputs)):
+        for i in range(0,len(inputs)):
             # print("inputs[", i, "]")
             print(i, "=", inputs[i])
 
@@ -499,7 +499,7 @@ class Model():
         ]
 
         print("Using cols:")
-        for i in range(1,len(inputs)):
+        for i in range(0,len(inputs)):
             # print("inputs[", i, "]")
             print(i, "=", inputs[i])
 
@@ -647,7 +647,7 @@ class Model():
         self.ps()
         print("Calculating avg PR of OS and final PR-OS....")
         inputs = [ # col_out, cols 1:2, col_out_pr,
-            "Avg-#OS"
+            "Avg-#OS",
             "PR-Avg OS",
             "PR-# OS", 
             "PR-OS",
