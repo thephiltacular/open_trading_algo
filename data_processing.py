@@ -339,7 +339,7 @@ class Model():
 
     def trend_NH_NM_lambda(self, numerator, denominatior, description):
         if description is not None and denominatior != 0:
-            return numerator/denominatior
+            return numerator/denominatior - 1.0
         else:
             return 0
 
