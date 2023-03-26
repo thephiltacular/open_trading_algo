@@ -2,6 +2,8 @@
 
 import pandas as pd
 import numpy as np
+import sys
+import inspect
 
 data_path = "23-03-07-TV-Data Input.csv"
 
@@ -51,13 +53,14 @@ class Model():
         # self.calculate_OB()
 
     # print separator
-    def ps(self):
+    def ps(self, function=""):
         print("===============================")
         print("Step: ", self.step, "/", self.total_steps)
+        print("In function: ", function)
         self.step += 1
 
     def calculate_all_model_v8(self):
-        self.total_steps = 29
+        self.total_steps = 33
         # calculations from v8 of model
         # 0:
         self.calculate_volume_div()  # cols vm through vv
@@ -79,7 +82,7 @@ class Model():
         self.calculate_trend_OS()  # cols RW through RZ
         # 15:
         self.calculate_PR()  # cols RJ through RT
-        self.calculate_OB()  # cols SH through SI
+        self.calculate_OB_OS()  # cols SH through SI
         self.calculate_PR_for_RU_RV()  # cols RU through RV
         self.calculate_avg_os()  # cols RH through RI
         self.calculate_PR_os()  # cols RF through RG
@@ -90,13 +93,23 @@ class Model():
         self.calculate_PR_ob()  # cols QD through QP
         self.calculate_avg_ob() # cols QB through QC
         # 25:
-        self.calculate_PR_ob()  # cols PZ through QA
+        self.calculate_PR_ob_avg() # cols PZ through QA
         self.calculate_avg_PR_OB_final()  # cols PX through PY
         self.calculate_trend_MD()  # cols PB through PE
         self.calculate_trend_MD_2()  # colds OX through PA
-        self.calculate_avg_md()  # cols OP through OW
-        # 26:
-        
+        self.calculate_PR_MD()  # cols OP through OW
+        # 30:
+        self.calculate_avg_md()  # cols ON through OO
+        self.calculate_PR_MD_avg()  # cols OL through OM
+        self.calculate_avg_PR_MD_final()  # cols OJ through OK
+        self.calculate_trend_MU()  # cols OF through OI
+        self.calculate_trend_MU_2()  # cols OB through OE
+        # 35:
+        self.calculate_PR_MU()  # cols NT through OA
+        self.calculate_avg_MU()  # cols NR through NS
+        self.calculate_PR_MU_avg()  # cols NP through NQ
+        self.calculate_avg_PR_MU_final()  # cols NN through NO
+        self.calculate_trends_NH_NM()  # cols NH through NM
         
     def calculate_all_model_v7(self): 
         # calculation order from v7 of model
@@ -210,26 +223,6 @@ class Model():
         else:
             return 0
 
-    ######################################### v8
-    # cols 
-    def calculate_momentum_MACD(self):
-        print("Calculating MACD L>S Mom Up...")
-        inputs = [ # col_out, lower, upper
-                ("MACD L>S Mom Up", "MACD Level (12, 26)", "MACD Signal (12, 26)")
-            ]
-        for day, df in self.data.items():
-            for col_out, lower, upper in inputs:
-                self.data[day][col_out] = df.apply(
-                            lambda row: self.MACD_lambda(row[upper], row[lower], row["Description"]),
-                            axis=1)
-                # print(self.data[day][col_out])
-        print("Done!")
-        
-    def MACD_lambda(self, upper, lower, description):
-        if description is not None and upper > lower and lower != 0:
-            return abs(upper)/abs(lower)
-        else:
-            return 0
 
     # cols NV through OF
     def calculate_abs_trend_d(self):
@@ -287,27 +280,144 @@ class Model():
             return abs(val)
         else:
             return 0
-    # 29
+
+#####################################
+# Trends NH through NM calculatations
+
+    # 40
     ######################################### v8
-    # cols OP through OW
-    def calculate_avg_md(self):
-        self.ps()
-        print("Calculating Avg MD....")
+    # col ML 
+    def calculate_momentum_MACD(self):
+        print("Calculating MACD L>S Mom Up...")
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        inputs = [ # col_out, lower, upper
+                ("MACD L>S Mom Up", "MACD Level (12, 26)", "MACD Signal (12, 26)")
+            ]
+        for day, df in self.data.items():
+            for col_out, lower, upper in inputs:
+                self.data[day][col_out] = df.apply(
+                            lambda row: self.MACD_lambda(row[upper], row[lower], row["Description"]),
+                            axis=1)
+                # print(self.data[day][col_out])
+        print("Done!")
+        
+    def MACD_lambda(self, upper, lower, description):
+        if description is not None and upper > lower and lower != 0:
+            return abs(upper)/abs(lower)
+        else:
+            return 0
+
+
+    # 39
+    ######################################### v8
+    # cols NH through NM
+    def calculate_trends_NH_NM(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following trends....")
+        inputs = [ # col_out, numerator, denominator
+                ("P/Ichi Span A-1", "Price",                                    "Ichimoku Leading Span A (9, 26, 52, 26)"),
+                ("P/Ichi Span B-1", "Price",                                    "Ichimoku Leading Span B (9, 26, 52, 26)"),
+                ("P/Ichi Line B-1", "Price",                                    "Ichimoku Base Line (9, 26, 52, 26)"),
+                ("P/Ichi Line C-1", "Price",                                    "Ichimoku Conversion Line (9, 26, 52, 26)"),
+                ("Ichi Line C/B-1", "Ichimoku Conversion Line (9, 26, 52, 26)", "Ichimoku Base Line (9, 26, 52, 26)"),
+                ("Ichi Span A/B-1", "Ichimoku Leading Span A (9, 26, 52, 26)", "Ichimoku Leading Span B (9, 26, 52, 26)"),
+            ]
+        cols_to_print = []
+        for col_out, numerator, denominator in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, numerator, denominator in inputs:
+                self.data[day][col_out] = df.apply(
+                            lambda row: self.trend_NH_NM_lambda(
+                                row[numerator], 
+                                row[denominator], 
+                                row["Description"]),
+                            axis=1)
+            # print(self.data[day][cols_to_print])
+        print("Done!")
+
+    def trend_NH_NM_lambda(self, numerator, denominatior, description):
+        if description is not None and denominatior != 0:
+            return numerator/denominatior
+        else:
+            return 0
+
+#####################################
+# MU calculatations
+
+    # 38
+    ######################################### v8
+    # cols NN through NO
+    def calculate_avg_PR_MU_final(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating avg PR of MU and final PR-MU....")
+        inputs = [ # col_out, cols 1:2, col_out_pr,
+            "Avg-#MU",
+            "PR-Avg MU",
+            "PR-# MU",  # col_out with count of above 0
+            "PR-MU",
+        ]
+        print("Using cols:")
+        for i in range(0,len(inputs)):
+            # print("inputs[", i, "]")
+            print(i, "=", inputs[i])
+
+        for day, df in self.data.items():
+            #               col_out     count
+            self.data[day][inputs[0]] = df.apply(
+                lambda row: self.avg_PR_OS_lambda(
+                    row[inputs[1]],
+                    row[inputs[2]],
+                    description=row["Description"]
+                ), axis=1)  #, result_type="expand")
+            # Calculate PR of the column that we just calculated
+            temp = self.data[day][inputs[0]].replace(0, np.nan)
+            self.data[day][inputs[3]] = temp.rank(pct=True).replace(np.nan, 0)            
+        print("Done!")
+
+    # 37
+    ######################################### v8
+    # cols NP through NQ
+    def calculate_PR_MU_avg(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following Percent Rank Columns...")
+        inputs = [  # col_out, col
+           ("PR-# MU", "# MU"),
+           ("PR-Avg MU", "Avg MU"),
+        ]
+        cols_to_print = ["Ticker"]
+        for col_out, col in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, col in inputs:
+                temp = df[col].replace(0, np.nan)
+                self.data[day][col_out] = temp.rank(pct=True).replace(np.nan, 0)
+            # print(self.data[day]["UO Oversold"])
+        print("Done!")
+
+    # 36
+    ######################################### v8
+    # cols NR through NS
+    def calculate_avg_MU(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating Avg MU....")
         inputs = [ # col_out, cols 1:10, # OB
-            "Avg MD",
-            "# MD",  # col_out with count of above 0
-            "PR-Aroon MD",
-            "PR-ADX MD",
-            "PR-D-DMI MD ",
-            "PR-AO MD",
-            "PR-RSI (14) 30-50 MD",
-            "PR-RSI (7) 30-50 MD",
-            "PR-St-RSI Fast MD",
-            "PR-St-RSI Slow MD",
+            "Avg MU",
+            "# MU",  # col_out with count of above 0
+            "PR-Aroon MU",
+            "PR-ADX MU",
+            "PR-D-DMI MU",
+            "PR-AO MU",
+            "PR-RSI (14) 30-50 MU",
+            "PR-RSI (7) 30-50 MU",
+            "PR-St-RSI Fast MU",
+            "PR-St-RSI Slow MU",
         ]
 
         print("Using cols:")
-        for i in range(1,len(inputs)):
+        for i in range(0,len(inputs)):
             # print("inputs[", i, "]")
             print(i, "=", inputs[i])
 
@@ -328,29 +438,54 @@ class Model():
             # print(self.data[day][[inputs[0], inputs[11]]])
         print("Done!")
 
-
-
-    # 28
+    # 35
     ######################################### v8
-    # cols OX through PA
-    def calculate_trend_MD_2(self):
-        self.ps()
-        print("Calculating MD columns...")
+    # cols NT through OA
+    def calculate_PR_MU(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following Percent Rank Columns...")
+        inputs = [  # col_out, col
+            ( "PR-Aroon MU",          "Aroon MU"),
+            ( "PR-ADX MU",            "ADX MU"),
+            ( "PR-D-DMI MU",          "D-DMI MU"),
+            ( "PR-AO MU",             "AO MU"),
+            ( "PR-RSI (14) 30-50 MU", "RSI (14) 30-50 MU"),
+            ( "PR-RSI (7) 30-50 MU",  "RSI (7) 30-50 MU"),
+            ( "PR-St-RSI Fast MU",    "St-RSI Fast MU"),
+            ( "PR-St-RSI Slow MU",    "St-RSI Slow MU"),
+        ]
+        cols_to_print = ["Ticker"]
+        for col_out, col in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, col in inputs:
+                temp = df[col].replace(0, np.nan)
+                self.data[day][col_out] = temp.rank(pct=True)
+            # print(self.data[day]["UO Oversold"])
+        print("Done!")
+
+    # 34
+    ######################################### v8
+    # cols OB through OE
+    def calculate_trend_MU_2(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating MU columns...")
         inputs = [
-            ("AO MD",     "Awesome Oscillator",  None, None),
-            ("D-DMI MD ", "Positive Directional Indicator (14)", "Negative Directional Indicator (14)", None),
-            ("ADX MD",    "Positive Directional Indicator (14)", "Negative Directional Indicator (14)", "Average Directional Index (14)"),
-            ("Aroon MD", "Aroon Down (14)", "Aroon Up (14)", None),
+            ("AO MU",     "Awesome Oscillator",  None, None),
+            ("D-DMI MU", "Positive Directional Indicator (14)", "Negative Directional Indicator (14)", None),
+            ("ADX MU",    "Positive Directional Indicator (14)", "Negative Directional Indicator (14)", "Average Directional Index (14)"),
+            ("Aroon MU", "Aroon Down (14)", "Aroon Up (14)", None),
         ]
         
         cols_to_print = ["Ticker"]
-        for col_out, val, idx, lower, upper in inputs:
+        for col_out, left, right, ret in inputs:
             cols_to_print += [col_out]
         print(cols_to_print)
         for day, df in self.data.items():
             for col_out, left, right, ret in inputs:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_md_rsi_lambda(
+                    lambda row: self.trend_mu_lambda(
                         row[left], 
                         row[right] if right is not None else 0, 
                         row[ret] if ret is not None else ret, 
@@ -358,7 +493,217 @@ class Model():
                     axis=1
                 )
 
-    def trend_md_lamda(self, left, right, ret, description):
+    def trend_mu_lambda(self, left, right, ret, description):
+        if right is None:
+            right = 0
+        if description is not None:
+            if (left - right) > 0:
+                if ret is None:
+                    return left-right
+                else:
+                    return ret
+            else:
+                return 0
+
+    # 33
+    ######################################### v8
+    # cols OF through OI
+    def calculate_trend_MU(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating MU columns...")
+        inputs_1 = [  # col_out, val, idx, upper, lower,  
+                ("RSI (7) 50-70 MU", "Relative Strength Index (7)",  "Average Directional Index (14)", 70.0, 50.0),
+                ("RSI (14) 50-70 MU", "Relative Strength Index (14)", "Average Directional Index (14)", 70.0, 50.0),
+            ]
+        inputs_2 = [  # col_out, val, idx, upper, lower,  
+                ("St-RSI Fast MU", "Stochastic RSI Fast (3, 3, 14, 14)", "Average Directional Index (14)", 80.0, 50.0),
+                ("St-RSI Slow MU", "Stochastic RSI Slow (3, 3, 14, 14)", "Average Directional Index (14)", 80.0, 50.0),
+            ]
+        cols_to_print = ["Ticker"]
+        for col_out, val, idx, lower, upper in inputs_1:
+            cols_to_print += [col_out]
+        for col_out, val, idx, lower, upper in inputs_2:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        # Calculate RSI
+        for day, df in self.data.items():
+            for col_out, val, idx, upper, lower in inputs_1:
+                self.data[day][col_out] = df.apply(
+                            lambda row: self.trend_MU_rsi_lambda(row[val], row[idx], upper, lower, row["Description"]),
+                            axis=1)
+            # print(self.data[day]["UO Oversold"])
+        # Calculate ST-RSI
+        for day, df in self.data.items():
+            for col_out, val, idx, upper, lower in inputs_2:
+                self.data[day][col_out] = df.apply(
+                            lambda row: self.trend_MU_st_rsi_lambda(row[val], row[idx], upper, lower, row["Description"]),
+                            axis=1)
+            # print(self.data[day]["UO Oversold"])
+        print("Done!")
+
+    def trend_MU_st_rsi_lambda(self, val, idx, upper, lower, description):
+        if description is not None and idx <= 20.0 and val < upper and val > lower:
+            return abs(val - lower)
+        else:
+            return 0
+
+    def trend_MU_rsi_lambda(self, val, idx, upper, lower, description):
+        if description is not None and idx > 20.0 and val < upper and val > lower:
+            return abs(val - lower)
+        else:
+            return 0
+
+#####################################
+# MD calculatations
+
+    # 32
+    ######################################### v8
+    # cols OJ through OK
+    def calculate_avg_PR_MD_final(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating avg PR of MD and final PR-MD....")
+        inputs = [ # col_out, cols 1:2, col_out_pr,
+            "Avg-#MD",
+            "PR-Avg MD",
+            "PR-# MD",  # col_out with count of above 0
+            "PR-MD",
+        ]
+        print("Using cols:")
+        for i in range(0,len(inputs)):
+            # print("inputs[", i, "]")
+            print(i, "=", inputs[i])
+
+        for day, df in self.data.items():
+            #               col_out     count
+            self.data[day][inputs[0]] = df.apply(
+                lambda row: self.avg_PR_OS_lambda(
+                    row[inputs[1]],
+                    row[inputs[2]],
+                    description=row["Description"]
+                ), axis=1)  #, result_type="expand")
+            # Calculate PR of the column that we just calculated
+            temp = self.data[day][inputs[0]].replace(0, np.nan)
+            self.data[day][inputs[3]] = temp.rank(pct=True).replace(np.nan, 0)            
+        print("Done!")
+
+    # 31
+    ######################################### v8
+    # cols OL through OM
+    def calculate_PR_MD_avg(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following Percent Rank Columns...")
+        inputs = [  # col_out, col
+           ("PR-# MD", "# MD"),
+           ("PR-Avg MD", "Avg MD"),
+        ]
+        cols_to_print = ["Ticker"]
+        for col_out, col in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, col in inputs:
+                temp = df[col].replace(0, np.nan)
+                self.data[day][col_out] = temp.rank(pct=True).replace(np.nan, 0)
+            # print(self.data[day]["UO Oversold"])
+        print("Done!")
+
+    # 30
+    ######################################### v8
+    # cols ON through OO
+    def calculate_avg_md(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating Avg MD....")
+        inputs = [ # col_out, cols 1:10, # OB
+            "Avg MD",
+            "# MD",  # col_out with count of above 0
+            "PR-Aroon MD",
+            "PR-ADX MD",
+            "PR-D-DMI MD",
+            "PR-AO MD",
+            "PR-RSI (14) 30-50 MD",
+            "PR-RSI (7) 30-50 MD",
+            "PR-St-RSI Fast MD",
+            "PR-St-RSI Slow MD",
+        ]
+
+        print("Using cols:")
+        for i in range(0,len(inputs)):
+            # print("inputs[", i, "]")
+            print(i, "=", inputs[i])
+
+        for day, df in self.data.items():
+            #               col_out     count
+            self.data[day][[inputs[0], inputs[1]]] = df.apply(
+                lambda row: self.avg_lambda(
+                    row[inputs[2]],
+                    row[inputs[3]],
+                    row[inputs[4]],
+                    row[inputs[5]],
+                    row[inputs[6]],
+                    row[inputs[7]],
+                    row[inputs[8]],
+                    row[inputs[9]],
+                    description=row["Description"]
+                ), axis=1, result_type="expand")
+            # print(self.data[day][[inputs[0], inputs[11]]])
+        print("Done!")
+
+    # 29
+    ######################################### v8
+    # cols OP through OW
+    def calculate_PR_MD(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following Percent Rank Columns...")
+        inputs = [  # col_out, col
+            ( "PR-Aroon MD",          "Aroon MD"),
+            ( "PR-ADX MD",            "ADX MD"),
+            ( "PR-D-DMI MD",          "D-DMI MD"),
+            ( "PR-AO MD",             "AO MD"),
+            ( "PR-RSI (14) 30-50 MD", "RSI (14) 30-50 MD"),
+            ( "PR-RSI (7) 30-50 MD",  "RSI (7) 30-50 MD"),
+            ( "PR-St-RSI Fast MD",    "St-RSI Fast MD"),
+            ( "PR-St-RSI Slow MD",    "St-RSI Slow MD"),
+        ]
+        cols_to_print = ["Ticker"]
+        for col_out, col in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, col in inputs:
+                temp = df[col].replace(0, np.nan)
+                self.data[day][col_out] = temp.rank(pct=True)
+            # print(self.data[day]["UO Oversold"])
+        print("Done!")
+
+    # 28
+    ######################################### v8
+    # cols OX through PA
+    def calculate_trend_MD_2(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating MD columns...")
+        inputs = [
+            ("AO MD",     "Awesome Oscillator",  None, None),
+            ("D-DMI MD", "Positive Directional Indicator (14)", "Negative Directional Indicator (14)", None),
+            ("ADX MD",    "Positive Directional Indicator (14)", "Negative Directional Indicator (14)", "Average Directional Index (14)"),
+            ("Aroon MD", "Aroon Down (14)", "Aroon Up (14)", None),
+        ]
+        
+        cols_to_print = ["Ticker"]
+        for col_out, left, right, ret in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, left, right, ret in inputs:
+                self.data[day][col_out] = df.apply(
+                    lambda row: self.trend_md_lambda(
+                        row[left], 
+                        row[right] if right is not None else 0, 
+                        row[ret] if ret is not None else ret, 
+                        row["Description"]),
+                    axis=1
+                )
+
+    def trend_md_lambda(self, left, right, ret, description):
         if right is None:
             right = 0
         if description is not None:
@@ -369,13 +714,12 @@ class Model():
                     return abs(ret)
             else:
                 return 0
-                
-        
+
     # 27
     ######################################### v8
     # cols PB through PE
     def calculate_trend_MD(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating MD columns...")
         inputs_1 = [  # col_out, val, idx, upper, lower,  
                 ("RSI (7) 30-50 MD", "Relative Strength Index (7)",  "Average Directional Index (14)", 30.0, 20.0),
@@ -419,13 +763,14 @@ class Model():
         else:
             return 0
 
-
+#####################################
+# OB calculatations
 
     # 26
     ######################################### v8
     # cols PX through PY
     def calculate_avg_PR_OB_final(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating avg PR of OB and final PR-OB....")
         inputs = [ # col_out, cols 1:2, col_out_pr,
             "Avg-#OB",
@@ -453,12 +798,11 @@ class Model():
             
         print("Done!")
 
-
     # 25
     ######################################### v8
     # cols PZ through QA
     def calculate_PR_ob_avg(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating the following Percent Rank Columns...")
         inputs = [  # col_out, col
            ("PR-# OB", "# OB"),
@@ -479,7 +823,7 @@ class Model():
     ######################################### v8
     # cols QB through QC
     def calculate_avg_ob(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating Avg OB....")
         inputs = [ # col_out, cols 1:10, # OB
             "Avg OB",
@@ -531,7 +875,7 @@ class Model():
     ######################################### v8
     # cols QD through QP
     def calculate_PR_ob(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating the following Percent Rank Columns...")
         inputs = [  # col_out, col
             ("PR-RSI (7) OB",                 "RSI (7) OB",),
@@ -540,7 +884,7 @@ class Model():
             ("PR-St-RSI Slow OB",             "St-RSI Slow OB",),
             ("PR-Stoch K% OB",                "Stoch K% OB",),
             ("PR-Stoch D% OB",                "Stoch D% OB",),
-            ("PR-Williams% OB",               "Williams% OB",),
+            ("PR-Williams% OB",               "Willams% OB",),
             ("PR-CCI OB",                     "CCI OB",),
             ("PR-CMF OB",                     "CMF OB",),
             ("PR-MFI OB",                     "MFI OB",),
@@ -563,7 +907,7 @@ class Model():
     ######################################### v8
     # cols QQ through QT
     def calculate_trend_OB(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating OB columns...")
         inputs_1 = [  # col_out, val, idx, upper, lower,  
                 ("RSI (7) OB",     "Relative Strength Index (7)",        "Average Directional Index (14)", 70.0, 20.0),
@@ -611,7 +955,7 @@ class Model():
     ######################################### v8
     # cols QU through RA
     def calculate_UO_overbought(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating UO overbought...")
         inputs = [  # col_out, price, lower
                 ("UO OB",       "Ultimate Oscillator (7, 14, 28)", 70.0),
@@ -640,12 +984,14 @@ class Model():
         else:
             return 0    
 
+#####################################
+# OS calculatations
 
     # 20
     ######################################### v8
     # cols RD through RE
     def calculate_avg_PR_OS_final(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating avg PR of OS and final PR-OS....")
         inputs = [ # col_out, cols 1:2, col_out_pr,
             "Avg-#OS",
@@ -693,7 +1039,7 @@ class Model():
     ######################################### v8
     # cols RF through RG
     def calculate_PR_os(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating the following Percent Rank Columns...")
         inputs = [  # col_out, col
            ("PR-# OS", "# OS"),
@@ -714,7 +1060,7 @@ class Model():
     ######################################### v8
     # cols RH through RI
     def calculate_avg_os(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating Avg OS....")
         inputs = [ # col_out, cols 1:10, # OS
             "Avg OS",
@@ -780,11 +1126,13 @@ class Model():
     ######################################### v8
     # cols RU through RV
     def calculate_PR_for_RU_RV(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating the following Percent Rank Columns...")
         inputs = [  # col_out, col
             ("PR-Bollinger Price/Lower-1 OS", "Bollinger Price/Lower-1 OS" ),
             ("PR-Keltner Price/Lower-1 OS",   "Keltner Price/Lower-1 OS" ),
+            ("PR-Bollinger Price/Lower-1 OB", "Bollinger Price/Lower-1 OB" ),
+            ("PR-Keltner Price/Lower-1 OB",   "Keltner Price/Lower-1 OB" ),
         ]
         cols_to_print = ["Ticker"]
         for col_out, col in inputs:
@@ -803,15 +1151,18 @@ class Model():
     # 16
     ######################################### v8
     # cols SH through SI, RB through RC
-    def calculate_OB(self):
-        self.ps()
+    def calculate_OB_OS(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating the following columns...")
         inputs = [  #col_out, col
+            ("Bollinger Price/Lower-1 OB", "Bollinger Price/Lower-1"),
+            ("Bollinger Price/Upper-1 OB", "Bollinger Price/Upper-1"),
+            ("Keltner Price/Lower-1 OB", "Keltner Price/Lower-1"),
+            ("Keltner Price/Upper-1 OB", "Keltner Price/Upper-1"),
             ("Bollinger Price/Lower-1 OS", "Bollinger Price/Lower-1"),
-            ("Keltner Price/Lower-1 OS", "Keltner Price/Lower-1"),
             ("Bollinger Price/Upper-1 OS", "Bollinger Price/Upper-1"),
+            ("Keltner Price/Lower-1 OS", "Keltner Price/Lower-1"),
             ("Keltner Price/Upper-1 OS", "Keltner Price/Upper-1"),
-            
         ]
         cols_to_print = ["Ticker"]
         for col_out, col in inputs:
@@ -820,24 +1171,33 @@ class Model():
         for day, df in self.data.items():
             for col_out, col in inputs:
                 temp = df[col].replace(0, np.nan)
-                quartile = temp.quantile(0.25)
-                self.data[day][col_out] = df.apply(
-                            lambda row: self.quartile_lambda(row[col], quartile, row["Description"]),
-                            axis=1)
-                
-                
+                quartile = temp.abs().quantile(0.25)
+                if "OB" in col_out:
+                    self.data[day][col_out] = df.apply(
+                                lambda row: self.quartile_lambda(row[col], quartile, row["Description"]),
+                                axis=1)
+                else:
+                    self.data[day][col_out] = df.apply(
+                                lambda row: self.quartile_lambda_OS(row[col], quartile, row["Description"]),
+                                axis=1)
+    
     def quartile_lambda(self, col, quartile, description):
         if description is not None and col != 0 and col <= quartile:
             return col
         else:
             return 0
-                
     
+    def quartile_lambda_OS(self, col, quartile, description):
+        if description is not None and col < 0 and abs(col) <= quartile:
+            return abs(col)
+        else:
+            return 0
+                
     # 15
     ######################################### v8
     # cols RJ through RT
     def calculate_PR(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating the following Percent Rank Columns...")
         inputs = [  # col_out, col
             ("PR-RSI (7) OS",                  "RSI (7) OS",),
@@ -866,7 +1226,6 @@ class Model():
             # print(self.data[day]["UO Oversold"])
         print("Done!")
         
-
     def percent_rank_lamda(self, val, description):
         if description is not None:
             return val
@@ -877,7 +1236,7 @@ class Model():
     ######################################### v8
     # cols RW through RZ
     def calculate_trend_OS(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating under or oversold columns...")
         inputs_1 = [  # col_out, val, idx, lower, upper 
                 ("RSI (7) OS",      "Relative Strength Index (7)", "Average Directional Index (14)", 20.0, 30.0),
@@ -926,7 +1285,7 @@ class Model():
     ######################################### v8
     # cols SC
     def caclulate_williams(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating Williams% OS....")
         inputs = [  # col_out, price, lower, upper
                 ("Williams% OS", "Williams Percent Range (14)", -100.0, -80.0),
@@ -950,7 +1309,7 @@ class Model():
     ######################################### v8
     # cols MJ through MK
     def calculate_UO_trend_U(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating UO Trend U...")
         inputs = [  # col_out, price, lower, upper
                 # ("UO Trend D", "Ultimate Oscillator (7, 14, 28)", 50, 70),
@@ -981,7 +1340,7 @@ class Model():
     ######################################### v8
     # cols MM
     def calculate_UO_TD(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating UO Trend D...")
         inputs = [  # col_out, price, lower, upper
                 ("UO TD", "Ultimate Oscillator (7, 14, 28)", 30.0, 50.0),
@@ -1014,7 +1373,7 @@ class Model():
     ######################################### v8
     # cols SD through SG
     def calculate_UO_OS(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating under or oversold columns...")
         inputs = [  # col_out, price, value
                 ("UO OS", "Ultimate Oscillator (7, 14, 28)", 30.0),
@@ -1048,12 +1407,14 @@ class Model():
         else:
             return 0
 
+########################
+# Initial calculatations
 
     # 9
     ######################################### v8
     # col SQ through SS
     def calculate_fibonacci_min(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating Fibonacci Minimum, Closest D-Pivot, and Current Pivot Level...")
         inputs = [ # r3, r2, r1, p, s1, s2, s3
                 ("D-Pivot Fibonacci R3",
@@ -1144,7 +1505,7 @@ class Model():
     ######################################### v8
     # cols SJ through SP, ST through TA
     def calculate_d_n_high_low(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating the following columns...")
         inputs = [ # col_out, numerator, denominator
                 ("D-52 Week High",  "Price", "52 Week High"),
@@ -1193,7 +1554,7 @@ class Model():
     ######################################### v8
     # cols TB through TI
     def calculate_price_high_low_div_atr(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating Price D-## Week/ATR...")
         inputs = [  # col_out, price, sub, denominator
                 ("D-52 Week High/ATR", "Price", "52 Week High", "Average True Range (14)"),
@@ -1222,14 +1583,11 @@ class Model():
         else:
             return 0
 
-    
-
-   
     # 6
     ######################################### v8
     # cols TK through TS, MN through MV
     def calculate_volatility(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating the following volatility columns...")
         inputs = [
             ("Volatility D/W", "Volatility", "Volatility Week"),
@@ -1289,7 +1647,7 @@ class Model():
     ######################################### v8
     # cols
     def calculate_ADX_filtered_RSI(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating ADX Filtered RSI columns...")
         cols_out = [
                 "ADX Filtered RSI (7)",
@@ -1331,7 +1689,7 @@ class Model():
     ######################################### v8
     # cols UD through UE, UU through UV
     def calculate_avg_pr(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating average of Percent Rank for the following columns:")
         inputs = [  # col_out, a, b
             ("Avg-# VD", "PR-Avg VD", "PR-# VD"),
@@ -1372,7 +1730,8 @@ class Model():
     ######################################### v8
     # cols UW through UX, UF through UG
     def calculate_percent_rank_avg_volume(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+
         print("Calculating Percent Rank for the following columns:")
         inputs = [  # col_out, col
             ("PR-Avg VD", "Avg VD"),
@@ -1396,7 +1755,7 @@ class Model():
     ######################################### v8
     # cols UD through UI and UU through UZ
     def calculate_avg_volume(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating avg volume for the following columns:")
         inputs = [ # col_out_l, col_out_r, a, b, c, d, e, f, g, h, i, j, k
             ("# VD", "Avg VD", "D-Relative Volume VD", "Volume 60/90 VD", "Volume 30/90 VD", "Volume 30/60 VD", "Volume 10/90 VD", "Volume 10/30 VD", "Volume/90 VD", "Volume/60 VD", "Volume/30 VD", "Volume/10 VD", "Volume/10 VD"),
@@ -1450,7 +1809,7 @@ class Model():
     ######################################### v8
     # cols UJ through UT and VA through VL
     def calculate_d_relative_volume_up_or_down(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating d-relative volume up and down cols")
         inputs = [ # col_out, col
             ("Volume 60/90 VD", "Volume 60/90"),
@@ -1506,7 +1865,7 @@ class Model():
     ######################################### v8
     # cols vm through vv
     def calculate_volume_div(self):
-        self.ps()
+        self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating the following columns...")
         inputs = [ # col_out, numerator, denominator
                 ("Volume 60/90", "Average Volume (60 day)", "Average Volume (90 day)"),
