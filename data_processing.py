@@ -449,8 +449,8 @@ class Model():
             ( "PR-ADX MU",            "ADX MU"),
             ( "PR-D-DMI MU",          "D-DMI MU"),
             ( "PR-AO MU",             "AO MU"),
-            ( "PR-RSI (14) 30-50 MU", "RSI (14) 30-50 MU"),
-            ( "PR-RSI (7) 30-50 MU",  "RSI (7) 30-50 MU"),
+            ( "PR-RSI (14) 50-70 MU", "RSI (14) 50-70 MU"),
+            ( "PR-RSI (7) 50-70 MU",  "RSI (7) 50-70 MU"),
             ( "PR-St-RSI Fast MU",    "St-RSI Fast MU"),
             ( "PR-St-RSI Slow MU",    "St-RSI Slow MU"),
         ]
