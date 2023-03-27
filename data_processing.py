@@ -141,8 +141,34 @@ class Model:
         # 50:
         self.calculate_avg_vol_TD()  # cols LH through LI
         self.calculate_PR_ichi_TD()  # cols KZ through LG
-        self.calculate_avg_ichi_TD()  # cols KX through KY
-        self.calculate_PR_EMA_TD()  # Cols KP through KW
+        self.calculate_avg_ichi_TD_2()  # cols KX through KY
+        self.calculate_PR_EMA_TD()  # cols KN through KW
+        self.calculate_avg_n_MA_TD()  # cols KL through KM
+        # 55:
+        self.calculate_avg_TD()  #
+        self.calculate_PR_TD_3()
+        self.calculate_avg_n_TD()
+        self.calculate_trends_TU()
+        self.calculate_trend_macd_TU()
+        # 60:
+        self.calculate_PR_TU_1()
+        self.calculate_avg_vol_TU()
+        self.calculate_avg_ichi_TU()
+        self.calculate_trends_TU_2()
+
+        # TODO implement the following functions following order of TD
+        # self.calculate_avg_MA_TU()  # cols LP through LQ
+        # self.calculate_PR_TU_2()  # cols LK
+        # # 50:
+        # self.calculate_avg_vol_TU()  # cols LH through LI
+        # self.calculate_PR_ichi_TU()  # cols KZ through LG
+        # self.calculate_avg_ichi_TU_2()  # cols KX through KY
+        # self.calculate_PR_EMA_TU()  # cols KN through KW
+        # self.calculate_avg_n_MA_TU()  # cols KL through KM
+        # # 55:
+        # self.calculate_avg_TU() #
+        # self.calculate_PR_TU_3()
+        # self.calculate_avg_n_TU()
 
     def calculate_all_model_v7(self):
         # calculation order from v7 of model
@@ -347,9 +373,335 @@ class Model:
                     s += row[i] + '"),'
             print(s)
 
+    #####################################
+    # TU calculatations
+
+    # 62
+    ######################################### v8
+    # cols
+    def calculate_trends_TU_2(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating ABS Trend for ....")
+        inputs = [  # col_out, col
+            # ("EMA Avg TD", "EMA Gap Slow-Fast"),
+            (self.cols["JJ"], self.cols["MN"]),
+            (self.cols["JK"], self.cols["HR"]),
+            (self.cols["JL"], self.cols["HS"]),
+            (self.cols["JM"], self.cols["HT"]),
+            (self.cols["JN"], self.cols["HU"]),
+            (self.cols["JO"], self.cols["HV"]),
+            (self.cols["JP"], self.cols["HW"]),
+            (self.cols["JQ"], self.cols["JJ"]),
+            # ("EMA (200) TD", "D-Exponential Moving Average (200)"),
+            # ("EMA (100) TD", "D-Exponential Moving Average (100)"),
+            # ("EMA (50) TD", "D-Exponential Moving Average (50)"),
+            # ("EMA (30) TD", "D-Exponential Moving Average (30)"),
+            # ("EMA (20) TD", "D-Exponential Moving Average (20)"),
+            # ("EMA (10) TD", "D-Exponential Moving Average (10)"),
+            # ("EMA (5) TD", "D-Exponential Moving Average (5)"),
+            # ("Parabolic TD", "D-Parabolic SAR"),
+            # ("Hull MA TD", "D-Hull Moving Average (9)"),
+            # ("Ichimoku TD", "Ichimoku Span A/B-1"),
+        ]
+        cols_to_print = []
+        for col_out, col in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, col in inputs:
+                self.data[day][col_out] = df.apply(
+                    lambda row: self.abs_trend_lambda(row[col], row["Description"]), axis=1
+                )
+            # print(self.data[day][cols_to_print])
+        print("Done!")
+
+    def abs_trend_lambda(self, val, description):
+        if description is not None and val < 0:
+            return abs(val)
+        else:
+            return 0
+
+    # 61
+    ######################################### v8
+    # cols
+    def calculate_avg_ichi_TU(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following trends....")
+        inputs = [
+            (
+                self.cols["JS"],
+                self.cols["JR"],
+                self.cols["JT"],
+                self.cols["JU"],
+                self.cols["JV"],
+                self.cols["JW"],
+                self.cols["JX"],
+                self.cols["JY"],
+            )
+        ]
+        self.print_inputs(inputs=inputs)
+        cols_to_print = []
+        for col_out_1, col_out_2, a, b, c, d, e, f in inputs:
+            cols_to_print += [col_out_1, col_out_2]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out_1, col_out_2, a, b, c, d, e, f in inputs:
+                self.data[day][[col_out_1, col_out_2]] = df.apply(
+                    lambda row: self.avg_lambda(
+                        row[a],
+                        row[b],
+                        row[c],
+                        row[d],
+                        row[e],
+                        row[f],
+                        description=row["Description"],
+                    ),
+                    axis=1,
+                    result_type="expand",
+                )
+            # print(self.data[day][cols_to_print])
+        print("Done!")
+
+    # 60
+    ######################################### v8
+    # cols MH through MI
+    def calculate_avg_vol_TU(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following trends....")
+        inputs = [
+            (
+                self.cols["JZ"],
+                self.cols["KA"],
+                self.cols["JD"],
+                self.cols["JE"],
+            )
+        ]
+        self.print_inputs(inputs=inputs)
+        cols_to_print = []
+        for col_out_1, col_out_2, left, right in inputs:
+            cols_to_print += [col_out_1, col_out_2]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out_1, col_out_2, left, right in inputs:
+                self.data[day][[col_out_1, col_out_2]] = df.apply(
+                    lambda row: self.avg_lambda(
+                        row[left], row[right], description=row["Description"]
+                    ),
+                    axis=1,
+                    result_type="expand",
+                )
+            # print(self.data[day][cols_to_print])
+        print("Done!")
+
+    # 60
+    ######################################### v8
+    # cols
+    def calculate_PR_TU_1(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following Percent Rank Columns...")
+        inputs = [  # col_out, col
+            (self.cols["JD"], self.cols["KB"]),
+            (self.cols["JE"], self.cols["KC"]),
+            (self.cols["JF"], self.cols["KD"]),
+            (self.cols["JG"], self.cols["KE"]),
+        ]
+        self.print_inputs(inputs=inputs)
+        cols_to_print = ["Ticker"]
+        for col_out, col in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, col in inputs:
+                temp = df[col].replace(0, np.nan)
+                self.data[day][col_out] = temp.rank(pct=True)
+            # print(self.data[day]["UO Oversold"])
+        print("Done!")
+
+    # 59
+    ######################################### v8
+    # col ML
+    def calculate_trend_macd_TU(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following trends....")
+        inputs = [("MACD TU", self.cols["AV"], self.cols["FM"])]
+        self.print_inputs(inputs=inputs)
+        cols_to_print = []
+        for col_out, left, right in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, left, right in inputs:
+                self.data[day][col_out] = df.apply(
+                    lambda row: self.macd_TU_lambda(row[left], row[right]),
+                    axis=1,
+                )
+            # print(self.data[day][cols_to_print])
+        print("Done!")
+
+    def macd_TU_lambda(self, left, right):
+        if left > 0 and right < 0 and abs(right) < left:
+            return left
+        else:
+            return 0
+
+    # 58
+    ######################################### v8
+    # cols MG through MB
+    def calculate_trends_TU(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following trends....")
+        inputs = [  # col_out, numerator, denominator
+            ("P/Ichi Span A-1 TU", "P/Ichi Span A-1", "Change %"),
+            ("P/Ichi Span B-1 TU", "P/Ichi Span B-1", "Change %"),
+            ("P/Ichi Line B-1 TU", "P/Ichi Line B-1", "Change %"),
+            ("P/Ichi Line C-1 TU", "P/Ichi Line C-1", "Change %"),
+            ("Ichi Line C/B TU", "Ichi Line C/B-1", "Change %"),
+            ("Ichi Span A/B-1 TU", "Ichi Span A/B-1", "Change %"),
+        ]
+        cols_to_print = []
+        for col_out, left, right in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, left, right in inputs:
+                self.data[day][col_out] = df.apply(
+                    lambda row: self.trend_TU_lambda(row[left], row[right], row["Description"]),
+                    axis=1,
+                )
+            # print(self.data[day][cols_to_print])
+        print("Done!")
+
+    def trend_TU_lambda(self, left, right, description):
+        if description is not None and left > 0 and left > right:
+            return abs(left)
+        else:
+            return 0
+
+    # 57
+    ######################################### v8
+    # cols KJ through KK
+    def calculate_avg_n_TD(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following trends....")
+        inputs = [
+            (self.cols["KG"], "temp", self.cols["KH"], self.cols["KI"], self.cols["KF"]),
+        ]
+        self.print_inputs(inputs=inputs)
+        cols_to_print = []
+        for col_out_1, col_out_2, a, b, col_3 in inputs:
+            cols_to_print += [col_out_1, col_out_2, col_3]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out_1, col_out_2, a, b, col_3 in inputs:
+                self.data[day][[col_out_1, col_out_2]] = df.apply(
+                    lambda row: self.avg_lambda(
+                        row[a],
+                        row[b],
+                        # row[c],
+                        # row[d],
+                        description=row["Description"],
+                    ),
+                    axis=1,
+                    result_type="expand",
+                )
+                temp = self.data[day][col_out_1].replace(0, np.nan)
+                self.data[day][col_3] = temp.rank(pct=True)
+            # print(self.data[day][cols_to_print])
+        print("Done!")
+
+    # 56
+    ######################################### v8
+    # cols KN through LG
+    def calculate_PR_TD_3(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following Percent Rank Columns...")
+        inputs = [  # col_out, col
+            (self.cols["KI"], self.cols["KK"]),
+            (self.cols["KH"], self.cols["KJ"]),
+        ]
+        self.print_inputs(inputs=inputs)
+        cols_to_print = ["Ticker"]
+        for col_out, col in inputs:
+            cols_to_print += [col_out]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out, col in inputs:
+                temp = df[col].replace(0, np.nan)
+                self.data[day][col_out] = temp.rank(pct=True)
+            # print(self.data[day]["UO Oversold"])
+        print("Done!")
+
+    # 55
+    ######################################### v8
+    # cols KJ through KK
+    def calculate_avg_TD(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following trends....")
+        inputs = [
+            (
+                self.cols["KK"],
+                self.cols["KL"],
+                self.cols["KX"],
+                self.cols["LH"],
+                self.cols["LN"],
+                self.cols["LO"],
+                self.cols["KJ"],
+            ),
+        ]
+        self.print_inputs(inputs=inputs)
+        cols_to_print = []
+        for col_out_1, col_out_2, a, b, c, d, col_3 in inputs:
+            cols_to_print += [col_out_1, col_out_2, col_3]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out_1, col_out_2, a, b, c, d, col_3 in inputs:
+                self.data[day][[col_out_1, col_out_2]] = df.apply(
+                    lambda row: self.avg_lambda(
+                        row[a], row[b], row[c], row[d], description=row["Description"]
+                    ),
+                    axis=1,
+                    result_type="expand",
+                )
+                temp = self.data[day][col_out_1].replace(0, np.nan)
+                self.data[day][col_3] = temp.rank(pct=True)
+            # print(self.data[day][cols_to_print])
+        print("Done!")
+
+    # 54
+    ######################################### v8
+    # cols KX through KY
+    def calculate_avg_n_MA_TD(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Calculating the following trends....")
+        inputs = [
+            (
+                self.cols["KM"],
+                "Count # Vol TD",
+                self.cols["KN"],
+                self.cols["KO"],
+                self.cols["KL"],
+            ),
+        ]
+        self.print_inputs(inputs=inputs)
+        cols_to_print = []
+        for col_out_1, col_out_2, a, b, col_3 in inputs:
+            cols_to_print += [col_out_1, col_out_2, col_3]
+        print(cols_to_print)
+        for day, df in self.data.items():
+            for col_out_1, col_out_2, a, b, col_3 in inputs:
+                self.data[day][[col_out_1, col_out_2]] = df.apply(
+                    lambda row: self.avg_lambda(row[a], row[b], description=row["Description"]),
+                    axis=1,
+                    result_type="expand",
+                )
+                temp = self.data[day][col_out_1].replace(0, np.nan)
+                self.data[day][col_3] = temp.rank(pct=True)
+            # print(self.data[day][cols_to_print])
+        print("Done!")
+
     # 53
     ######################################### v8
-    # cols KZ through LG
+    # cols KN through LG
     def calculate_PR_EMA_TD(self):
         self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating the following Percent Rank Columns...")
@@ -362,6 +714,8 @@ class Model:
             (self.cols["KU"], self.cols["LW"]),
             (self.cols["KV"], self.cols["LX"]),
             (self.cols["KW"], self.cols["LY"]),
+            (self.cols["KO"], self.cols["LQ"]),
+            (self.cols["KN"], self.cols["LP"]),
         ]
         self.print_inputs(inputs=inputs)
         cols_to_print = ["Ticker"]
@@ -378,7 +732,7 @@ class Model:
     # 52
     ######################################### v8
     # cols KX through KY
-    def calculate_avg_ichi_TD(self):
+    def calculate_avg_ichi_TD_2(self):
         self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating the following trends....")
         inputs = [
@@ -398,7 +752,12 @@ class Model:
         for day, df in self.data.items():
             for col_out_1, col_out_2, a, b, col_3 in inputs:
                 self.data[day][[col_out_1, col_out_2]] = df.apply(
-                    lambda row: self.avg_lambda(row[a], row[b], description=row["Description"]),
+                    lambda row: self.avg_lambda(
+                        row[a],
+                        row[b],
+                        # row[c],
+                        description=row["Description"],
+                    ),
                     axis=1,
                     result_type="expand",
                 )
@@ -2004,7 +2363,7 @@ class Model:
         self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Calculating UO Trend U...")
         inputs = [  # col_out, price, lower, upper
-            # ("UO Trend D", "Ultimate Oscillator (7, 14, 28)", 50, 70),
+            ("UO TU", "Ultimate Oscillator (7, 14, 28)", 50, 70),
             # ("MFI TD", "Money Flow (14)", 20, 50),
             ("MFI TU", "Money Flow (14)", 50, 80),
             ("CMF TU", "Chaikin Money Flow (20)", 0.05, 0.2),
