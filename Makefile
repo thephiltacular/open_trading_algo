@@ -1,6 +1,6 @@
 ROOTDIR=$(PWD)
 
-SRC = 
+SRC =
 
 .PHONY:	help	clean	lint	format	format_check\
 lint_check_flake8	lint_check_all	format_check_black	format_check_isort	format_check_all  \
@@ -39,7 +39,7 @@ format_black: #Run black formatter for python scripts
 	black $(SRC)/
 
 format_isort:	# Run isort for python libraries
-	isort **/*.py 
+	isort **/*.py
 
 install_poetry:
 	# install poetry if you do n
