@@ -2,7 +2,7 @@ ROOTDIR=$(PWD)
 
 SRC =
 
-.PHONY:	help	clean	lint	format	format_check\
+.PHONY:	help	clean	lint	format	format_check  compile\
 lint_check_flake8	lint_check_all	format_check_black	format_check_isort	format_check_all  \
 install_poetic	install_depends tests
 
@@ -21,6 +21,9 @@ lint: lint_check_all
 format: format_black format_isort
 
 format_check: format_check_all
+
+compile:
+	python3 -m compileall -o 2
 
 lint_check_flake8: ## check linting with flake
 	flake8 --max-line-length=101 --ignore=E402,F841,F401,E302,E305,E203,W503,C901,F403 $(SRC)/ || pflake8
