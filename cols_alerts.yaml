@@ -26,3 +26,7 @@ Y:
 Z: "PR-Div Neg-Pos"
 AA: "PR-Div Neg"
 AB: "PR-Div Pos"
+AC: "Oldest Negative Divergence"
+AD: "Oldest Positive Divergence"
+AE: "Oldest Drivergence"
+AF: "Oldest Divergence Type"

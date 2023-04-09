@@ -1,9 +1,15 @@
 #! /usr/bin/env python3
+import datetime
 import inspect
+import logging
 import sys
+
 import numpy as np
 import pandas as pd
+import pytz
 import yaml
+from dateutil import parser
+from dateutil.tz import tzutc
 
 # data_path = "23-03-07-TV-Data Input.csv"
 
@@ -24,7 +30,9 @@ import yaml
 # create regression model to optimize parameters for each day
 # df = pd.read_csv(data_path, header=0)
 
-
+latest_init = datetime.datetime(1980, 1, 1, 0, 0, 0, 000000, tzinfo=tzutc())
+oldest_init = datetime.datetime.now(pytz.utc)
+# trading_day = datetime.datetime(2023, 3, 7, tzinfo=tzutc())
 class Model:
     def __init__(self):
         data_folder = "data/"
@@ -80,6 +88,7 @@ class Model:
 
     def calculate_all_alerts_v8(self):
         self.transform_alerts_df()
+        self.add_alerts_to_model()
 
     def calculate_all_model_v8(self):
         self.total_steps = 94
@@ -316,6 +325,51 @@ class Model:
     #####################################
     # Alert calculatations
 
+    # 96
+    ######################################### v8
+    # cols
+    def add_alerts_to_model(self):
+        self.ps(inspect.stack()[0][0].f_code.co_name)
+        print("Moving Alerts into model...")
+        inputs = [(self.cols_alerts)]
+
+        for day, df_data in self.data.items():
+
+            # df_alert = self.alerts[day]
+            df = self.alerts[day]
+            df = df.set_index(df["Ticker"])
+            print(df)
+            # temp = df_data[["Ticker", self.cols["D"]]].combine(df_alert[["ticker", self.cols_alerts[["G"]]]], self.move_lambda)
+            temp = df_data.apply(
+                lambda row: self.move_lambda(row["Ticker"], row["Description"], df), axis=1
+            )
+            print(temp)
+
+    def move_lambda(self, ticker_data, description, df_alert):
+        if description is not None:
+            try:
+                if ticker_data in df_alert.index:
+                    # location = df_alert["Ticker"].where(df_alert["Ticker"] == ticker_data])
+                    print(
+                        "Found ticker",
+                        ticker_data,
+                        "in alerts at location: ",
+                        df_alert.loc[ticker_data][self.cols_alerts["G"]],
+                    )
+                else:
+                    return 0
+            except:
+                return 0
+
+                return True
+        else:
+            return False
+
+    # def move_lambda(self, ticker_alert, ticker_data, item, description):
+    #     if description is not None and ticker_alert == ticker_data:
+    #         return item
+    #     else:
+    #         return 0
     # 95
     ######################################### v8
     # cols
@@ -333,6 +387,9 @@ class Model:
         #     cols_to_print += [col_out_1]
         # print(cols_to_print)
         for day, df in self.alerts.items():
+            self.trading_day = parser.parse(
+                self.alerts[day][self.cols_alerts["E"]][0]
+            ) + datetime.timedelta(days=1)
             self.alerts[day]["Ticker"] = df.apply(
                 # self.data[day][[col_out_1, col_out_2]] = df.apply(
                 lambda row: self.fix_alerts_ticker_lambda(
@@ -341,7 +398,7 @@ class Model:
                 axis=1,
                 result_type="expand",
             )
-            print(self.alerts[day]["Ticker"])
+            # print(self.alerts[day]["Ticker"])
             self.alerts[day][[self.cols_alerts["G"], self.cols_alerts["H"]]] = df.apply(
                 # self.data[day][[col_out_1, col_out_2]] = df.apply(
                 lambda row: self.alerts_count_div_lambda(
@@ -371,10 +428,107 @@ class Model:
                 result_type="expand",
             )
             # print(self.temp)
-            print(self.alerts[day][["Ticker", self.cols_alerts["G"], self.cols_alerts["H"]]])
+            # print(self.alerts[day][["Ticker", self.cols_alerts["G"], self.cols_alerts["H"]]])
             self.temp = {}
+            # Use lambda to determine the latest and oldest divergences and types
+            print("Calculating latest divergence data...")
+            logging.info("Calculating latest divergence data...")
+            try:
+                self.alerts[day].apply(
+                    lambda row: self.get_latest_divergence_lambda(
+                        ticker=row[self.cols_alerts["B"]],
+                        time=row[self.cols_alerts["E"]],
+                        description=row[self.cols_alerts["D"]],
+                    ),
+                    axis=1,
+                )
+            except Exception as e:
+                logging.warning(e)
+            logging.info("Done!")
+            print("Done")
+            print(self.temp)
+            # extract data from temp and apply to alert DF
+            logging.info("Entering apply_latest_divergence_lambda...")
+            self.alerts[day][
+                [
+                    self.cols_alerts["I"],  # latest
+                    self.cols_alerts["J"],  # latest type
+                    self.cols_alerts["K"],  # latest neg
+                    self.cols_alerts["L"],  # latest pos
+                    self.cols_alerts["AE"],  # oldest
+                    self.cols_alerts["AF"],  # oldest type
+                    self.cols_alerts["AC"],  # oldest negative
+                    self.cols_alerts["AD"],  # oldest positive
+                    self.cols_alerts["M"],  # days negative divergence
+                    self.cols_alerts["N"],  # days positive divergence
+                ]
+            ] = self.alerts[day].apply(
+                lambda row: self.apply_latest_divergence_lambda(
+                    ticker=row[self.cols_alerts["B"]],
+                ),
+                axis=1,
+                result_type="expand",
+            )
+            print("Calculating the following trends....")
+            logging.info("calculating pr columns")
+            inputs = [  # col_out, left, right,
+                (
+                    self.cols_alerts["O"],
+                    self.cols_alerts["G"],
+                ),
+                (
+                    self.cols_alerts["P"],
+                    self.cols_alerts["H"],
+                ),
+                (
+                    self.cols_alerts["Q"],
+                    self.cols_alerts["M"],
+                ),
+                (
+                    self.cols_alerts["R"],
+                    self.cols_alerts["N"],
+                ),
+            ]
+            self.print_inputs(inputs=inputs)
+            for col_out_1, col in inputs:
+                temp = self.alerts[day][col].replace(0, np.nan)
+                self.alerts[day][col_out_1] = temp.rank(pct=True)
+            # print(self.data[day][cols_to_print])
+            print("Done!")
+            logging.info("calculating diffs")
+            inputs = [  # col_out, left, right,
+                (
+                    self.cols_alerts["S"],
+                    self.cols_alerts["O"],
+                    self.cols_alerts["Q"],
+                    self.cols_alerts["U"],
+                ),
+                (
+                    self.cols_alerts["T"],
+                    self.cols_alerts["P"],
+                    self.cols_alerts["R"],
+                    self.cols_alerts["V"],
+                ),
+            ]
+            self.print_inputs(inputs=inputs)
+            for col_out_1, a, b, col_out_2 in inputs:
+                self.alerts[day][col_out_1] = self.alerts[day].apply(
+                    lambda row: self.add_lambda(row[a], row[b]), axis=1
+                )
+                temp = self.alerts[day][col_out_1].replace(0, np.nan)
+                self.alerts[day][col_out_2] = temp.rank(pct=True)
 
-        print("Done!")
+            print("Done!")
+            print("Calculating diffs and PRs")
+            self.alerts[day][self.cols_alerts["W"]] = self.alerts[day].apply(
+                lambda row: self.subtract_lambda(
+                    row[self.cols_alerts["V"]], row[self.cols_alerts["U"]]
+                ),
+                axis=1,
+            )
+            temp = self.alerts[day][self.cols_alerts["W"]].replace(0, np.nan)
+            self.alerts[day][self.cols_alerts["X"]] = temp.rank(pct=True)
+            print("Done!")
 
     def fix_alerts_ticker_lambda(self, col):
         return col[5 : col.find(",")]
@@ -397,8 +551,114 @@ class Model:
         return self.temp[ticker][0], self.temp[ticker][1]
 
     def get_latest_divergence_lambda(self, ticker, time, description):
+        new_time = parser.parse(time)
+        logging.debug(ticker, time, description)
         if ticker in self.temp:
-            pass
+            logging.debug("Ticker: ", ticker, "exists, checking if latest or oldest")
+            obj = self.temp[ticker]
+            # with self.temp[ticker] as obj:
+            try:
+                if new_time > obj["latest"]:
+                    obj["latest"] = new_time
+                    obj["latest_type"] = description
+                    if "Negative" in description:
+                        obj["latest_neg"] = new_time
+                    else:
+                        obj["latest_pos"] = new_time
+                if new_time < obj["oldest"]:
+                    obj["oldest"] = new_time
+                    obj["oldest_type"] = description
+                    if "Negative" in description:
+                        obj["oldest_neg"] = new_time
+                    else:
+                        obj["oldest_pos"] = new_time
+                self.temp[ticker] = obj
+            except Exception as e:
+                logging.critical(e)
+                logging.critical(ticker, "object:", obj)
+                logging.critical(ticker, time)
+        else:
+            logging.debug("Ticker: ", ticker, "does not exist, initializing")
+            try:
+                # create the entry
+                neg_latest = new_time if "Negative" in description else latest_init
+                pos_latest = new_time if "Positive" in description else latest_init
+                neg_oldest = new_time if "Negative" in description else oldest_init
+                pos_oldest = new_time if "Positive" in description else oldest_init
+                # intialize latest with really old date and oldest with really new date
+                self.temp[ticker] = {
+                    "latest": new_time,
+                    "latest_type": description,
+                    "latest_neg": neg_latest,
+                    "latest_pos": pos_latest,
+                    "oldest": new_time,
+                    "oldest_type": description,
+                    "oldest_neg": neg_oldest,
+                    "oldest_pos": pos_oldest,
+                    "trading_day": self.trading_day,
+                }
+            except Exception as e:
+                logging.critical(e)
+                logging.critical(ticker, self.temp[ticker])
+        return new_time
+
+    def apply_latest_divergence_lambda(self, ticker):
+        if ticker in self.temp:
+            # with self.temp[ticker] as obj:
+            obj = self.temp[ticker]
+            dif_neg = (
+                (obj["latest_neg"] - self.trading_day) if obj["latest_neg"] is not latest_init else 0
+            )
+            dif_pos = (
+                (obj["latest_pos"] - self.trading_day) if obj["latest_pos"] is not latest_init else 0
+            )
+            # dif_neg = (obj["latest_neg"] - obj["oldest_neg"]) if obj["latest_neg"] is not latest_init and obj["oldest_neg"] is not oldest_init else 0
+            # dif_pos = (obj["latest_pos"] - obj["oldest_pos"]) if obj["latest_neg"] is not latest_init and obj["oldest_neg"] is not oldest_init else 0
+            if dif_neg != 0 and abs(dif_neg.days) > 8:
+                dif_neg = 0
+            if dif_pos != 0 and abs(dif_pos.days) > 8:
+                dif_pos = 0
+            print(
+                "Latest: ", obj["latest"], obj["latest_type"], obj["latest_neg"], obj["latest_pos"]
+            )
+            print(
+                "Oldest: ", obj["oldest"], obj["oldest_type"], obj["oldest_neg"], obj["oldest_pos"]
+            )
+            print("Differences[neg, pos] [", dif_neg, dif_pos, "]")
+            return (
+                obj["latest"],
+                obj["latest_type"],
+                obj["latest_neg"],
+                obj["latest_pos"],
+                obj["oldest"],
+                obj["oldest_type"],
+                obj["oldest_neg"],
+                obj["oldest_pos"],
+                dif_neg,
+                dif_pos,
+            )
+        else:
+            return (
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
+
+    def add_lambda(self, *cols):
+        sum = 0.0
+        for col in cols:
+            sum += col
+        return sum
+
+    def subtract_lambda(self, a, b):
+        return a - b
 
     #####################################
     # Trigger score calculatations
