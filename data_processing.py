@@ -340,10 +340,12 @@ class Model:
             df = df.set_index(df["Ticker"])
             print(df)
             # temp = df_data[["Ticker", self.cols["D"]]].combine(df_alert[["ticker", self.cols_alerts[["G"]]]], self.move_lambda)
-            temp = df_data.apply(
-                lambda row: self.move_lambda(row["Ticker"], row["Description"], df), axis=1
+            self.data[day][[self.cols["BW"], self.cols["BX"]]] = df_data.apply(
+                lambda row: self.move_lambda(row["Ticker"], row["Description"], df),
+                axis=1,
+                result_type="expand",
             )
-            print(temp)
+            print(self.data[day][[self.cols["BW"], self.cols["BX"]]])
 
     def move_lambda(self, ticker_data, description, df_alert):
         if description is not None:
@@ -354,16 +356,34 @@ class Model:
                         "Found ticker",
                         ticker_data,
                         "in alerts at location: ",
-                        df_alert.loc[ticker_data][self.cols_alerts["G"]],
                     )
-                else:
-                    return 0
-            except:
-                return 0
+                    div_neg = df_alert.loc[ticker_data][self.cols_alerts["U"]].replace(np.nan, 0.0)
+                    div_pos = df_alert.loc[ticker_data][self.cols_alerts["V"]].replace(np.nan, 0.0)
+                    if type(div_pos) is np.int64:
+                        print("Single value found pos: ", div_pos)
+                    else:
+                        # print("Multiple values found pos: ", list(div_pos))
+                        # print("returning: pos", list(div_pos)[0])
+                        div_pos = list(div_pos)[0]
 
-                return True
+                    if type(div_neg) is np.int64:
+                        print("Single value found neg: ", div_neg)
+                    else:
+                        # print("Multiple values found neg: ", list(div_neg))
+                        # print("returning neg: ", list(div_neg)[0])
+                        div_neg = list(div_neg)[0]
+                    # if div_neg == np.nan:
+                    #     div_neg = 0.0
+                    # if div_pos == np.nan:
+                    #     div_pos = 0.0
+                    print("neg: ", div_neg, "pos: ", div_pos)
+                    return div_neg, div_pos
+                else:
+                    return 0.0, 0.0
+            except:
+                return 0.0, 0.0
         else:
-            return False
+            return 0.0, 0.0
 
     # def move_lambda(self, ticker_alert, ticker_data, item, description):
     #     if description is not None and ticker_alert == ticker_data:
