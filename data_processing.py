@@ -30,6 +30,11 @@ from dateutil.tz import tzutc
 # create regression model to optimize parameters for each day
 # df = pd.read_csv(data_path, header=0)
 
+
+# look at 1 day 1 weeek 2 week 1 month performance
+# which of the indicators is mostly right when predicting an upward/downward tick
+
+
 latest_init = datetime.datetime(1980, 1, 1, 0, 0, 0, 000000, tzinfo=tzutc())
 oldest_init = datetime.datetime.now(pytz.utc)
 # trading_day = datetime.datetime(2023, 3, 7, tzinfo=tzutc())
@@ -68,7 +73,7 @@ class Model:
         self.step = 0
         self.total_steps = 94
         self.calculate_all_alerts_v8()
-        # self.calculate_all_model_v8()
+        self.calculate_all_model_v8()
 
     # Generate list of cols A through ZZ
     def gen_col_labels(self):
@@ -332,7 +337,6 @@ class Model:
         self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Moving Alerts into model...")
         inputs = [(self.cols_alerts)]
-
         for day, df_data in self.data.items():
 
             # df_alert = self.alerts[day]
@@ -678,6 +682,16 @@ class Model:
         return sum
 
     def subtract_lambda(self, a, b):
+        if type(a) is int:
+            a = float(a)
+        if type(b) is int:
+            b = float(b)
+        if a == np.nan:
+            a = 0.0
+        if b == np.nan:
+            b = 0.0
+        diff = a - b
+        print(f"a: {a}   b: {b}   diff={diff}")
         return a - b
 
     #####################################
@@ -5173,7 +5187,9 @@ class Model:
 
 
 if __name__ == "__main__":
+    model = None
     try:
         model = Model()
+
     except Exception as e:
         print(e)
