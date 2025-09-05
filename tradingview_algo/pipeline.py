@@ -1,8 +1,7 @@
-"""High-level orchestration pipeline.
+"""Pipeline utilities for TradingViewAlgoDev.
 
-This `ModelPipeline` is a clean, documented, and testable façade that replaces
-the monolithic class structure in `data_processing.py`. It doesn't mutate
-external state on construction and avoids printing; callers control execution.
+This module provides classes and functions for processing financial data pipelines,
+including model computation and data transformation.
 """
 
 from __future__ import annotations
@@ -17,17 +16,22 @@ from .types import AlertsByDay, ColumnAddResult, DataByDay, DayKey
 
 @dataclass
 class ModelPipeline:
-    """Orchestrates indicator calculations over day-partitioned data.
+    """Pipeline for computing financial models and indicators.
 
-    Attributes
-    - data: mapping of day key -> DataFrame-like object containing columns
-    - alerts: mapping of day key -> DataFrame-like alerts data
-
-    Note: This class is library-friendly: it does not print or perform I/O.
+    Attributes:
+        config (dict): Configuration settings.
     """
 
     data: DataByDay
     alerts: AlertsByDay
+
+    def __init__(self, config):
+        """Initialize the ModelPipeline.
+
+        Args:
+            config (dict): Configuration dictionary.
+        """
+        # ...existing code...
 
     # ----------------------------- Utility helpers ----------------------------
     def _has_columns(self, day: DayKey, columns: list[str]) -> bool:
@@ -45,6 +49,12 @@ class ModelPipeline:
 
         Requires the day's frame to support `__getitem__` dict-like access to
         columns by name and item assignment for new columns (pandas-compatible).
+
+        Args:
+            day (pd.DataFrame): Daily data.
+            left_col (str): Left column name.
+            right_col (str): Right column name.
+            out (str): Output column name.
         """
 
         df = self.data[day]
@@ -57,7 +67,13 @@ class ModelPipeline:
             df[out] = [I.ema_gap(l, r) for l, r in zip(left, right)]
 
     def compute_percent_rank(self, day: DayKey, in_col: str, out_col: str) -> None:
-        """Compute percent-rank for a column within the day's data."""
+        """Compute percent-rank for a column within the day's data.
+
+        Args:
+            day (pd.DataFrame): Daily data.
+            in_col (str): Input column name.
+            out_col (str): Output column name.
+        """
 
         df = self.data[day]
         values = df[in_col].tolist() if hasattr(df[in_col], "tolist") else list(df[in_col])
@@ -71,6 +87,9 @@ class ModelPipeline:
         - Slow:  D-Exponential Moving Average (30|50|100)
         Outputs:
         - Fast EMA Avg, Slow EMA Avg, EMA Gap Slow-Fast
+
+        Args:
+            day (pd.DataFrame): Daily data.
         """
 
         fast_cols = [
@@ -93,7 +112,13 @@ class ModelPipeline:
 
     # ------------------------ Batch/utility operations -----------------------
     def add_from_binary_flag(self, day: DayKey, out_col: str, in_col: str) -> None:
-        """Copy a binary flag (0/1) from in_col to out_col with safe casting."""
+        """Copy a binary flag (0/1) from in_col to out_col with safe casting.
+
+        Args:
+            day (pd.DataFrame): Daily data.
+            out_col (str): Output column name.
+            in_col (str): Input column name.
+        """
 
         df = self.data[day]
         src = df[in_col]
@@ -106,6 +131,11 @@ class ModelPipeline:
         """Average a set of numeric columns into `out_col`.
 
         Falls back to python averaging when vectorization fails.
+
+        Args:
+            day (pd.DataFrame): Daily data.
+            out_col (str): Output column name.
+            columns (list[str]): List of column names to average.
         """
 
         df = self.data[day]
@@ -121,6 +151,12 @@ class ModelPipeline:
 
         This is a placeholder showing how alerts can be merged; the concrete
         joining logic depends on the original schema, which is not fully known.
+
+        Args:
+            day (pd.DataFrame): Daily data.
+            pos_col (str): Positive alert column name.
+            neg_col (str): Negative alert column name.
+            latest_col (str): Latest alert column name.
         """
 
         # Implementation would align on ticker and assign counts per row.

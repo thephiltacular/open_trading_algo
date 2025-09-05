@@ -1,9 +1,9 @@
-"""Live data interface for TradingViewAlgoDev.
+"""Live data ingestion for TradingViewAlgoDev.
 
-This module loads configuration from a YAML file and periodically fetches
-financial data for a list of tickers/ETFs from a free source (default: Yahoo Finance).
-It exposes a clean interface for downstream analysis and alert generation.
+This module provides interfaces for fetching live financial data from various APIs,
+with support for bulk requests, rate limiting, and caching.
 """
+
 from tradingview_algo.fin_data_apis.fetchers import (
     fetch_yahoo,
     fetch_finnhub,

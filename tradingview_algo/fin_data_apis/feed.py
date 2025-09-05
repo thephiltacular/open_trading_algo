@@ -1,3 +1,11 @@
+"""
+feed.py
+
+This module provides a LiveDataFeed class for periodically fetching and caching live ticker data
+from various financial data APIs. It supports multiple sources like Yahoo, Finnhub, FMP, Alpha Vantage,
+and Twelve Data, with configurable update rates and callback functions for data updates.
+"""
+
 from tradingview_algo.fin_data_apis.fetchers import (
     fetch_yahoo,
     fetch_finnhub,
@@ -10,7 +18,7 @@ from tradingview_algo.fin_data_apis.fetchers import (
     fetch_twelve_data_bulk,
 )
 from tradingview_algo.fin_data_apis.config import LiveDataConfig
-from tradingview_algo.data_cache import DataCache
+from tradingview_algo.cache.data_cache import DataCache
 from tradingview_algo.fin_data_apis.secure_api import get_api_key
 import threading
 import time
@@ -44,6 +52,12 @@ class LiveDataFeed:
         self.cache = cache or DataCache()
 
     def start(self):
+        """
+        Starts the background thread to run the data feed if it is not already running.
+
+        If the thread is already alive, this method does nothing. Otherwise, it clears the stop event,
+        creates a new daemon thread targeting the internal _run method, and starts the thread.
+        """
         if self._thread and self._thread.is_alive():
             return
         self._stop.clear()
@@ -51,11 +65,23 @@ class LiveDataFeed:
         self._thread.start()
 
     def stop(self):
+        """
+        Stops the background data feed thread.
+
+        Sets the stop event to signal the thread to terminate and waits for the thread to join.
+        """
         self._stop.set()
         if self._thread:
             self._thread.join()
 
     def _run(self):
+        """
+        Internal method that runs the data fetching loop in the background thread.
+
+        Continuously fetches data from the configured source at the specified update rate,
+        updates the latest_data dictionary, and calls the on_update callback if provided.
+        Stops when the stop event is set.
+        """
         while not self._stop.is_set():
             src = self.config.source.lower()
             if src == "yahoo":
@@ -87,4 +113,10 @@ class LiveDataFeed:
             time.sleep(self.config.update_rate)
 
     def get_latest(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Returns the most recent data fetched by the feed.
+
+        Returns:
+            Dict[str, Dict[str, Any]]: A dictionary mapping ticker symbols to their latest field data.
+        """
         return self.latest_data

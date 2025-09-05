@@ -1,9 +1,24 @@
+"""Risk management utilities for TradingViewAlgoDev.
+
+This module provides functions for position sizing, stop-loss logic, and portfolio hedging.
 """
-Risk management utilities for use with SignalOptimizer and backtesting.
-Includes position sizing, stop-loss, and portfolio hedge logic.
-"""
+
 import pandas as pd
 import numpy as np
+
+
+def calculate_position_size(capital, risk_per_trade, stop_loss_pct):
+    """Calculate position size based on risk.
+
+    Args:
+        capital (float): Total capital.
+        risk_per_trade (float): Risk per trade as percentage.
+        stop_loss_pct (float): Stop loss percentage.
+
+    Returns:
+        float: Position size.
+    """
+    # ...existing code...
 
 
 def fixed_fractional_position_size(

@@ -1,4 +1,8 @@
-"""V8 model orchestration over the modular pipeline.
+"""V8 model implementation for TradingViewAlgoDev.
+
+This module implements the V8 trading model with indicators and signals.
+
+V8 model orchestration over the modular pipeline.
 
 Implements a practical, testable subset of the v8 calculation order:
 - EMA averages and EMA gap
@@ -1033,3 +1037,14 @@ class V8Model:
 
 
 __all__ = ["V8Model", "_load_cols_yaml"]
+
+
+# def calculate_v8_indicators(df):
+#     """Calculate V8 model indicators.
+
+#     Args:
+#         df (pd.DataFrame): Input data.
+
+#     Returns:
+#         pd.DataFrame: Data with indicators.
+#     """

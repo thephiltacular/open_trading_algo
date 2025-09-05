@@ -1,7 +1,10 @@
 """
-Data enrichment utilities for signal suites.
-Gathers and adds required columns to a DataFrame for selected signals using yfinance and sentiment sources.
+Data enrichment utilities for TradingViewAlgoDev.
+
+This module provides functions to enrich DataFrames with required columns for signals,
+using various financial data APIs. It supports caching and bulk requests to minimize API calls.
 """
+
 import pandas as pd
 
 import yfinance as yf
@@ -18,10 +21,17 @@ def enrich_dataframe_for_signals(
     api_key: Optional[str] = None,
     tickers: Optional[List[str]] = None,
 ) -> pd.DataFrame:
-    """
-    Adds required columns for the given signals to the DataFrame using the selected API (yahoo, finnhub, fmp, alpha_vantage, twelve_data).
-    Only missing columns are fetched/added. Optionally accepts pre-fetched yfinance info and history.
-    If tickers is provided, will fetch for all tickers in one bulk call (recommended for efficiency).
+    """Enrich a DataFrame with required columns for given signals.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame to enrich.
+        ticker (str): The ticker symbol.
+        signals (list): List of signal types (e.g., 'long', 'short').
+        source (str): The API source to use (default: 'yahoo').
+        api_key (str, optional): API key if required.
+
+    Returns:
+        pd.DataFrame: The enriched DataFrame.
     """
     # Map signal names to required columns
     signal_requirements = {

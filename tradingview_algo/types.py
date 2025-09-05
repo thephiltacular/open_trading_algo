@@ -1,4 +1,8 @@
-"""Lightweight type aliases and contracts for the TradingView algo package.
+"""Type definitions for TradingViewAlgoDev.
+
+This module defines type aliases and data structures used throughout the package.
+
+Lightweight type aliases and contracts for the TradingView algo package.
 
 The original code (`data_processing.py`) manipulates pandas DataFrames keyed by
 "day" (e.g., '03-07A'). To keep imports lightweight and avoid forcing a hard

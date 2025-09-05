@@ -1,13 +1,8 @@
-"""
-SignalOptimizer: Compute indicators, generate/backtest signals, and optimize signal combinations for all trade types.
+"""Signal optimization for TradingViewAlgoDev.
 
-Features:
-- Compute indicators for all tickers and timeframes
-- Generate trading signals
-- Backtest signals on historical data
-- Find best signal combinations for long, short, swing, etc.
-- Extensible for new indicators/strategies
+This module provides classes for optimizing trading signals and backtesting strategies.
 """
+
 import itertools
 from typing import Any, Callable, Dict, List
 
@@ -15,6 +10,12 @@ import pandas as pd
 
 
 class SignalOptimizer:
+    """Class for optimizing and backtesting trading signals.
+
+    Attributes:
+        data (pd.DataFrame): Historical data.
+    """
+
     def __init__(
         self,
         data: Dict[str, pd.DataFrame],
@@ -22,9 +23,12 @@ class SignalOptimizer:
         signal_generators: Dict[str, Callable],
     ):
         """
-        data: Dict[ticker, DataFrame] - historical price data for each ticker
-        indicators: Dict[name, func] - indicator functions (func(df) -> pd.Series)
-        signal_generators: Dict[name, func] - signal functions (func(df, indicators) -> pd.Series)
+        Initialize the SignalOptimizer.
+
+        Args:
+            data (Dict[str, pd.DataFrame]): Historical price data for each ticker.
+            indicators (Dict[str, Callable]): Indicator functions (func(df) -> pd.Series).
+            signal_generators (Dict[str, Callable]): Signal functions (func(df, indicators) -> pd.Series).
         """
         self.data = data
         self.indicators = indicators

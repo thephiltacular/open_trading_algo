@@ -1,3 +1,9 @@
+"""Database population script for TradingViewAlgoDev.
+
+This module provides a class to populate the database with financial data from various APIs,
+handling caching, rate limits, and concurrent fetching.
+"""
+
 import yaml
 import pandas as pd
 from pathlib import Path
@@ -21,7 +27,22 @@ from tradingview_algo.fin_data_apis.alpha_vantage_api import (
 
 
 class DatabasePopulator:
+    """Class for populating the database with financial data.
+
+    Attributes:
+        config_path (Path): Path to config file.
+        tickers_path (Path): Path to tickers file.
+        db (DataCache): Database cache instance.
+    """
+
     def __init__(self, config_path=None, tickers_path=None, db_path=None):
+        """Initialize the DatabasePopulator.
+
+        Args:
+            config_path (str, optional): Path to config file.
+            tickers_path (str, optional): Path to tickers file.
+            db_path (str, optional): Path to database.
+        """
         self.config_path = Path(
             config_path or Path(__file__).parent.parent / "live_data_config.yaml"
         )
@@ -138,6 +159,12 @@ class DatabasePopulator:
         return []
 
     def run(self, start=None, end=None):
+        """Run the database population process.
+
+        Args:
+            start (str, optional): Start date.
+            end (str, optional): End date.
+        """
         # Use config date_range if not provided
         if not start or not end:
             if self.date_range:

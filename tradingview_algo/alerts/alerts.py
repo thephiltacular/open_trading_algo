@@ -1,8 +1,6 @@
-# moved from tradingview_algo/alerts.py
-"""Alert transformation and aggregation utilities.
+"""Alert utilities for TradingViewAlgoDev.
 
-These functions encapsulate behaviors seen in `transform_alerts_df` and
-related helpers from the original `data_processing.py`.
+This module provides functions for parsing and aggregating alerts.
 """
 
 from __future__ import annotations
@@ -86,6 +84,18 @@ def summarize_alerts(
         bucket = summary.setdefault(ticker, TickerAlertCounts())
         bucket.add(time_str, description)
     return summary
+
+
+def parse_alerts(alert_data):
+    """Parse alert data.
+
+    Args:
+        alert_data (dict): Raw alert data.
+
+    Returns:
+        list: Parsed alerts.
+    """
+    # ...existing code...
 
 
 __all__ = [
