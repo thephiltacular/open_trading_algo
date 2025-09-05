@@ -13,7 +13,11 @@ from tradingview_algo.fin_data_apis.fetchers import (
 from tradingview_algo.fin_data_apis.tradingview_api import TradingViewAPI
 from tradingview_algo.fin_data_apis.polygon_api import PolygonAPI
 from tradingview_algo.fin_data_apis.secure_api import get_api_key
-from tradingview_algo.data_cache import DataCache
+from tradingview_algo.cache.data_cache import DataCache
+from tradingview_algo.fin_data_apis.alpha_vantage_api import (
+    AlphaVantageAPI,
+    ALPHA_VANTAGE_TECHNICAL_INDICATORS,
+)
 
 
 class DatabasePopulator:
@@ -63,69 +67,75 @@ class DatabasePopulator:
         return apis
 
     def _fetch_and_store(self, api, tickers, start, end):
-        results = []
+        # Fetch OHLCV for all tickers in as few API calls as possible, return a single DataFrame
+        def normalize_df(df, ticker):
+            col_map = {
+                "Open": "open",
+                "High": "high",
+                "Low": "low",
+                "Close": "close",
+                "Volume": "volume",
+                "open": "open",
+                "high": "high",
+                "low": "low",
+                "close": "close",
+                "volume": "volume",
+            }
+            df = df.rename(columns=col_map)
+            if "date" not in df.columns:
+                if "timestamp" in df.columns:
+                    df["date"] = pd.to_datetime(df["timestamp"], unit="s").dt.normalize()
+                elif df.index.name in ["date", "datetime"]:
+                    df = df.reset_index().rename(columns={df.index.name: "date"})
+                else:
+                    df["date"] = pd.Timestamp.utcnow().normalize()
+            df["ticker"] = ticker
+            keep = ["date", "ticker", "open", "high", "low", "close", "volume"]
+            for col in keep:
+                if col not in df.columns:
+                    df[col] = None
+            return df[keep]
+
+        # Prefer Yahoo for bulk, fallback to others if needed
         if api == "yahoo":
             data = fetch_yahoo(tickers, self.fields, cache=self.db)
-            for ticker, d in data.items():
-                df = pd.DataFrame([d])
-                df["ticker"] = ticker
-                self.db.store_price_data(ticker, df)
-                results.append(df)
         elif api == "finnhub":
             key = get_api_key("finnhub")
             data = fetch_finnhub_bulk(tickers, self.fields, key)
-            for ticker, d in data.items():
-                df = pd.DataFrame([d])
-                df["ticker"] = ticker
-                self.db.store_price_data(ticker, df)
-                results.append(df)
         elif api == "fmp":
             key = get_api_key("fmp")
             data = fetch_fmp_bulk(tickers, self.fields, key)
-            for ticker, d in data.items():
-                df = pd.DataFrame([d])
-                df["ticker"] = ticker
-                self.db.store_price_data(ticker, df)
-                results.append(df)
         elif api == "alpha_vantage":
             key = get_api_key("alpha_vantage")
             data = fetch_alpha_vantage_bulk(tickers, self.fields, key)
-            for ticker, d in data.items():
-                df = pd.DataFrame([d])
-                df["ticker"] = ticker
-                self.db.store_price_data(ticker, df)
-                results.append(df)
         elif api == "twelve_data":
             key = get_api_key("twelve_data")
             data = fetch_twelve_data_bulk(tickers, self.fields, key)
-            for ticker, d in data.items():
-                df = pd.DataFrame([d])
-                df["ticker"] = ticker
-                self.db.store_price_data(ticker, df)
-                results.append(df)
         elif api == "tradingview":
             tv_api = TradingViewAPI(get_api_key("tradingview"))
-            for ticker in tickers:
-                try:
-                    data = tv_api.get_chart_data(ticker)
-                    df = pd.DataFrame(data)
-                    df["ticker"] = ticker
-                    self.db.store_price_data(ticker, df)
-                    results.append(df)
-                except Exception:
-                    continue
+            data = {ticker: tv_api.get_chart_data(ticker) for ticker in tickers}
         elif api == "polygon":
             polygon_api = PolygonAPI(get_api_key("polygon"))
-            for ticker in tickers:
-                try:
-                    data = polygon_api.get_stock_aggregates(ticker)
-                    df = pd.DataFrame(data.get("results", []))
-                    df["ticker"] = ticker
-                    self.db.store_price_data(ticker, df)
-                    results.append(df)
-                except Exception:
-                    continue
-        return results
+            data = {ticker: polygon_api.get_stock_aggregates(ticker) for ticker in tickers}
+        else:
+            data = {}
+
+        frames = []
+        for ticker, d in data.items():
+            if isinstance(d, dict) and "results" in d:
+                df = pd.DataFrame(d["results"])
+            elif isinstance(d, (list, pd.DataFrame)):
+                df = pd.DataFrame(d)
+            else:
+                df = pd.DataFrame([d])
+            if df.empty:
+                continue
+            df = normalize_df(df, ticker)
+            self.db.store_price_data(ticker, df)
+            frames.append(df)
+        if frames:
+            return [pd.concat(frames, ignore_index=True)]
+        return []
 
     def run(self, start=None, end=None):
         # Use config date_range if not provided
@@ -154,17 +164,86 @@ class DatabasePopulator:
                     print(f"Error fetching from {api}: {e}")
         if results:
             all_data = pd.concat(results, ignore_index=True)
-            if "timestamp" in all_data.columns:
-                all_data["date"] = pd.to_datetime(all_data["timestamp"], unit="s").dt.normalize()
-            elif "date" in all_data.columns:
-                all_data["date"] = pd.to_datetime(all_data["date"]).dt.normalize()
-            else:
-                all_data["date"] = pd.Timestamp.utcnow().normalize()
+            all_data["date"] = pd.to_datetime(all_data["date"]).dt.normalize()
             all_data = all_data.set_index(["date", "ticker"]).sort_index()
+            # Calculate indicators for each ticker
+            from tradingview_algo.indicators import indicators as ind
+
+            indicator_frames = []
+            for ticker in all_data.index.get_level_values("ticker").unique():
+                tdf = all_data.xs(ticker, level="ticker")
+                # Calculate indicators using close, high, low, open, volume
+                out = pd.DataFrame(index=tdf.index)
+                out["SMA_14"] = ind.sma(tdf["close"], 14)
+                out["EMA_14"] = ind.ema(tdf["close"], 14)
+                out["WMA_14"] = ind.wma(tdf["close"], 14)
+                out["DEMA_14"] = ind.dema(tdf["close"], 14)
+                out["TEMA_14"] = ind.tema(tdf["close"], 14)
+                out["TRIMA_14"] = ind.trima(tdf["close"], 14)
+                macd_line, macd_signal, macd_hist = ind.macd(tdf["close"])
+                out["MACD"] = macd_line
+                out["MACD_SIGNAL"] = macd_signal
+                out["MACD_HIST"] = macd_hist
+                out["RSI_14"] = ind.rsi(tdf["close"], 14)
+                out["WILLR_14"] = ind.willr(tdf["high"], tdf["low"], tdf["close"], 14)
+                out["CCI_20"] = ind.cci(tdf["high"], tdf["low"], tdf["close"], 20)
+                out["ATR_14"] = ind.atr(tdf["high"], tdf["low"], tdf["close"], 14)
+                out["OBV"] = ind.obv(tdf["close"], tdf["volume"])
+                out["ROC_12"] = ind.roc(tdf["close"], 12)
+                out["MOM_10"] = ind.mom(tdf["close"], 10)
+                ma, upper, lower = ind.bbands(tdf["close"], 20)
+                out["BB_MA"] = ma
+                out["BB_UPPER"] = upper
+                out["BB_LOWER"] = lower
+                out["MIDPOINT_14"] = ind.midpoint(tdf["close"], 14)
+                out["MIDPRICE_14"] = ind.midprice(tdf["high"], tdf["low"], 14)
+                out["ticker"] = ticker
+                indicator_frames.append(out.reset_index())
+            if indicator_frames:
+                indicators_df = pd.concat(indicator_frames, ignore_index=True)
+                indicators_df = indicators_df.set_index(["date", "ticker"])
+                all_data = all_data.merge(
+                    indicators_df, left_index=True, right_index=True, how="left"
+                )
             all_data.to_parquet("all_data.parquet")
-            print("Unified data saved to all_data.parquet")
+            print("Unified data saved to all_data.parquet (with indicators)")
         else:
             print("No new data fetched.")
+
+    def calculate_indicators(self, all_data):
+        """
+        Given a DataFrame indexed by [date, ticker] with columns open, high, low, close, volume,
+        calculate technical indicators for each ticker and merge into the DataFrame.
+        """
+        av_key = get_api_key("alpha_vantage")
+        if not av_key:
+            return all_data
+        av_api = AlphaVantageAPI(av_key)
+        indicators = list(ALPHA_VANTAGE_TECHNICAL_INDICATORS.keys())
+        indicator_frames = []
+        for ticker in all_data.index.get_level_values("ticker").unique():
+            for ind in indicators:
+                try:
+                    ind_df = av_api.technical_indicator(
+                        symbol=ticker, indicator=ind, interval=self.interval, return_format="df"
+                    )
+                    if not ind_df.empty:
+                        ind_df["ticker"] = ticker
+                        ind_df["indicator"] = ind
+                        indicator_frames.append(ind_df)
+                except Exception:
+                    continue
+        if indicator_frames:
+            indicators_df = pd.concat(indicator_frames)
+            indicators_df = indicators_df.reset_index().pivot_table(
+                index=["index", "ticker"],
+                columns="indicator",
+                values=indicators_df.columns.difference(["ticker", "indicator"])[0],
+                aggfunc="first",
+            )
+            indicators_df.index.names = ["date", "ticker"]
+            all_data = all_data.merge(indicators_df, left_index=True, right_index=True, how="left")
+        return all_data
 
 
 # Example usage:

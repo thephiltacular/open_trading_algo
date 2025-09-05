@@ -13,6 +13,124 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+# --- Technical Indicator Calculations ---
+import numpy as np
+import pandas as pd
+
+
+def sma(series: pd.Series, window: int) -> pd.Series:
+    """Simple Moving Average"""
+    return series.rolling(window=window, min_periods=1).mean()
+
+
+def ema(series: pd.Series, window: int) -> pd.Series:
+    """Exponential Moving Average"""
+    return series.ewm(span=window, adjust=False).mean()
+
+
+def wma(series: pd.Series, window: int) -> pd.Series:
+    """Weighted Moving Average"""
+    weights = np.arange(1, window + 1)
+    return series.rolling(window).apply(lambda x: np.dot(x, weights) / weights.sum(), raw=True)
+
+
+def dema(series: pd.Series, window: int) -> pd.Series:
+    """Double Exponential Moving Average"""
+    ema1 = ema(series, window)
+    ema2 = ema(ema1, window)
+    return 2 * ema1 - ema2
+
+
+def tema(series: pd.Series, window: int) -> pd.Series:
+    """Triple Exponential Moving Average"""
+    ema1 = ema(series, window)
+    ema2 = ema(ema1, window)
+    ema3 = ema(ema2, window)
+    return 3 * (ema1 - ema2) + ema3
+
+
+def trima(series: pd.Series, window: int) -> pd.Series:
+    """Triangular Moving Average"""
+    return series.rolling(window, min_periods=1).mean().rolling(window, min_periods=1).mean()
+
+
+def macd(series: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9):
+    """MACD, MACD Signal, MACD Histogram"""
+    macd_line = ema(series, fast) - ema(series, slow)
+    signal_line = ema(macd_line, signal)
+    hist = macd_line - signal_line
+    return macd_line, signal_line, hist
+
+
+def rsi(series: pd.Series, window: int = 14) -> pd.Series:
+    """Relative Strength Index"""
+    delta = series.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window, min_periods=1).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window, min_periods=1).mean()
+    rs = gain / loss.replace(0, np.nan)
+    rsi = 100 - (100 / (1 + rs))
+    return rsi.fillna(0)
+
+
+def willr(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
+    """Williams %R"""
+    highest_high = high.rolling(window).max()
+    lowest_low = low.rolling(window).min()
+    return -100 * (highest_high - close) / (highest_high - lowest_low)
+
+
+def cci(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 20) -> pd.Series:
+    """Commodity Channel Index"""
+    tp = (high + low + close) / 3
+    ma = tp.rolling(window).mean()
+    md = tp.rolling(window).apply(lambda x: np.mean(np.abs(x - np.mean(x))), raw=True)
+    return (tp - ma) / (0.015 * md)
+
+
+def atr(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
+    """Average True Range"""
+    prev_close = close.shift(1)
+    tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(
+        axis=1
+    )
+    return tr.rolling(window).mean()
+
+
+def obv(close: pd.Series, volume: pd.Series) -> pd.Series:
+    """On Balance Volume"""
+    direction = np.sign(close.diff()).fillna(0)
+    return (volume * direction).cumsum()
+
+
+def roc(series: pd.Series, window: int = 12) -> pd.Series:
+    """Rate of Change"""
+    return series.pct_change(periods=window) * 100
+
+
+def mom(series: pd.Series, window: int = 10) -> pd.Series:
+    """Momentum"""
+    return series.diff(window)
+
+
+def bbands(series: pd.Series, window: int = 20, num_std: float = 2.0):
+    """Bollinger Bands: returns (middle, upper, lower)"""
+    ma = series.rolling(window).mean()
+    std = series.rolling(window).std()
+    upper = ma + num_std * std
+    lower = ma - num_std * std
+    return ma, upper, lower
+
+
+def midpoint(series: pd.Series, window: int = 14) -> pd.Series:
+    """MidPoint over period"""
+    return (series.rolling(window).max() + series.rolling(window).min()) / 2
+
+
+def midprice(high: pd.Series, low: pd.Series, window: int = 14) -> pd.Series:
+    """Midpoint Price over period"""
+    return (high.rolling(window).max() + low.rolling(window).min()) / 2
+
+
 # ----------------------------- Generic helpers -----------------------------
 
 
