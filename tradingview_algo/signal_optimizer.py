@@ -47,19 +47,93 @@ class SignalOptimizer:
             for name, func in self.signal_generators.items():
                 self.signal_results[ticker][name] = func(df, self.indicator_results[ticker])
 
-    def backtest_signals(self, trade_type: str = "long", signal_names: List[str] = None):
-        """Backtest selected signals for all tickers and return performance metrics."""
+    def set_risk_management(self, position_size_func=None, stop_loss_func=None, hedge_func=None):
+        """
+        Register risk management functions for use in backtesting.
+        position_size_func: (account_value, risk_per_trade, stop_distance) -> float
+        stop_loss_func: (df) -> pd.Series (stop-loss price per row)
+        hedge_func: (df, market_index, threshold) -> pd.Series (hedge signal)
+        """
+        self.position_size_func = position_size_func
+        self.stop_loss_func = stop_loss_func
+        self.hedge_func = hedge_func
+
+    def backtest_signals(
+        self,
+        trade_type: str = "long",
+        signal_names: List[str] = None,
+        account_value: float = 100000,
+        risk_per_trade: float = 0.01,
+    ):
+        """
+        Backtest selected signals for all tickers and return performance metrics.
+        Now supports position sizing and stop-loss if risk management is set.
+        """
         if signal_names is None:
             signal_names = list(self.signal_generators.keys())
         self.results[trade_type] = {}
         for ticker in self.data:
-            # Combine signals (AND logic)
-            combined_signal = pd.Series(True, index=self.data[ticker].index)
+            df = self.data[ticker]
+            combined_signal = pd.Series(True, index=df.index)
             for name in signal_names:
                 combined_signal &= self.signal_results[ticker][name]
-            # Simple backtest: buy when signal, hold, sell when not
-            perf = self._simple_backtest(self.data[ticker], combined_signal, trade_type)
-            self.results[trade_type][ticker] = perf
+            # Risk management: position sizing and stop-loss
+            if (
+                hasattr(self, "position_size_func")
+                and hasattr(self, "stop_loss_func")
+                and self.position_size_func
+                and self.stop_loss_func
+            ):
+                stop_loss_prices = self.stop_loss_func(df)
+                returns = []
+                in_trade = False
+                entry_price = 0
+                entry_idx = 0
+                shares = 0
+                for i in range(len(df)):
+                    if combined_signal.iloc[i] and not in_trade:
+                        entry_price = df["open"].iloc[i]
+                        stop_price = stop_loss_prices.iloc[i]
+                        stop_distance = abs(entry_price - stop_price)
+                        shares = self.position_size_func(
+                            account_value, risk_per_trade, stop_distance
+                        )
+                        in_trade = True
+                        entry_idx = i
+                    elif in_trade:
+                        # Stop-loss triggered
+                        if (
+                            trade_type == "long"
+                            and df["low"].iloc[i] <= stop_loss_prices.iloc[entry_idx]
+                        ) or (
+                            trade_type == "short"
+                            and df["high"].iloc[i] >= stop_loss_prices.iloc[entry_idx]
+                        ):
+                            exit_price = stop_loss_prices.iloc[entry_idx]
+                            returns.append(
+                                (exit_price - entry_price) * shares
+                                if trade_type == "long"
+                                else (entry_price - exit_price) * shares
+                            )
+                            in_trade = False
+                        # Signal exit
+                        elif not combined_signal.iloc[i]:
+                            exit_price = df["close"].iloc[i]
+                            returns.append(
+                                (exit_price - entry_price) * shares
+                                if trade_type == "long"
+                                else (entry_price - exit_price) * shares
+                            )
+                            in_trade = False
+                total_return = sum(returns)
+                self.results[trade_type][ticker] = {
+                    "total_return": total_return,
+                    "trades": len(returns),
+                }
+            else:
+                # Fallback to simple backtest
+                perf = self._simple_backtest(df, combined_signal, trade_type)
+                self.results[trade_type][ticker] = perf
         return self.results[trade_type]
 
     def optimize_signals(self, trade_type: str = "long", max_signals: int = 3):
@@ -308,3 +382,27 @@ class SignalOptimizer:
             total_return = sum(returns)
             results.append({"ticker": ticker, "net_return": total_return, "trades": len(returns)})
         return results
+
+    def add_short_signals(self, short_signals: Dict[str, Callable]):
+        """
+        Add or update short signal generators for short position testing.
+        """
+        self.signal_generators.update(short_signals)
+
+    def add_long_signals(self, long_signals: Dict[str, Callable]):
+        """
+        Add or update long signal generators for long position testing.
+        """
+        self.signal_generators.update(long_signals)
+
+    def add_options_signals(self, options_signals: Dict[str, Callable]):
+        """
+        Add or update options signal generators for options trading strategies.
+        """
+        self.signal_generators.update(options_signals)
+
+    def add_sentiment_signals(self, sentiment_signals: Dict[str, Callable]):
+        """
+        Add or update sentiment signal generators for all trade types.
+        """
+        self.signal_generators.update(sentiment_signals)
