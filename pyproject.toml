@@ -1,6 +1,6 @@
 
 [tool.poetry]
-name = "tradingview-algo"
+name = "open_trading_algo"
 version = "1.0.0"
 description = "A modular, portable trading and backtesting framework with signal, risk, and data enrichment support."
 authors = ["Philip Mai <philipemai.com>"]

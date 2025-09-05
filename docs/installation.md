@@ -52,7 +52,7 @@ The library automatically creates and manages a SQLite database for caching. You
 
 ```bash
 # Optional: Create custom database config
-echo "db_path: /path/to/your/database.sqlite3" > db_config.yaml
+echo "db_path: /path/to/your/database.sqlite3" > config/db_config.yaml
 ```
 
 ### 3. Verify Installation
@@ -132,7 +132,7 @@ export ALPHA_VANTAGE_API_KEY="your_key_here"
 
 ### Live Data Configuration
 
-Create `live_data_config.yaml` for real-time feeds:
+Create `config/live_data_config.yaml` for real-time feeds:
 
 ```yaml
 source: "finnhub"  # or "yahoo", "alpha_vantage", etc.
@@ -144,7 +144,7 @@ api_key: null  # Uses .env file if null
 
 ### Model Configuration
 
-Create `cols_model.yaml` to customize technical indicators:
+Create `config/cols_model.yaml` to customize technical indicators:
 
 ```yaml
 # EMAs to compute

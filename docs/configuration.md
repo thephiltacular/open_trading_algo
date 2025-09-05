@@ -6,11 +6,11 @@ open_trading_algo uses YAML configuration files to customize behavior across all
 
 | File | Purpose | Location |
 |------|---------|----------|
-| `live_data_config.yaml` | Real-time data feed settings | Project root |
-| `cols_model.yaml` | Technical indicator parameters | Project root |
-| `cols_alerts.yaml` | Alert and signal thresholds | Project root |
-| `db_config.yaml` | Database connection settings | Project root |
-| `api_config.yaml` | API endpoints and rate limits | Library root |
+| `config/live_data_config.yaml` | Real-time data feed settings | config/ |
+| `config/cols_model.yaml` | Technical indicator parameters | config/ |
+| `config/cols_alerts.yaml` | Alert and signal thresholds | config/ |
+| `config/db_config.yaml` | Database connection settings | config/ |
+| `config/api_config.yaml` | API endpoints and rate limits | config/ |
 | `.env` | Secure API key storage | Project root |
 
 ## Environment Configuration (.env)
@@ -44,7 +44,7 @@ DEFAULT_STOP_LOSS=0.02  # 2% stop loss
 ### Basic Live Data Setup
 
 ```yaml
-# live_data_config.yaml
+# config/live_data_config.yaml
 source: "yahoo"  # yahoo, finnhub, alpha_vantage, fmp, twelve_data
 tickers:
   - "AAPL"

@@ -1,6 +1,0 @@
-# Database configuration for open_trading_algo
-# Set the path to the SQLite database file. If not set, defaults to open_trading_algo/tv_data_cache.sqlite3
-
-
-db_path: data/tv_data_cache.sqlite3
-enable_caching: true

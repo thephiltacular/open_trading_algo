@@ -23,24 +23,26 @@ cache = DataCache()
 
 # Or specify custom location
 cache = DataCache(db_path="/path/to/custom/database.db")
-```
-
-### Store and Retrieve Price Data
 
 ```python
 import yfinance as yf
 import pandas as pd
 
 # Get historical data
-ticker = yf.Ticker("AAPL")
-df = ticker.history(period="1y")
-
-# Store in cache
-cache.store_price_data("AAPL", df)
+```python
+# Create config/db_config.yaml
+db_config = """
 
 # Retrieve from cache
 cached_df = cache.get_price_data("AAPL")
 print(f"Cached data shape: {cached_df.shape}")
+"""
+
+with open("config/db_config.yaml", "w") as f:
+    f.write(db_config)
+
+# Cache will automatically use this configuration
+cache = DataCache()
 print(f"Date range: {cached_df.index[0]} to {cached_df.index[-1]}")
 
 # Check if data exists

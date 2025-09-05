@@ -27,8 +27,8 @@ except Exception as e:  # pragma: no cover
     )
     raise
 
-from tradingview_algo import ModelPipeline
-from tradingview_algo.v8_model import V8Model
+from open_trading_algo import ModelPipeline
+from open_trading_algo.v8_model import V8Model
 
 
 def discover_day_files(data_dir: Path) -> Dict[str, list[Path]]:
@@ -63,7 +63,7 @@ def run(
         pipeline = ModelPipeline(data={day: df}, alerts={})
         if use_v8:
             if cols_model_path is None:
-                cols_model_path = Path("cols_model.yaml").resolve()
+                cols_model_path = Path("config/cols_model.yaml").resolve()
             v8 = V8Model.from_yaml(pipeline, cols_model_path)
             v8.compute_all()
         else:
@@ -84,7 +84,9 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--out-dir", default="data_out", help="Output directory for CSVs")
     parser.add_argument("--v8", action="store_true", help="Run the v8 model pipeline")
     parser.add_argument(
-        "--cols-model", default="cols_model.yaml", help="Path to cols_model.yaml for v8"
+        "--cols-model",
+        default="config/cols_model.yaml",
+        help="Path to config/cols_model.yaml for v8",
     )
     args = parser.parse_args(argv)
 

@@ -2,7 +2,7 @@
 import time
 from pathlib import Path
 
-from tradingview_algo.live_data import LiveDataFeed
+from open_trading_algo.live_data import LiveDataFeed
 
 
 def print_update(data):
@@ -12,7 +12,7 @@ def print_update(data):
 
 
 if __name__ == "__main__":
-    config_path = Path("live_data_config.yaml")
+    config_path = Path("config/live_data_config.yaml")
     feed = LiveDataFeed(config_path, on_update=print_update)
     print("Starting live data feed...")
     feed.start()

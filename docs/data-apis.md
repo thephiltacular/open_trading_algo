@@ -252,7 +252,7 @@ limiter.check()  # Blocks if rate limit exceeded
 ### Custom Rate Limit Configuration
 
 ```yaml
-# api_config.yaml
+# config/api_config.yaml
 finnhub:
   free_limit_per_minute: 60
   free_limit_per_day: 1440
@@ -471,7 +471,7 @@ import yaml
 class ConfigurableDataFetcher:
     """Data fetcher with runtime API configuration"""
 
-    def __init__(self, config_path="api_config.yaml"):
+    def __init__(self, config_path="config/api_config.yaml"):
         with open(config_path, "r") as f:
             self.config = yaml.safe_load(f)
 

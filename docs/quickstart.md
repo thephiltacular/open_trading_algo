@@ -190,7 +190,7 @@ fields: ["price", "volume"]
 update_rate: 30
 """
 
-config_path = Path("live_config.yaml")
+config_path = Path("config/live_data_config.yaml")
 config_path.write_text(config_content)
 
 # Callback function for data updates
