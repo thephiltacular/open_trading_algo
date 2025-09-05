@@ -1,0 +1,95 @@
+#
+tiingo:
+  name: Tiingo
+  docs: https://api.tiingo.com/documentation/end-of-day
+  free_limit_per_minute: 60
+  free_limit_per_day: 500
+  api_key_env: TIINGO_API_KEY
+  notes: |
+    - 60 API calls per minute, 500 per day for free accounts (as of 2024).
+    - Register for a free API key at https://api.tiingo.com/
+    - Used for historical and real-time OHLCV data, news, and more.
+    - See https://api.tiingo.com/documentation/end-of-day for details.
+yahoo:
+  name: Yahoo Finance (yfinance)
+  docs: https://github.com/ranaroussi/yfinance
+  free_limit_per_minute: ~60
+  free_limit_per_day: ~2000
+  notes: |
+    - No official documented rate limits, but practical limits are ~60/min and ~2,000/day.
+    - Exceeding these may result in 429 errors or temporary bans.
+    - See https://github.com/ranaroussi/yfinance/issues/430 for community discussion.
+
+# Sentiment APIs
+lunarcrush:
+  name: LunarCrush
+  docs: https://lunarcrush.com/developers
+  free_limit_per_minute: 30
+  free_limit_per_day: 1000
+  api_key_env: LUNARCRUSH_API_KEY
+  notes: |
+    - 30 API calls per minute, 1,000 per day for free accounts.
+    - Register for a free API key at https://lunarcrush.com/developers.
+    - Used for social sentiment (Twitter/X, Reddit, etc).
+
+pushshift:
+  name: Pushshift (Reddit)
+  docs: https://github.com/pushshift/api
+  free_limit_per_minute: 60
+  free_limit_per_day: 5000
+  notes: |
+    - 60 API calls per minute, 5,000 per day (subject to change, not always enforced).
+    - No API key required for public endpoints.
+    - Used for Reddit sentiment.
+
+stocktwits:
+  name: StockTwits
+  docs: https://api.stocktwits.com/developers/docs/api
+  free_limit_per_minute: 200
+  free_limit_per_day: 10000
+  api_key_env: STOCKTWITS_API_KEY
+  notes: |
+    - 200 API calls per minute, 10,000 per day for free accounts.
+    - Register for a free API key at https://stocktwits.com/developers.
+    - Used for social sentiment.
+# API endpoint configuration and rate limits for open_trading_algo
+
+finnhub:
+  name: Finnhub
+  docs: https://finnhub.io/docs/api#quote
+  free_limit_per_minute: 60
+  free_limit_per_day: 1440
+  notes: |
+    - 60 API calls per minute for free accounts (shared across all endpoints).
+    - 1,440 API calls per day for free accounts.
+    - See https://finnhub.io/docs/api/rate-limit for details.
+
+fmp:
+  name: Financial Modeling Prep (FMP)
+  docs: https://site.financialmodelingprep.com/developer/docs/
+  free_limit_per_minute: 5
+  free_limit_per_day: 250
+  notes: |
+    - 5 API calls per minute for free accounts.
+    - 250 API calls per day for free accounts.
+    - See https://site.financialmodelingprep.com/developer/docs/#Rate-Limits for details.
+
+alpha_vantage:
+  name: Alpha Vantage
+  docs: https://www.alphavantage.co/documentation/
+  free_limit_per_minute: 5
+  free_limit_per_day: 500
+  notes: |
+    - 5 API calls per minute for free accounts.
+    - 500 API calls per day for free accounts.
+    - See https://www.alphavantage.co/premium/ for details.
+
+twelve_data:
+  name: Twelve Data
+  docs: https://twelvedata.com/docs#quote
+  free_limit_per_minute: 8
+  free_limit_per_day: 800
+  notes: |
+    - 8 API calls per minute for free accounts.
+    - 800 API calls per day for free accounts.
+    - See https://twelvedata.com/pricing for details.

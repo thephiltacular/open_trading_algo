@@ -1,0 +1,30 @@
+# Live data configuration for open_trading_algo
+#
+# update_rate: polling interval in seconds
+# tickers: list of ETF or stock symbols to fetch
+# source: which free API to use (yahoo, alphavantage, finnhub, etc.)
+# api_key: optional, for sources that require it
+# fields: which data fields to pull (price, volume, indicators, etc.)
+update_rate: 300  # seconds (5 minutes)
+# tickers list moved to all_tickers.yaml for maintainability
+# To use all tickers, import or reference all_tickers.yaml in your code
+# Example: see open_trading_algo/live_data.py for loading logic
+# tickers:
+#   - SPY
+#   - QQQ
+#   - VTI
+#   - IWM
+#   - EFA
+source: yahoo
+api_key: ''
+fields:
+  - price
+  - volume
+  - open
+  - high
+  - low
+  - close
+  - previous_close
+  - change
+  - percent_change
+  - timestamp
