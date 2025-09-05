@@ -60,8 +60,8 @@ echo "db_path: /path/to/your/database.sqlite3" > db_config.yaml
 Test your setup with a simple script:
 
 ```python
-from tradingview_algo.fin_data_apis.fetchers import fetch_yahoo
-from tradingview_algo.cache.data_cache import DataCache
+from open_trading_algo.fin_data_apis.fetchers import fetch_yahoo
+from open_trading_algo.cache.data_cache import DataCache
 
 # Test data fetching
 data = fetch_yahoo(["AAPL"], ["price", "volume"])

@@ -16,7 +16,7 @@ The cache system is designed to:
 ### Initialize Cache
 
 ```python
-from tradingview_algo.cache.data_cache import DataCache
+from open_trading_algo.cache.data_cache import DataCache
 
 # Use default database location
 cache = DataCache()
@@ -51,7 +51,7 @@ print(f"Has AAPL data: {has_data}")
 ### Store and Retrieve Signals
 
 ```python
-from tradingview_algo.indicators.indicators import calculate_rsi
+from open_trading_algo.indicators.indicators import calculate_rsi
 
 # Calculate RSI signals
 rsi = calculate_rsi(df["Close"])
@@ -144,7 +144,7 @@ df = smart_cache.get_fresh_price_data("AAPL")
 
 # This will compute RSI only if not cached
 def compute_rsi_signals(df):
-    from tradingview_algo.indicators.indicators import calculate_rsi
+    from open_trading_algo.indicators.indicators import calculate_rsi
 
     rsi = calculate_rsi(df["Close"])
     return pd.DataFrame({"rsi": rsi}, index=df.index)
@@ -231,7 +231,7 @@ watchlist = ["AAPL", "GOOGL", "MSFT", "TSLA"]
 
 # Define signal computation function
 def compute_macd_signals(df):
-    from tradingview_algo.indicators.indicators import calculate_macd
+    from open_trading_algo.indicators.indicators import calculate_macd
 
     macd_line, macd_signal, macd_hist = calculate_macd(df["Close"])
 
@@ -542,8 +542,8 @@ large_results = processor.process_large_timeframe(
 ### Automatic Caching in Signal Generation
 
 ```python
-from tradingview_algo.indicators.long_signals import compute_and_cache_long_signals
-from tradingview_algo.indicators.short_signals import compute_and_cache_short_signals
+from open_trading_algo.indicators.long_signals import compute_and_cache_long_signals
+from open_trading_algo.indicators.short_signals import compute_and_cache_short_signals
 
 # These functions automatically use the cache
 long_signals = compute_and_cache_long_signals("AAPL", df, "1d")
@@ -556,7 +556,7 @@ print(f"Short signals: {short_signals['signal'].sum()}")
 ### Cache-Aware Data Fetching
 
 ```python
-from tradingview_algo.fin_data_apis.fetchers import fetch_yahoo
+from open_trading_algo.fin_data_apis.fetchers import fetch_yahoo
 
 # Fetchers automatically use cache when available
 data = fetch_yahoo(["AAPL"], ["price", "volume"], cache=cache)

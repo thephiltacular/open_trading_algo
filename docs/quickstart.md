@@ -7,7 +7,7 @@ This guide will get you up and running with TradingViewAlgoDev in minutes.
 ### Fetch Current Stock Prices
 
 ```python
-from tradingview_algo.fin_data_apis.fetchers import fetch_yahoo
+from open_trading_algo.fin_data_apis.fetchers import fetch_yahoo
 
 # Get current prices for multiple stocks
 tickers = ["AAPL", "GOOGL", "MSFT", "TSLA"]
@@ -22,12 +22,12 @@ for ticker, info in data.items():
 ### Use Multiple Data Sources
 
 ```python
-from tradingview_algo.fin_data_apis.fetchers import (
+from open_trading_algo.fin_data_apis.fetchers import (
     fetch_yahoo,
     fetch_finnhub,
     fetch_alpha_vantage,
 )
-from tradingview_algo.fin_data_apis.secure_api import get_api_key
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
 
 # Yahoo Finance (free, no API key required)
 yahoo_data = fetch_yahoo(["AAPL"], ["price"])
@@ -51,7 +51,7 @@ print(f"Alpha Vantage: ${av_data['AAPL']['price']:.2f}")
 
 ```python
 import yfinance as yf
-from tradingview_algo.indicators.indicators import (
+from open_trading_algo.indicators.indicators import (
     calculate_rsi,
     calculate_macd,
     calculate_bollinger_bands,
@@ -80,7 +80,7 @@ print(f"BB Lower: ${bb_lower.iloc[-1]:.2f}")
 ### Advanced Technical Analysis
 
 ```python
-from tradingview_algo.indicators.indicators import (
+from open_trading_algo.indicators.indicators import (
     calculate_adx,
     calculate_stochastic,
     calculate_williams_r,
@@ -104,7 +104,7 @@ print(f"Williams %R: {williams_r.iloc[-1]:.2f}")
 ### Long Signals
 
 ```python
-from tradingview_algo.indicators.long_signals import (
+from open_trading_algo.indicators.long_signals import (
     rsi_oversold_signal,
     macd_bullish_crossover,
     bollinger_squeeze_breakout,
@@ -126,7 +126,7 @@ print(f"BB Breakout Signal: {bb_signal.iloc[-1]}")
 ### Short Signals
 
 ```python
-from tradingview_algo.indicators.short_signals import (
+from open_trading_algo.indicators.short_signals import (
     rsi_overbought_signal,
     macd_bearish_crossover,
     breaking_support,
@@ -150,7 +150,7 @@ print(f"Support Break Signal: {support_break.iloc[-1]}")
 ### Using the Cache System
 
 ```python
-from tradingview_algo.cache.data_cache import DataCache
+from open_trading_algo.cache.data_cache import DataCache
 import pandas as pd
 
 # Initialize cache
@@ -178,7 +178,7 @@ print(f"Signal count: {cached_signals['signal'].sum()}")
 ### Real-time Data Streaming
 
 ```python
-from tradingview_algo.fin_data_apis.feed import LiveDataFeed
+from open_trading_algo.fin_data_apis.feed import LiveDataFeed
 from pathlib import Path
 import time
 
@@ -214,7 +214,7 @@ feed.stop()
 ### Position Sizing
 
 ```python
-from tradingview_algo.risk_management import (
+from open_trading_algo.risk_management import (
     percent_of_portfolio,
     fixed_dollar_amount,
     volatility_adjusted,
@@ -242,7 +242,7 @@ print(f"Volatility adjusted: {shares_vol} shares")
 ### Stop Loss Calculation
 
 ```python
-from tradingview_algo.risk_management import (
+from open_trading_algo.risk_management import (
     percentage_stop_loss,
     atr_stop_loss,
     support_resistance_stop,
@@ -265,7 +265,7 @@ print(f"ATR stop loss: ${stop_atr:.2f}")
 ### Multi-Signal Analysis
 
 ```python
-from tradingview_algo.signal_optimizer import SignalOptimizer
+from open_trading_algo.signal_optimizer import SignalOptimizer
 
 # Initialize optimizer with data
 optimizer = SignalOptimizer(df)
@@ -306,11 +306,11 @@ print(f"Sharpe Ratio: {results['sharpe_ratio']:.2f}")
 ## Complete Example: End-to-End Analysis
 
 ```python
-from tradingview_algo.fin_data_apis.fetchers import fetch_yahoo
-from tradingview_algo.indicators.indicators import *
-from tradingview_algo.indicators.long_signals import *
-from tradingview_algo.cache.data_cache import DataCache
-from tradingview_algo.signal_optimizer import SignalOptimizer
+from open_trading_algo.fin_data_apis.fetchers import fetch_yahoo
+from open_trading_algo.indicators.indicators import *
+from open_trading_algo.indicators.long_signals import *
+from open_trading_algo.cache.data_cache import DataCache
+from open_trading_algo.signal_optimizer import SignalOptimizer
 import yfinance as yf
 
 

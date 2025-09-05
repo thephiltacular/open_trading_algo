@@ -466,8 +466,8 @@ alert_config = load_config("cols_alerts")
 ### Using Configurations
 
 ```python
-from tradingview_algo.fin_data_apis.feed import LiveDataFeed
-from tradingview_algo.indicators.indicators import calculate_rsi
+from open_trading_algo.fin_data_apis.feed import LiveDataFeed
+from open_trading_algo.indicators.indicators import calculate_rsi
 
 # Use live data config
 feed = LiveDataFeed(Path("live_data_config.yaml"))

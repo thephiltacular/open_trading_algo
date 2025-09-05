@@ -36,7 +36,7 @@ A comprehensive Python library for algorithmic trading, technical analysis, and 
 - **Portfolio-level risk controls**
 - **Correlation-based hedging** strategies
 
-### 🔄 Live Trading Ready
+### 🔄 Live Trading Ready (WIP - this is a future goal)
 - **Real-time data feeds** with configurable intervals
 - **Event-driven processing** for low-latency signals
 - **Production logging** and monitoring
@@ -55,9 +55,9 @@ pip install -e .
 ### Basic Usage
 
 ```python
-from tradingview_algo.fin_data_apis.fetchers import fetch_yahoo
-from tradingview_algo.indicators.indicators import calculate_rsi
-from tradingview_algo.indicators.long_signals import rsi_oversold_signal
+from open_trading_algo.fin_data_apis.fetchers import fetch_yahoo
+from open_trading_algo.indicators.indicators import calculate_rsi
+from open_trading_algo.indicators.long_signals import rsi_oversold_signal
 
 # Fetch current market data
 data = fetch_yahoo(["AAPL", "GOOGL"], ["price", "volume"])
@@ -104,10 +104,10 @@ TradingViewAlgoDev uses a persistent, efficient SQLite database to cache and sto
 
 ### How It Works
 
-* On first use, the database is automatically created in the project directory as `tradingview_algo/tv_data_cache.sqlite3`.
+* On first use, the database is automatically created in the project directory as `open_trading_algo/tv_data_cache.sqlite3`.
 * All data fetches (live, enrichment, backtest) check the local database first. Only missing data is requested from yfinance or other sources.
 * New data is automatically stored in the database for future use.
-* The database is managed by the `DataCache` class in `tradingview_algo/data_cache.py`.
+* The database is managed by the `DataCache` class in `open_trading_algo/data_cache.py`.
 
 ### Custom Database Path
 
@@ -140,7 +140,7 @@ TradingViewAlgoDev caches all computed signals (long, short, options, sentiment)
 #### Example Usage
 
 ```python
-from tradingview_algo.data_cache import DataCache
+from open_trading_algo.data_cache import DataCache
 import pandas as pd
 
 # Suppose you have a DataFrame `signals_df` with datetime index and a 'signal_value' column
@@ -166,7 +166,7 @@ print("Signals cached:", exists)
 Each signal module provides a `compute_and_cache_*_signals` function:
 
 ```python
-from tradingview_algo.long_signals import compute_and_cache_long_signals
+from open_trading_algo.long_signals import compute_and_cache_long_signals
 
 signals_df = compute_and_cache_long_signals("AAPL", price_df, "1d")
 ```
@@ -177,3 +177,11 @@ This pattern is used for all signal types (long, short, options, sentiment).
 
 - The database is SQLite for maximum portability and zero setup. For advanced users, you can point `db_path` to a remote or cloud SQLite file.
 - If you ever want to reset the cache, simply delete the `.sqlite3` file and it will be recreated on next use.
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) for instructions on how to get started, code style, testing, and submitting pull requests.
+
+## 📝 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

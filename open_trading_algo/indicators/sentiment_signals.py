@@ -4,7 +4,7 @@ Best practices from investment banking and hedge funds.
 Each function takes a DataFrame (with required columns) and returns a boolean or numeric Series.
 """
 import pandas as pd
-from tradingview_algo.data_cache import DataCache, is_caching_enabled
+from open_trading_algo.data_cache import DataCache, is_caching_enabled
 
 
 def compute_and_cache_sentiment_signals(ticker: str, df: pd.DataFrame, timeframe: str):
@@ -100,4 +100,4 @@ sentiment_signals = {
     "short_interest_crowding": short_interest_crowding,
     "volatility_sentiment": volatility_sentiment,
 }
-# moved from tradingview_algo/sentiment_signals.py
+# moved from open_trading_algo/sentiment_signals.py

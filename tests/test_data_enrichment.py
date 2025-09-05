@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from tradingview_algo.data_enrichment import enrich_dataframe_for_signals
+from open_trading_algo.data_enrichment import enrich_dataframe_for_signals
 
 # Example ticker for testing (liquid, lots of data)
 TICKER = "AAPL"

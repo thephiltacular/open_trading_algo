@@ -1,8 +1,8 @@
 import os
 import pytest
 from pathlib import Path
-from tradingview_algo.fin_data_apis import feed as live_data
-from tradingview_algo.fin_data_apis.secure_api import get_api_key
+from open_trading_algo.fin_data_apis import feed as live_data
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
 
 # Use a common ticker for all tests to avoid excessive API usage
 TICKERS = ["AAPL"]

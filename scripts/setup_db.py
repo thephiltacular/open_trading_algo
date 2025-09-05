@@ -3,7 +3,7 @@ Script to set up the SQLite database for TradingViewAlgoDev.
 Creates the database and tables if not present, unless a custom path is specified in config.
 """
 import os
-from tradingview_algo.data_cache import DataCache, DB_PATH
+from open_trading_algo.cache.data_cache import DataCache, DB_PATH
 import yaml
 
 

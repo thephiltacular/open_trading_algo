@@ -4,7 +4,7 @@ Only one request is made; all data is stored for future use.
 """
 import yfinance as yf
 import pandas as pd
-from tradingview_algo.data_cache import DataCache
+from open_trading_algo.cache.data_cache import DataCache
 
 
 def main():

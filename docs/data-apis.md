@@ -19,7 +19,7 @@ TradingViewAlgoDev provides unified access to multiple financial data providers 
 ### Single Data Source
 
 ```python
-from tradingview_algo.fin_data_apis.fetchers import fetch_yahoo
+from open_trading_algo.fin_data_apis.fetchers import fetch_yahoo
 
 # Fetch current data
 tickers = ["AAPL", "GOOGL", "MSFT"]
@@ -37,12 +37,12 @@ for ticker in tickers:
 ### Multiple Data Sources with Fallback
 
 ```python
-from tradingview_algo.fin_data_apis.fetchers import (
+from open_trading_algo.fin_data_apis.fetchers import (
     fetch_yahoo,
     fetch_finnhub,
     fetch_alpha_vantage,
 )
-from tradingview_algo.fin_data_apis.secure_api import get_api_key
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
 
 
 def get_stock_data(ticker, fields):
@@ -92,12 +92,12 @@ else:
 For efficiency, use bulk fetchers when requesting data for multiple tickers:
 
 ```python
-from tradingview_algo.fin_data_apis.fetchers import (
+from open_trading_algo.fin_data_apis.fetchers import (
     fetch_finnhub_bulk,
     fetch_fmp_bulk,
     fetch_alpha_vantage_bulk,
 )
-from tradingview_algo.fin_data_apis.secure_api import get_api_key
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
 
 tickers = ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN"]
 fields = ["price", "volume", "high", "low"]
@@ -120,7 +120,7 @@ for ticker, data in bulk_data.items():
 
 ```python
 import yfinance as yf
-from tradingview_algo.cache.data_cache import DataCache
+from open_trading_algo.cache.data_cache import DataCache
 
 
 def fetch_historical_with_cache(ticker, period="1y"):
@@ -159,7 +159,7 @@ print(f"Date range: {df.index[0]} to {df.index[-1]}")
 ### Real-time Data Aggregation
 
 ```python
-from tradingview_algo.fin_data_apis.fetchers import (
+from open_trading_algo.fin_data_apis.fetchers import (
     fetch_yahoo,
     fetch_finnhub,
     fetch_fmp,
@@ -235,7 +235,7 @@ print(df[["yahoo_price", "finnhub_price"]].describe())
 The library automatically handles rate limits for all data sources:
 
 ```python
-from tradingview_algo.fin_data_apis.rate_limit import rate_limit, RateLimiter
+from open_trading_algo.fin_data_apis.rate_limit import rate_limit, RateLimiter
 
 # Manual rate limiting
 @rate_limit("finnhub")
@@ -303,7 +303,7 @@ if data:
 ### Polygon.io - Options Data
 
 ```python
-from tradingview_algo.fin_data_apis.polygon_api import PolygonAPI
+from open_trading_algo.fin_data_apis.polygon_api import PolygonAPI
 
 polygon = PolygonAPI()
 
@@ -322,7 +322,7 @@ for option in options["results"][:5]:  # First 5 options
 ### Tiingo - News Integration
 
 ```python
-from tradingview_algo.fin_data_apis.tiingo_api import TiingoAPI
+from open_trading_algo.fin_data_apis.tiingo_api import TiingoAPI
 
 tiingo = TiingoAPI()
 
@@ -338,7 +338,7 @@ print(df.tail())
 ### Alpha Vantage - Technical Indicators
 
 ```python
-from tradingview_algo.fin_data_apis.alpha_vantage_api import AlphaVantageAPI
+from open_trading_algo.fin_data_apis.alpha_vantage_api import AlphaVantageAPI
 
 av = AlphaVantageAPI()
 
@@ -357,7 +357,7 @@ for date, values in list(rsi_data.items())[-5:]:
 ### Caching Strategy
 
 ```python
-from tradingview_algo.cache.data_cache import DataCache
+from open_trading_algo.cache.data_cache import DataCache
 import pandas as pd
 
 

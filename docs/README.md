@@ -80,7 +80,7 @@ TradingViewAlgoDev is designed as a modular, production-ready framework for:
 
 ```
 TradingViewAlgoDev/
-├── tradingview_algo/           # Main library package
+├── open_trading_algo/           # Main library package
 │   ├── fin_data_apis/         # Data source integrations
 │   ├── indicators/            # Technical analysis indicators
 │   ├── cache/                 # Local data caching

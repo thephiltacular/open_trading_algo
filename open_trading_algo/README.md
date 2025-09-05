@@ -13,7 +13,7 @@ The original `data_processing.py` is not modified. You can progressively migrate
 ## Example
 
 ```python
-from tradingview_algo import ModelPipeline
+from open_trading_algo import ModelPipeline
 
 # Suppose you already loaded day-partitioned pandas DataFrames
 pipeline = ModelPipeline(data=my_data_by_day, alerts=my_alerts_by_day)

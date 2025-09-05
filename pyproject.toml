@@ -6,13 +6,13 @@ description = "A modular, portable trading and backtesting framework with signal
 authors = ["Philip Mai <philipemai.com>"]
 readme = "README.md"
 packages = [
-	{ include = "tradingview_algo" }
+	{ include = "open_trading_algo" }
 ]
 [tool.setuptools]
-packages = ["tradingview_algo"]
+packages = ["open_trading_algo"]
 
 [tool.poetry.scripts]
-run-model = "tradingview_algo.pipeline:main"
+run-model = "open_trading_algo.pipeline:main"
 
 
 [tool.poetry.dependencies]
