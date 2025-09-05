@@ -16,7 +16,7 @@ from tradingview_algo.fin_data_apis.fetchers import (
     fetch_twelve_data_bulk,
 )
 from tradingview_algo.fin_data_apis.config import LiveDataConfig
-from tradingview_algo.data_cache import DataCache
+from tradingview_algo.cache.data_cache import DataCache
 from tradingview_algo.fin_data_apis.secure_api import get_api_key
 import threading
 import time
@@ -33,8 +33,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 import yaml
 
-from tradingview_algo.data_cache import DataCache
-from tradingview_algo.secure_api import get_api_key
+from tradingview_algo.fin_data_apis.secure_api import get_api_key
 
 try:
     import yfinance as yf
