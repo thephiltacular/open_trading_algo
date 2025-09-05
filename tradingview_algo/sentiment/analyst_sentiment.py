@@ -5,8 +5,62 @@ Best practices: Use multiple sources (Yahoo Finance, Finnhub, FMP, etc.), normal
 
 import requests
 from typing import Dict, Any
+import pandas as pd
+from tradingview_algo.data_cache import DataCache, is_caching_enabled
 from tradingview_algo.fin_data_apis.secure_api import get_api_key
 from tradingview_algo.fin_data_apis.rate_limit import rate_limit
+
+
+def fetch_bulk_finnhub_analyst_sentiment(tickers: list, api_key: str) -> pd.DataFrame:
+    """
+    Fetch Finnhub analyst sentiment for multiple tickers (one call per ticker, as bulk not supported).
+    Returns a DataFrame indexed by [date, ticker].
+    """
+    cache = DataCache() if is_caching_enabled() else None
+    signal_type = "analyst_finnhub_sentiment"
+    timeframe = "1d"
+    dfs = []
+    for ticker in tickers:
+        if cache and cache.has_signals(ticker, timeframe, signal_type):
+            df = cache.get_signals(ticker, timeframe, signal_type).copy()
+        else:
+            df = fetch_finnhub_analyst_sentiment(ticker, api_key).copy()
+        df["ticker"] = ticker
+        dfs.append(df)
+    if dfs:
+        result = pd.concat(dfs)
+        result = result.set_index([result.index, "ticker"])
+        result.index.names = ["date", "ticker"]
+        return result
+    return pd.DataFrame(columns=["buy"]).set_index(
+        [pd.Index([], name="date"), pd.Index([], name="ticker")]
+    )
+
+
+def fetch_bulk_fmp_analyst_price_targets(tickers: list, api_key: str) -> pd.DataFrame:
+    """
+    Fetch FMP analyst price targets for multiple tickers (one call per ticker, as bulk not supported).
+    Returns a DataFrame indexed by [date, ticker].
+    """
+    cache = DataCache() if is_caching_enabled() else None
+    signal_type = "analyst_fmp_price_targets"
+    timeframe = "1d"
+    dfs = []
+    for ticker in tickers:
+        if cache and cache.has_signals(ticker, timeframe, signal_type):
+            df = cache.get_signals(ticker, timeframe, signal_type).copy()
+        else:
+            df = fetch_fmp_analyst_price_targets(ticker, api_key).copy()
+        df["ticker"] = ticker
+        dfs.append(df)
+    if dfs:
+        result = pd.concat(dfs)
+        result = result.set_index([result.index, "ticker"])
+        result.index.names = ["date", "ticker"]
+        return result
+    return pd.DataFrame(columns=["targetMean"]).set_index(
+        [pd.Index([], name="date"), pd.Index([], name="ticker")]
+    )
 
 
 # Example 1: Fetch analyst recommendations from Finnhub (requires API key)
@@ -17,6 +71,12 @@ def fetch_finnhub_analyst_sentiment(ticker: str, api_key: str) -> Dict[str, Any]
     """
     if not api_key:
         api_key = get_api_key("finnhub")
+    cache = DataCache() if is_caching_enabled() else None
+    signal_type = "analyst_finnhub_sentiment"
+    timeframe = "1d"
+    if cache and cache.has_signals(ticker, timeframe, signal_type):
+        df = cache.get_signals(ticker, timeframe, signal_type)
+        return df
 
     @rate_limit("finnhub")
     def _call():
@@ -27,18 +87,29 @@ def fetch_finnhub_analyst_sentiment(ticker: str, api_key: str) -> Dict[str, Any]
             data = resp.json()
             if data:
                 latest = data[0]
-                return {
-                    "buy": latest.get("buy"),
-                    "hold": latest.get("hold"),
-                    "sell": latest.get("sell"),
-                    "strongBuy": latest.get("strongBuy"),
-                    "strongSell": latest.get("strongSell"),
-                    "period": latest.get("period"),
-                    "url": url,
-                }
+                dt = pd.Timestamp.utcnow().normalize()
+                df = pd.DataFrame(
+                    {
+                        "buy": [latest.get("buy")],
+                        "hold": [latest.get("hold")],
+                        "sell": [latest.get("sell")],
+                        "strongBuy": [latest.get("strongBuy")],
+                        "strongSell": [latest.get("strongSell")],
+                        "period": [latest.get("period")],
+                    },
+                    index=[dt],
+                )
+                if cache:
+                    cache.store_signals(
+                        ticker,
+                        timeframe,
+                        signal_type,
+                        df[["buy"]].rename(columns={"buy": "signal_value"}),
+                    )
+                return df
         except Exception as e:
-            return {"error": str(e), "url": url}
-        return {"buy": None, "url": url}
+            return pd.DataFrame({"buy": [None]}, index=[pd.Timestamp.utcnow().normalize()])
+        return pd.DataFrame({"buy": [None]}, index=[pd.Timestamp.utcnow().normalize()])
 
     return _call()
 
@@ -51,6 +122,12 @@ def fetch_fmp_analyst_price_targets(ticker: str, api_key: str) -> Dict[str, Any]
     """
     if not api_key:
         api_key = get_api_key("fmp")
+    cache = DataCache() if is_caching_enabled() else None
+    signal_type = "analyst_fmp_price_targets"
+    timeframe = "1d"
+    if cache and cache.has_signals(ticker, timeframe, signal_type):
+        df = cache.get_signals(ticker, timeframe, signal_type)
+        return df
 
     @rate_limit("fmp")
     def _call():
@@ -61,16 +138,27 @@ def fetch_fmp_analyst_price_targets(ticker: str, api_key: str) -> Dict[str, Any]
             data = resp.json()
             if isinstance(data, list) and data:
                 latest = data[0]
-                return {
-                    "targetHigh": latest.get("targetHigh"),
-                    "targetLow": latest.get("targetLow"),
-                    "targetMean": latest.get("targetMean"),
-                    "targetMedian": latest.get("targetMedian"),
-                    "url": url,
-                }
+                dt = pd.Timestamp.utcnow().normalize()
+                df = pd.DataFrame(
+                    {
+                        "targetHigh": [latest.get("targetHigh")],
+                        "targetLow": [latest.get("targetLow")],
+                        "targetMean": [latest.get("targetMean")],
+                        "targetMedian": [latest.get("targetMedian")],
+                    },
+                    index=[dt],
+                )
+                if cache:
+                    cache.store_signals(
+                        ticker,
+                        timeframe,
+                        signal_type,
+                        df[["targetMean"]].rename(columns={"targetMean": "signal_value"}),
+                    )
+                return df
         except Exception as e:
-            return {"error": str(e), "url": url}
-        return {"targetMean": None, "url": url}
+            return pd.DataFrame({"targetMean": [None]}, index=[pd.Timestamp.utcnow().normalize()])
+        return pd.DataFrame({"targetMean": [None]}, index=[pd.Timestamp.utcnow().normalize()])
 
     return _call()
 
@@ -81,9 +169,8 @@ def aggregate_analyst_sentiment(ticker: str, finnhub_key: str, fmp_key: str) -> 
     Aggregate analyst sentiment from Finnhub and FMP.
     Returns a dict with consensus and price targets.
     """
-    finnhub = fetch_finnhub_analyst_sentiment(ticker, finnhub_key)
-    fmp = fetch_fmp_analyst_price_targets(ticker, fmp_key)
-    return {
-        "finnhub": finnhub,
-        "fmp": fmp,
-    }
+    finnhub_df = fetch_finnhub_analyst_sentiment(ticker, finnhub_key)
+    fmp_df = fetch_fmp_analyst_price_targets(ticker, fmp_key)
+    # Combine as new columns for indicator DataFrame usage
+    df = finnhub_df.join(fmp_df, how="outer")
+    return df
