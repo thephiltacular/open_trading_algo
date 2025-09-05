@@ -3,16 +3,25 @@ Data enrichment utilities for signal suites.
 Gathers and adds required columns to a DataFrame for selected signals using yfinance and sentiment sources.
 """
 import pandas as pd
+
 import yfinance as yf
-from typing import List, Dict
+from typing import List, Dict, Optional
+from tradingview_algo.fin_data_apis import fetchers
 
 
 def enrich_dataframe_for_signals(
-    df: pd.DataFrame, ticker: str, signals: List[str], info: dict = None, hist: pd.DataFrame = None
+    df: pd.DataFrame,
+    ticker: str,
+    signals: List[str],
+    hist: pd.DataFrame = None,
+    source: str = "yahoo",
+    api_key: Optional[str] = None,
+    tickers: Optional[List[str]] = None,
 ) -> pd.DataFrame:
     """
-    Adds required columns for the given signals to the DataFrame using yfinance and sentiment APIs.
+    Adds required columns for the given signals to the DataFrame using the selected API (yahoo, finnhub, fmp, alpha_vantage, twelve_data).
     Only missing columns are fetched/added. Optionally accepts pre-fetched yfinance info and history.
+    If tickers is provided, will fetch for all tickers in one bulk call (recommended for efficiency).
     """
     # Map signal names to required columns
     signal_requirements = {
@@ -76,19 +85,62 @@ def enrich_dataframe_for_signals(
         "vix": None,  # Not available from yfinance, placeholder
         # Add more as needed
     }
-    # Fetch yfinance info if needed
-    yf_info = info
+    # Determine tickers to fetch
+    tickers = tickers or [ticker]
+
+    # Determine which columns are missing for each ticker
+    needed_fields = set()
+    for sig in signals:
+        needed_fields.update(signal_requirements.get(sig, []))
+    missing_fields = [col for col in needed_fields if col not in df.columns]
+
+    price_fields = [
+        f
+        for f in missing_fields
+        if f
+        in [
+            "price",
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+            "previous_close",
+            "change",
+            "percent_change",
+            "timestamp",
+        ]
+    ]
+
+    # Fetch from selected API if not yahoo
+    api_data = None
+    if source != "yahoo" and price_fields:
+        fetch_map = {
+            "finnhub": fetchers.fetch_finnhub_bulk,
+            "fmp": fetchers.fetch_fmp_bulk,
+            "alpha_vantage": fetchers.fetch_alpha_vantage_bulk,
+            "twelve_data": fetchers.fetch_twelve_data_bulk,
+        }
+        fetch_func = fetch_map.get(source.lower())
+        if fetch_func and api_key:
+            api_data = fetch_func(tickers, price_fields, api_key)
+
+    # Fetch yfinance info if needed (fallback)
+    yf_info = None
     yf_hist = hist
     for sig in signals:
         for col in signal_requirements.get(sig, []):
             if col not in df.columns:
-                if col in yfinance_fields and yfinance_fields[col] is not None:
+                # Try API data first
+                if api_data and ticker in api_data and col in api_data[ticker]:
+                    df[col] = api_data[ticker][col]
+                elif col in yfinance_fields and yfinance_fields[col] is not None:
                     if yf_info is None:
                         yf_info = yf.Ticker(ticker).info
                     val = yf_info.get(yfinance_fields[col], None)
                     if val is not None:
                         df[col] = val
-                elif col == "close" or col == "high" or col == "low":
+                elif col in ["close", "high", "low"]:
                     # Try to get from yfinance history if not present
                     if yf_hist is None:
                         yf_hist = yf.Ticker(ticker).history(period="max")

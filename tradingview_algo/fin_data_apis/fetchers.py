@@ -1,53 +1,23 @@
-"""Live data interface for TradingViewAlgoDev.
-
-This module loads configuration from a YAML file and periodically fetches
-financial data for a list of tickers/ETFs from a free source (default: Yahoo Finance).
-It exposes a clean interface for downstream analysis and alert generation.
-"""
-from tradingview_algo.fin_data_apis.fetchers import (
-    fetch_yahoo,
-    fetch_finnhub,
-    fetch_fmp,
-    fetch_alpha_vantage,
-    fetch_twelve_data,
-    fetch_finnhub_bulk,
-    fetch_fmp_bulk,
-    fetch_alpha_vantage_bulk,
-    fetch_twelve_data_bulk,
-)
-from tradingview_algo.fin_data_apis.config import LiveDataConfig
-from tradingview_algo.data_cache import DataCache
+# Split from live_data.py: all fetch_* and bulk fetch functions
+from pathlib import Path
+from typing import Any, Dict, List
 from tradingview_algo.fin_data_apis.secure_api import get_api_key
-import threading
-import time
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
-import yaml
-
-
-import threading
-import time
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
-
-
-import yaml
-
-from tradingview_algo.data_cache import DataCache
-from tradingview_algo.secure_api import get_api_key
-
-try:
-    import yfinance as yf
-except ImportError:
-    raise ImportError("Please install yfinance: pip install yfinance")
-# --- Bulk fetchers for each provider ---
 import concurrent.futures
+import requests
+import yfinance as yf
+from tradingview_algo.cache.data_cache import DataCache
+
+# ...existing fetch_yahoo, fetch_finnhub, fetch_fmp, fetch_alpha_vantage, fetch_twelve_data, and their bulk variants...
+# (To be filled in next step)
+
+# --- Live data fetchers and bulk fetchers ---
+from tradingview_algo.fin_data_apis.rate_limit import rate_limit_check
 
 
 def fetch_finnhub_bulk(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Finnhub using parallel requests (no true bulk endpoint)."""
+    rate_limit_check("finnhub")
 
     def fetch_one(ticker):
         return ticker, fetch_finnhub([ticker], fields, api_key).get(ticker, {})
@@ -61,14 +31,14 @@ def fetch_finnhub_bulk(
 
 
 def fetch_fmp_bulk(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from FMP using a single bulk request."""
+    rate_limit_check("fmp")
     return fetch_fmp(tickers, fields, api_key)
 
 
 def fetch_alpha_vantage_bulk(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Alpha Vantage using parallel requests (no true bulk endpoint)."""
+    rate_limit_check("alpha_vantage")
 
     def fetch_one(ticker):
         return ticker, fetch_alpha_vantage([ticker], fields, api_key).get(ticker, {})
@@ -84,7 +54,7 @@ def fetch_alpha_vantage_bulk(
 def fetch_twelve_data_bulk(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Twelve Data using parallel requests (no true bulk endpoint)."""
+    rate_limit_check("twelve_data")
 
     def fetch_one(ticker):
         return ticker, fetch_twelve_data([ticker], fields, api_key).get(ticker, {})
@@ -97,26 +67,14 @@ def fetch_twelve_data_bulk(
     return data
 
 
-class LiveDataConfig:
-    def __init__(self, config_path: Path):
-        with config_path.open("r", encoding="utf-8") as f:
-            cfg = yaml.safe_load(f)
-        self.update_rate = int(cfg.get("update_rate", 300))
-        self.tickers = list(cfg.get("tickers", []))
-        self.source = str(cfg.get("source", "yahoo"))
-        self.api_key = str(cfg.get("api_key", ""))
-        self.fields = list(cfg.get("fields", ["price", "volume"]))
-
-
 def fetch_yahoo(
     tickers: List[str], fields: List[str], batch_size: int = 80, cache: DataCache = None
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Yahoo Finance, using cache to minimize requests."""
+    rate_limit_check("yahoo")
     import math
 
     data = {}
     uncached = []
-    # Check cache first
     if cache is not None:
         for ticker in tickers:
             df = cache.get_price_data(ticker)
@@ -151,7 +109,6 @@ def fetch_yahoo(
                 uncached.append(ticker)
     else:
         uncached = tickers
-    # Fetch uncached from yfinance in batches
     n = len(uncached)
     for i in range(0, n, batch_size):
         batch = uncached[i : i + batch_size]
@@ -198,7 +155,6 @@ def fetch_yahoo(
                     elif field == "timestamp":
                         out[field] = str(latest.name)
                 data[ticker] = out
-                # Store in cache
                 if cache is not None:
                     cache.store_price_data(ticker, tdf)
             except Exception:
@@ -206,12 +162,7 @@ def fetch_yahoo(
     return data
 
 
-# --- Additional live data fetchers ---
-import requests
-
-
 def fetch_finnhub(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Finnhub."""
     url = "https://finnhub.io/api/v1/quote"
     data = {}
     for ticker in tickers:
@@ -241,7 +192,6 @@ def fetch_finnhub(tickers: List[str], fields: List[str], api_key: str) -> Dict[s
 
 
 def fetch_fmp(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Financial Modeling Prep (FMP)."""
     url = "https://financialmodelingprep.com/api/v3/quote/{}"
     data = {}
     try:
@@ -268,7 +218,6 @@ def fetch_fmp(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, 
                 elif field == "timestamp":
                     out[field] = q.get("timestamp")
             data[ticker] = out
-        # Fill missing tickers
         for ticker in tickers:
             if ticker not in data:
                 data[ticker] = {f: None for f in fields}
@@ -281,7 +230,6 @@ def fetch_fmp(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, 
 def fetch_alpha_vantage(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Alpha Vantage (batch quotes)."""
     url = "https://www.alphavantage.co/query"
     data = {}
     for ticker in tickers:
@@ -315,7 +263,6 @@ def fetch_alpha_vantage(
 def fetch_twelve_data(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Twelve Data."""
     url = "https://api.twelvedata.com/quote"
     data = {}
     for ticker in tickers:
@@ -344,74 +291,3 @@ def fetch_twelve_data(
         except Exception:
             data[ticker] = {f: None for f in fields}
     return data
-
-
-class LiveDataFeed:
-    """Live data feed that periodically fetches ticker data and exposes it for analysis."""
-
-    def __init__(
-        self,
-        config_path: Path,
-        on_update: Optional[Callable[[Dict[str, Dict[str, Any]]], None]] = None,
-        cache: Optional[DataCache] = None,
-    ):
-        self.config = LiveDataConfig(config_path)
-        # If API key is not set in config, try to load from .env or environment
-        if not self.config.api_key and self.config.source.lower() in {
-            "finnhub",
-            "fmp",
-            "alpha_vantage",
-            "twelve_data",
-        }:
-            self.config.api_key = get_api_key(self.config.source)
-        self.on_update = on_update
-        self._stop = threading.Event()
-        self._thread = None
-        self.latest_data: Dict[str, Dict[str, Any]] = {}
-        self.cache = cache or DataCache()
-
-    def start(self):
-        if self._thread and self._thread.is_alive():
-            return
-        self._stop.clear()
-        self._thread = threading.Thread(target=self._run, daemon=True)
-        self._thread.start()
-
-    def stop(self):
-        self._stop.set()
-        if self._thread:
-            self._thread.join()
-
-    def _run(self):
-        while not self._stop.is_set():
-            src = self.config.source.lower()
-            if src == "yahoo":
-                self.latest_data = fetch_yahoo(
-                    self.config.tickers, self.config.fields, cache=self.cache
-                )
-            elif src == "finnhub":
-                self.latest_data = fetch_finnhub_bulk(
-                    self.config.tickers, self.config.fields, self.config.api_key
-                )
-            elif src == "fmp":
-                self.latest_data = fetch_fmp_bulk(
-                    self.config.tickers, self.config.fields, self.config.api_key
-                )
-            elif src == "alpha_vantage":
-                self.latest_data = fetch_alpha_vantage_bulk(
-                    self.config.tickers, self.config.fields, self.config.api_key
-                )
-            elif src == "twelve_data":
-                self.latest_data = fetch_twelve_data_bulk(
-                    self.config.tickers, self.config.fields, self.config.api_key
-                )
-            else:
-                self.latest_data = {
-                    t: {f: None for f in self.config.fields} for t in self.config.tickers
-                }
-            if self.on_update:
-                self.on_update(self.latest_data)
-            time.sleep(self.config.update_rate)
-
-    def get_latest(self) -> Dict[str, Dict[str, Any]]:
-        return self.latest_data

@@ -1,3 +1,19 @@
+## API Endpoints, Rate Limits, and Documentation
+
+TradingViewAlgoDev supports multiple data providers. Each provider has its own rate limits for free accounts. Exceeding these limits may result in errors or temporary bans. Always use the bulk fetch functions to minimize API calls.
+
+| Provider         | Docs Link                                                        | Free Limit (per min) | Free Limit (per day) | Notes |
+|------------------|------------------------------------------------------------------|----------------------|----------------------|-------|
+| **Finnhub**      | [API Docs](https://finnhub.io/docs/api#quote)                    | 60                   | 1,440                | 60/min, 1,440/day. [Details](https://finnhub.io/docs/api/rate-limit) |
+| **FMP**          | [API Docs](https://site.financialmodelingprep.com/developer/docs/)| 5                    | 250                  | 5/min, 250/day. [Details](https://site.financialmodelingprep.com/developer/docs/#Rate-Limits) |
+| **Alpha Vantage**| [API Docs](https://www.alphavantage.co/documentation/)           | 5                    | 500                  | 5/min, 500/day. [Details](https://www.alphavantage.co/premium/) |
+| **Twelve Data**  | [API Docs](https://twelvedata.com/docs#quote)                    | 8                    | 800                  | 8/min, 800/day. [Details](https://twelvedata.com/pricing) |
+| **Yahoo Finance**| [yfinance](https://github.com/ranaroussi/yfinance)               | ~60                  | ~2,000               | No official limits; ~60/min, ~2,000/day. [Discussion](https://github.com/ranaroussi/yfinance/issues/430) |
+
+**Tip:** Use the `api_config.yaml` file for a machine-readable version of these limits and documentation links.
+
+**Always use the bulk fetch functions** in `live_data.py` to minimize API calls and avoid exceeding these limits.
+
 ## Secure API Key Storage
 
 **Never hardcode API keys in your scripts.**
