@@ -196,3 +196,5 @@ secrets.*
 
 # YAML cache
 *.yaml~
+
+!secrets.env.example
