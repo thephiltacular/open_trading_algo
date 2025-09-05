@@ -140,7 +140,7 @@ open_trading_algo caches all computed signals (long, short, options, sentiment) 
 #### Example Usage
 
 ```python
-from open_trading_algo.data_cache import DataCache
+from open_trading_algo.cache.data_cache import DataCache
 import pandas as pd
 
 # Suppose you have a DataFrame `signals_df` with datetime index and a 'signal_value' column

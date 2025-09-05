@@ -4,7 +4,7 @@ Includes fundamental, technical, and sentiment-based signals.
 Each function takes a DataFrame (with required columns) and returns a boolean Series.
 """
 import pandas as pd
-from tradingview_algo.data_cache import DataCache, is_caching_enabled
+from open_trading_algo.cache.data_cache import DataCache, is_caching_enabled
 
 
 def signal_undervalued(df: pd.DataFrame) -> pd.Series:
