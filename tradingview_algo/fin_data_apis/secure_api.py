@@ -16,6 +16,7 @@ def get_api_key(service: str) -> Optional[str]:
         "fmp": "FMP_API_KEY",
         "alpha_vantage": "ALPHA_VANTAGE_API_KEY",
         "twelve_data": "TWELVE_DATA_API_KEY",
+        "polygon": "POLYGON_API_KEY",
     }
     key = env_map.get(service.lower())
     if key:
