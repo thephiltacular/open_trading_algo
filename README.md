@@ -1,60 +1,99 @@
-## API Endpoints, Rate Limits, and Documentation
+# TradingViewAlgoDev
 
-TradingViewAlgoDev supports multiple data providers. Each provider has its own rate limits for free accounts. Exceeding these limits may result in errors or temporary bans. Always use the bulk fetch functions to minimize API calls.
+A comprehensive Python library for algorithmic trading, technical analysis, and financial data processing. Built for performance, reliability, and ease of use in both research and production environments.
 
-| Provider         | Docs Link                                                        | Free Limit (per min) | Free Limit (per day) | Notes |
-|------------------|------------------------------------------------------------------|----------------------|----------------------|-------|
-| **Finnhub**      | [API Docs](https://finnhub.io/docs/api#quote)                    | 60                   | 1,440                | 60/min, 1,440/day. [Details](https://finnhub.io/docs/api/rate-limit) |
-| **FMP**          | [API Docs](https://site.financialmodelingprep.com/developer/docs/)| 5                    | 250                  | 5/min, 250/day. [Details](https://site.financialmodelingprep.com/developer/docs/#Rate-Limits) |
-| **Alpha Vantage**| [API Docs](https://www.alphavantage.co/documentation/)           | 5                    | 500                  | 5/min, 500/day. [Details](https://www.alphavantage.co/premium/) |
-| **Twelve Data**  | [API Docs](https://twelvedata.com/docs#quote)                    | 8                    | 800                  | 8/min, 800/day. [Details](https://twelvedata.com/pricing) |
-| **Yahoo Finance**| [yfinance](https://github.com/ranaroussi/yfinance)               | ~60                  | ~2,000               | No official limits; ~60/min, ~2,000/day. [Discussion](https://github.com/ranaroussi/yfinance/issues/430) |
+## 🚀 Quick Links
 
-**Tip:** Use the `api_config.yaml` file for a machine-readable version of these limits and documentation links.
+- **[📚 Complete Documentation](docs/README.md)** - Comprehensive guides and API reference
+- **[⚡ Quick Start Guide](docs/quickstart.md)** - Get up and running in minutes
+- **[🔧 Installation & Setup](docs/installation.md)** - Installation instructions and configuration
+- **[📊 Data APIs Guide](docs/data-apis.md)** - Multi-source financial data fetching
+- **[💾 Cache System](docs/data-cache.md)** - Local data storage and optimization
 
-**Always use the bulk fetch functions** in `live_data.py` to minimize API calls and avoid exceeding these limits.
+## Key Features
 
-## Secure API Key Storage
+### 🎯 Multi-Source Data Integration
+- **7+ data providers**: Yahoo Finance, Finnhub, Alpha Vantage, FMP, Twelve Data, Polygon, Tiingo
+- **Automatic rate limiting** and error handling
+- **Smart failover** between data sources
+- **Local caching** for performance and cost reduction
 
-**Never hardcode API keys in your scripts.**
+### 📈 Advanced Technical Analysis
+- **50+ technical indicators**: RSI, MACD, Bollinger Bands, ADX, Stochastic, Williams %R, etc.
+- **Custom indicators**: Fibonacci retracements, volume profiles, market breadth
+- **Multi-timeframe analysis** support
+- **Signal aggregation** and optimization
 
-TradingViewAlgoDev supports secure API key management using a `.env` file in your project root. This keeps your keys out of source code and version control.
+### 🎯 Intelligent Signal Generation
+- **Long/short equity signals** with multiple strategies
+- **Options trading signals** for calls and puts
+- **Sentiment-based signals** from social media and analyst ratings
+- **Machine learning ensemble** methods
 
-### How to Use
+### ⚖️ Risk Management
+- **Dynamic position sizing** based on volatility
+- **Automated stop-loss** and take-profit levels
+- **Portfolio-level risk controls**
+- **Correlation-based hedging** strategies
 
-1. Copy `.env.example` to `.env` in your project root:
+### 🔄 Live Trading Ready
+- **Real-time data feeds** with configurable intervals
+- **Event-driven processing** for low-latency signals
+- **Production logging** and monitoring
+- **Thread-safe operations** for concurrent processing
 
-	```bash
-	cp .env.example .env
-	```
+## Quick Start
 
-2. Edit `.env` and add your API keys:
+### Installation
 
-	```env
-	FINNHUB_API_KEY=your_finnhub_key
-	FMP_API_KEY=your_fmp_key
-	ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key
-	TWELVE_DATA_API_KEY=your_twelve_data_key
-	```
-
-3. The code will automatically load the correct key for each data provider. You can also set these as system environment variables if you prefer.
-
-4. **Do not commit your `.env` file to version control.**
-
-### Accessing API Keys in Python
-
-Use the provided helper:
-
-```python
-from tradingview_algo.secure_api import get_api_key
-
-key = get_api_key("finnhub")  # or "fmp", "alpha_vantage", "twelve_data"
+```bash
+git clone https://github.com/thephiltacular/TradingViewAlgoDev.git
+cd TradingViewAlgoDev
+pip install -e .
 ```
 
-The live data module will use these keys automatically if not set in your YAML config.
+### Basic Usage
 
+```python
+from tradingview_algo.fin_data_apis.fetchers import fetch_yahoo
+from tradingview_algo.indicators.indicators import calculate_rsi
+from tradingview_algo.indicators.long_signals import rsi_oversold_signal
 
-# TradingViewAlgoDev
+# Fetch current market data
+data = fetch_yahoo(["AAPL", "GOOGL"], ["price", "volume"])
+print(f"AAPL: ${data['AAPL']['price']:.2f}")
+
+# Technical analysis with historical data
+import yfinance as yf
+
+df = yf.Ticker("AAPL").history(period="6mo")
+
+# Calculate RSI and generate signals
+rsi = calculate_rsi(df["Close"])
+signals = rsi_oversold_signal(df["Close"])
+
+print(f"Current RSI: {rsi.iloc[-1]:.2f}")
+print(f"Active signals: {signals.sum()}")
+```
+
+## Architecture Overview
+
+```
+TradingViewAlgoDev/
+├── 📊 fin_data_apis/     # Multi-source data integration
+│   ├── fetchers.py       # Unified data fetching interface
+│   ├── rate_limit.py     # Automatic rate limiting
+│   └── [7 API modules]   # Individual data source integrations
+├── 📈 indicators/        # Technical analysis library
+│   ├── indicators.py     # 50+ technical indicators
+│   ├── long_signals.py   # Long position signals
+│   ├── short_signals.py  # Short position signals
+│   └── options_signals.py # Options trading signals
+├── 💾 cache/            # High-performance local storage
+├── 🎯 sentiment/        # Sentiment analysis integration
+├── ⚖️ risk_management.py # Position sizing and risk controls
+└── 🔄 signal_optimizer.py # Multi-signal optimization
+```
 
 ## Automated Local Database Setup
 
