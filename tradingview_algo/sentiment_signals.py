@@ -4,6 +4,38 @@ Best practices from investment banking and hedge funds.
 Each function takes a DataFrame (with required columns) and returns a boolean or numeric Series.
 """
 import pandas as pd
+from tradingview_algo.data_cache import DataCache, is_caching_enabled
+
+
+def compute_and_cache_sentiment_signals(ticker: str, df: pd.DataFrame, timeframe: str):
+    """
+    Compute and cache sentiment signals for a ticker and timeframe.
+    Uses the enable_caching config variable in db_config.yaml to control caching.
+    If caching is enabled and signals are present, loads from cache. Otherwise computes and (if enabled) stores signals.
+    """
+    signal_type = "sentiment_trend"
+    if is_caching_enabled():
+        cache = DataCache()
+        if cache.has_signals(ticker, timeframe, signal_type):
+            return cache.get_signals(ticker, timeframe, signal_type)
+    # Example: combine multiple sentiment signals into one
+    combined = news_nlp_sentiment(df).abs() > 0.2 | news_event_sentiment(df) | (
+        social_media_trend(df) > 0
+    ) | social_media_influencer_impact(df) | (analyst_consensus_change(df) > 0) | (
+        analyst_rating_change(df) > 0
+    ) | (
+        options_put_call_ratio(df) > 1.2
+    ) | options_unusual_activity(
+        df
+    ) | (
+        short_interest_crowding(df) > 0.1
+    ) | (
+        volatility_sentiment(df) > 20
+    )
+    signals_df = pd.DataFrame({"signal_value": combined.astype(int)}, index=df.index)
+    if is_caching_enabled():
+        cache.store_signals(ticker, timeframe, signal_type, signals_df)
+    return signals_df
 
 
 def news_nlp_sentiment(df: pd.DataFrame, threshold: float = 0.2) -> pd.Series:

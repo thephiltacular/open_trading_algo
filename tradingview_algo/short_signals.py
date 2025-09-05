@@ -3,7 +3,38 @@ Short position signal suite for use with SignalOptimizer.
 Includes fundamental, technical, and sentiment-based signals.
 Each function takes a DataFrame (with required columns) and returns a boolean Series.
 """
+
 import pandas as pd
+from tradingview_algo.data_cache import DataCache, is_caching_enabled
+
+
+def compute_and_cache_short_signals(ticker: str, df: pd.DataFrame, timeframe: str):
+    """
+    Compute and cache short signals for a ticker and timeframe.
+    Uses the enable_caching config variable in db_config.yaml to control caching.
+    If caching is enabled and signals are present, loads from cache. Otherwise computes and (if enabled) stores signals.
+    """
+    signal_type = "short_trend"
+    if is_caching_enabled():
+        cache = DataCache()
+        if cache.has_signals(ticker, timeframe, signal_type):
+            return cache.get_signals(ticker, timeframe, signal_type)
+    # Example: combine multiple signals into one
+    combined = (
+        signal_overvalued(df)
+        | signal_deteriorating_financials(df)
+        | signal_negative_earnings_revision(df)
+        | signal_negative_momentum(df)
+        | signal_support_breakdown(df)
+        | signal_overbought_rsi(df)
+        | signal_rising_short_interest(df)
+        | signal_negative_news(df)
+        | signal_bearish_social_sentiment(df)
+    )
+    signals_df = pd.DataFrame({"signal_value": combined.astype(int)}, index=df.index)
+    if is_caching_enabled():
+        cache.store_signals(ticker, timeframe, signal_type, signals_df)
+    return signals_df
 
 
 def signal_overvalued(df: pd.DataFrame) -> pd.Series:

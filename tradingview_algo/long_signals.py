@@ -1,9 +1,12 @@
+# ...existing signal functions and long_signals dict...
+
 """
 Long position signal suite for use with SignalOptimizer.
 Includes fundamental, technical, and sentiment-based signals.
 Each function takes a DataFrame (with required columns) and returns a boolean Series.
 """
 import pandas as pd
+from tradingview_algo.data_cache import DataCache, is_caching_enabled
 
 
 def signal_undervalued(df: pd.DataFrame) -> pd.Series:
@@ -74,7 +77,6 @@ def signal_social_sentiment(df: pd.DataFrame) -> pd.Series:
     return sentiment.diff() > 0
 
 
-# Dictionary of all long signals
 long_signals = {
     "undervalued": signal_undervalued,
     "high_roe": signal_high_roe,
@@ -87,3 +89,22 @@ long_signals = {
     "analyst_upgrades": signal_analyst_upgrades,
     "social_sentiment": signal_social_sentiment,
 }
+
+
+def compute_and_cache_long_signals(ticker: str, df: pd.DataFrame, timeframe: str):
+    """
+    Compute and cache long signals for a ticker and timeframe.
+    Uses the enable_caching config variable in db_config.yaml to control caching.
+    If caching is enabled and signals are present, loads from cache. Otherwise computes and (if enabled) stores signals.
+    """
+    signal_type = "long_trend"  # or use a more specific name per signal
+    if is_caching_enabled():
+        cache = DataCache()
+        if cache.has_signals(ticker, timeframe, signal_type):
+            return cache.get_signals(ticker, timeframe, signal_type)
+    # Example: combine multiple signals into one
+    combined = signal_undervalued(df) & signal_high_roe(df) & signal_sma_trend(df)
+    signals_df = pd.DataFrame({"signal_value": combined.astype(int)}, index=df.index)
+    if is_caching_enabled():
+        cache.store_signals(ticker, timeframe, signal_type, signals_df)
+    return signals_df

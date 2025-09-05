@@ -30,6 +30,7 @@ MANIFEST
 *.manifest
 *.spec
 
+
 # Installer logs
 debug.log
 pip-log.txt
@@ -153,7 +154,9 @@ venv.bak/
 __pypackages__/
 
 # Secrets
+secrets.env
 secrets.*
+!env.example
 *.key
 *.pem
 *.crt
