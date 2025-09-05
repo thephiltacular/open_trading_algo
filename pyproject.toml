@@ -3,7 +3,7 @@
 name = "open_trading_algo"
 version = "1.0.0"
 description = "A modular, portable trading and backtesting framework with signal, risk, and data enrichment support."
-authors = ["Philip Mai <philipemai.com>"]
+authors = ["Philip Mai <philip.e.mai@gmail.com>"]
 readme = "README.md"
 packages = [
 	{ include = "open_trading_algo" }
@@ -18,16 +18,20 @@ run-model = "open_trading_algo.pipeline:main"
 [tool.poetry.dependencies]
 
 python = "^3.8"
-pandas = "^1.3.0"
-numpy = "^1.21.0"
-yfinance = "^0.2.0"
-PyYAML = "^6.0"
-scikit-learn = "^1.0.0"
-sqlite3 = "*"
+pandas = "^2.2.2"
+numpy = "^1.26.4"
+yfinance = "^0.2.40"
+PyYAML = "^6.0.1"
+scikit-learn = "^1.5.0"
 
 
 [tool.poetry.group.dev.dependencies]
 
+pre-commit = "^3.7.0"
+black = "^24.4.2"
+flake8 = "^7.0.0"
+isort = "^5.13.2"
+shellcheck-py = "^0.10.0.1"
 
 
 [build-system]
