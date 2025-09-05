@@ -1,4 +1,9 @@
-# Split from live_data.py: all fetch_* and bulk fetch functions
+"""
+fetchers.py
+
+Bulk and single-ticker data fetchers for various financial data APIs (Yahoo, Finnhub, FMP, Alpha Vantage, Twelve Data).
+Handles rate limiting, caching, and concurrent requests where appropriate.
+"""
 from pathlib import Path
 from typing import Any, Dict, List
 from tradingview_algo.fin_data_apis.secure_api import get_api_key
@@ -17,6 +22,15 @@ from tradingview_algo.fin_data_apis.rate_limit import rate_limit_check
 def fetch_finnhub_bulk(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
+    """
+    Fetch data for multiple tickers from Finnhub concurrently.
+    Args:
+        tickers: List of ticker symbols.
+        fields: List of fields to fetch.
+        api_key: Finnhub API key.
+    Returns:
+        Dictionary mapping ticker to field-value dict.
+    """
     rate_limit_check("finnhub")
 
     def fetch_one(ticker):
@@ -31,6 +45,15 @@ def fetch_finnhub_bulk(
 
 
 def fetch_fmp_bulk(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
+    """
+    Fetch data for multiple tickers from Financial Modeling Prep (FMP).
+    Args:
+        tickers: List of ticker symbols.
+        fields: List of fields to fetch.
+        api_key: FMP API key.
+    Returns:
+        Dictionary mapping ticker to field-value dict.
+    """
     rate_limit_check("fmp")
     return fetch_fmp(tickers, fields, api_key)
 
@@ -38,6 +61,15 @@ def fetch_fmp_bulk(tickers: List[str], fields: List[str], api_key: str) -> Dict[
 def fetch_alpha_vantage_bulk(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
+    """
+    Fetch data for multiple tickers from Alpha Vantage concurrently.
+    Args:
+        tickers: List of ticker symbols.
+        fields: List of fields to fetch.
+        api_key: Alpha Vantage API key.
+    Returns:
+        Dictionary mapping ticker to field-value dict.
+    """
     rate_limit_check("alpha_vantage")
 
     def fetch_one(ticker):
@@ -54,6 +86,15 @@ def fetch_alpha_vantage_bulk(
 def fetch_twelve_data_bulk(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
+    """
+    Fetch data for multiple tickers from Twelve Data concurrently.
+    Args:
+        tickers: List of ticker symbols.
+        fields: List of fields to fetch.
+        api_key: Twelve Data API key.
+    Returns:
+        Dictionary mapping ticker to field-value dict.
+    """
     rate_limit_check("twelve_data")
 
     def fetch_one(ticker):
@@ -70,6 +111,16 @@ def fetch_twelve_data_bulk(
 def fetch_yahoo(
     tickers: List[str], fields: List[str], batch_size: int = 80, cache: DataCache = None
 ) -> Dict[str, Dict[str, Any]]:
+    """
+    Fetch data for multiple tickers from Yahoo Finance, using yfinance and optional cache.
+    Args:
+        tickers: List of ticker symbols.
+        fields: List of fields to fetch.
+        batch_size: Number of tickers to fetch per batch.
+        cache: Optional DataCache instance for local caching.
+    Returns:
+        Dictionary mapping ticker to field-value dict.
+    """
     rate_limit_check("yahoo")
     import math
 
@@ -163,6 +214,15 @@ def fetch_yahoo(
 
 
 def fetch_finnhub(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
+    """
+    Fetch quote data for tickers from Finnhub.
+    Args:
+        tickers: List of ticker symbols.
+        fields: List of fields to fetch.
+        api_key: Finnhub API key.
+    Returns:
+        Dictionary mapping ticker to field-value dict.
+    """
     url = "https://finnhub.io/api/v1/quote"
     data = {}
     for ticker in tickers:
@@ -192,6 +252,15 @@ def fetch_finnhub(tickers: List[str], fields: List[str], api_key: str) -> Dict[s
 
 
 def fetch_fmp(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
+    """
+    Fetch quote data for tickers from Financial Modeling Prep (FMP).
+    Args:
+        tickers: List of ticker symbols.
+        fields: List of fields to fetch.
+        api_key: FMP API key.
+    Returns:
+        Dictionary mapping ticker to field-value dict.
+    """
     url = "https://financialmodelingprep.com/api/v3/quote/{}"
     data = {}
     try:
@@ -230,6 +299,15 @@ def fetch_fmp(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, 
 def fetch_alpha_vantage(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
+    """
+    Fetch quote data for tickers from Alpha Vantage.
+    Args:
+        tickers: List of ticker symbols.
+        fields: List of fields to fetch.
+        api_key: Alpha Vantage API key.
+    Returns:
+        Dictionary mapping ticker to field-value dict.
+    """
     url = "https://www.alphavantage.co/query"
     data = {}
     for ticker in tickers:
@@ -263,6 +341,15 @@ def fetch_alpha_vantage(
 def fetch_twelve_data(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
+    """
+    Fetch quote data for tickers from Twelve Data.
+    Args:
+        tickers: List of ticker symbols.
+        fields: List of fields to fetch.
+        api_key: Twelve Data API key.
+    Returns:
+        Dictionary mapping ticker to field-value dict.
+    """
     url = "https://api.twelvedata.com/quote"
     data = {}
     for ticker in tickers:

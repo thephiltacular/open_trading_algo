@@ -176,7 +176,7 @@ class V8Model:
             if base in df.columns:
                 values = df[base].tolist() if hasattr(df[base], "tolist") else list(df[base])
                 # percent rank within the day
-                from .percent_rank import percent_rank as pr
+                from .indicators.percent_rank import percent_rank as pr
 
                 df[pr_out] = pr(values)
 
@@ -1021,7 +1021,7 @@ class V8Model:
                 # normalize count via rank within-day
                 series = df["# Trigger Score"]
                 vals = series.tolist() if hasattr(series, "tolist") else list(series)
-                from .percent_rank import percent_rank as pr
+                from .indicators.percent_rank import percent_rank as pr
 
                 pr_counts = pr(vals)
                 if "Avg Trigger Score" in cols:

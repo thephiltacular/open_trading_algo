@@ -1,3 +1,15 @@
+#
+tiingo:
+  name: Tiingo
+  docs: https://api.tiingo.com/documentation/end-of-day
+  free_limit_per_minute: 60
+  free_limit_per_day: 500
+  api_key_env: TIINGO_API_KEY
+  notes: |
+    - 60 API calls per minute, 500 per day for free accounts (as of 2024).
+    - Register for a free API key at https://api.tiingo.com/
+    - Used for historical and real-time OHLCV data, news, and more.
+    - See https://api.tiingo.com/documentation/end-of-day for details.
 yahoo:
   name: Yahoo Finance (yfinance)
   docs: https://github.com/ranaroussi/yfinance

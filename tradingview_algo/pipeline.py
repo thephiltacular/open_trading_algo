@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import Dict, Mapping, Optional
 
 from . import indicators as I
-from . import percent_rank as PR
+from .indicators import percent_rank as PR
 from .types import AlertsByDay, ColumnAddResult, DataByDay, DayKey
 
 
