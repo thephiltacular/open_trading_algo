@@ -20,6 +20,61 @@ try:
     import yfinance as yf
 except ImportError:
     raise ImportError("Please install yfinance: pip install yfinance")
+# --- Bulk fetchers for each provider ---
+import concurrent.futures
+
+
+def fetch_finnhub_bulk(
+    tickers: List[str], fields: List[str], api_key: str
+) -> Dict[str, Dict[str, Any]]:
+    """Fetch latest data for tickers from Finnhub using parallel requests (no true bulk endpoint)."""
+
+    def fetch_one(ticker):
+        return ticker, fetch_finnhub([ticker], fields, api_key).get(ticker, {})
+
+    data = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        results = executor.map(fetch_one, tickers)
+        for ticker, out in results:
+            data[ticker] = out
+    return data
+
+
+def fetch_fmp_bulk(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
+    """Fetch latest data for tickers from FMP using a single bulk request."""
+    return fetch_fmp(tickers, fields, api_key)
+
+
+def fetch_alpha_vantage_bulk(
+    tickers: List[str], fields: List[str], api_key: str
+) -> Dict[str, Dict[str, Any]]:
+    """Fetch latest data for tickers from Alpha Vantage using parallel requests (no true bulk endpoint)."""
+
+    def fetch_one(ticker):
+        return ticker, fetch_alpha_vantage([ticker], fields, api_key).get(ticker, {})
+
+    data = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        results = executor.map(fetch_one, tickers)
+        for ticker, out in results:
+            data[ticker] = out
+    return data
+
+
+def fetch_twelve_data_bulk(
+    tickers: List[str], fields: List[str], api_key: str
+) -> Dict[str, Dict[str, Any]]:
+    """Fetch latest data for tickers from Twelve Data using parallel requests (no true bulk endpoint)."""
+
+    def fetch_one(ticker):
+        return ticker, fetch_twelve_data([ticker], fields, api_key).get(ticker, {})
+
+    data = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        results = executor.map(fetch_one, tickers)
+        for ticker, out in results:
+            data[ticker] = out
+    return data
 
 
 class LiveDataConfig:
@@ -315,19 +370,19 @@ class LiveDataFeed:
                     self.config.tickers, self.config.fields, cache=self.cache
                 )
             elif src == "finnhub":
-                self.latest_data = fetch_finnhub(
+                self.latest_data = fetch_finnhub_bulk(
                     self.config.tickers, self.config.fields, self.config.api_key
                 )
             elif src == "fmp":
-                self.latest_data = fetch_fmp(
+                self.latest_data = fetch_fmp_bulk(
                     self.config.tickers, self.config.fields, self.config.api_key
                 )
             elif src == "alpha_vantage":
-                self.latest_data = fetch_alpha_vantage(
+                self.latest_data = fetch_alpha_vantage_bulk(
                     self.config.tickers, self.config.fields, self.config.api_key
                 )
             elif src == "twelve_data":
-                self.latest_data = fetch_twelve_data(
+                self.latest_data = fetch_twelve_data_bulk(
                     self.config.tickers, self.config.fields, self.config.api_key
                 )
             else:
