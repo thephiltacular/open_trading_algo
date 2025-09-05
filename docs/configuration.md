@@ -1,6 +1,6 @@
 # Configuration Guide
 
-TradingViewAlgoDev uses YAML configuration files to customize behavior across all modules. This guide covers all configuration options and best practices.
+open_trading_algo uses YAML configuration files to customize behavior across all modules. This guide covers all configuration options and best practices.
 
 ## Configuration Files Overview
 

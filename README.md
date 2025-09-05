@@ -1,4 +1,4 @@
-# TradingViewAlgoDev
+# open_trading_algo
 
 A comprehensive Python library for algorithmic trading, technical analysis, and financial data processing. Built for performance, reliability, and ease of use in both research and production environments.
 
@@ -47,8 +47,8 @@ A comprehensive Python library for algorithmic trading, technical analysis, and 
 ### Installation
 
 ```bash
-git clone https://github.com/thephiltacular/TradingViewAlgoDev.git
-cd TradingViewAlgoDev
+git clone https://github.com/thephiltacular/open_trading_algo.git
+cd open_trading_algo
 pip install -e .
 ```
 
@@ -79,7 +79,7 @@ print(f"Active signals: {signals.sum()}")
 ## Architecture Overview
 
 ```
-TradingViewAlgoDev/
+open_trading_algo/
 ├── 📊 fin_data_apis/     # Multi-source data integration
 │   ├── fetchers.py       # Unified data fetching interface
 │   ├── rate_limit.py     # Automatic rate limiting
@@ -97,7 +97,7 @@ TradingViewAlgoDev/
 
 ## Automated Local Database Setup
 
-TradingViewAlgoDev uses a persistent, efficient SQLite database to cache and store all financial data locally. This ensures:
+open_trading_algo uses a persistent, efficient SQLite database to cache and store all financial data locally. This ensures:
 - Minimal requests to external APIs (prevents throttling)
 - Fast repeated access to historical and live data
 - Data is retained even if the host is shut down
@@ -132,7 +132,7 @@ This will create the database and all required tables if they do not exist.
 
 ### Signal Caching: Avoid Recomputing Signals
 
-TradingViewAlgoDev caches all computed signals (long, short, options, sentiment) for each ticker, timeframe, and signal type. This means:
+open_trading_algo caches all computed signals (long, short, options, sentiment) for each ticker, timeframe, and signal type. This means:
 - Signals are only computed once per unique (ticker, timeframe, signal_type) combination.
 - All signal modules (`long_signals.py`, `short_signals.py`, `options_signals.py`, `sentiment_signals.py`) are integrated with the cache.
 - On repeated runs, signals are loaded instantly from the database.

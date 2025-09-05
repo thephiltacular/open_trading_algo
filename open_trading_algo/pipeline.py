@@ -1,4 +1,4 @@
-"""Pipeline utilities for TradingViewAlgoDev.
+"""Pipeline utilities for open_trading_algo.
 
 This module provides classes and functions for processing financial data pipelines,
 including model computation and data transformation.

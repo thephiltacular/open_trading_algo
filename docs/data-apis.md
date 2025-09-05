@@ -1,6 +1,6 @@
 # Data APIs & Fetchers
 
-TradingViewAlgoDev provides unified access to multiple financial data providers through a consistent API. This module handles rate limiting, error handling, and data normalization across all supported sources.
+open_trading_algo provides unified access to multiple financial data providers through a consistent API. This module handles rate limiting, error handling, and data normalization across all supported sources.
 
 ## Supported Data Sources
 

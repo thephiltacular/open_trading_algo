@@ -1,4 +1,4 @@
-"""Database population script for TradingViewAlgoDev.
+"""Database population script for open_trading_algo.
 
 This module provides a class to populate the database with financial data from various APIs,
 handling caching, rate limits, and concurrent fetching.
@@ -9,18 +9,18 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from tradingview_algo.fin_data_apis.fetchers import (
+from open_trading_algo.fin_data_apis.fetchers import (
     fetch_yahoo,
     fetch_finnhub_bulk,
     fetch_fmp_bulk,
     fetch_alpha_vantage_bulk,
     fetch_twelve_data_bulk,
 )
-from tradingview_algo.fin_data_apis.tradingview_api import TradingViewAPI
-from tradingview_algo.fin_data_apis.polygon_api import PolygonAPI
-from tradingview_algo.fin_data_apis.secure_api import get_api_key
-from tradingview_algo.cache.data_cache import DataCache
-from tradingview_algo.fin_data_apis.alpha_vantage_api import (
+from open_trading_algo.fin_data_apis.tradingview_api import TradingViewAPI
+from open_trading_algo.fin_data_apis.polygon_api import PolygonAPI
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
+from open_trading_algo.cache.data_cache import DataCache
+from open_trading_algo.fin_data_apis.alpha_vantage_api import (
     AlphaVantageAPI,
     ALPHA_VANTAGE_TECHNICAL_INDICATORS,
 )
@@ -194,7 +194,7 @@ class DatabasePopulator:
             all_data["date"] = pd.to_datetime(all_data["date"]).dt.normalize()
             all_data = all_data.set_index(["date", "ticker"]).sort_index()
             # Calculate indicators for each ticker
-            from tradingview_algo.indicators import indicators as ind
+            from open_trading_algo.indicators import indicators as ind
 
             indicator_frames = []
             for ticker in all_data.index.get_level_values("ticker").unique():

@@ -1,5 +1,5 @@
 """
-Data cache module for TradingViewAlgoDev.
+Data cache module for open_trading_algo.
 Efficiently stores and retrieves financial data locally using SQLite.
 Prevents redundant requests and persists data across sessions.
 

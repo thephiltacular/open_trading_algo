@@ -1,10 +1,10 @@
-"""Live data ingestion for TradingViewAlgoDev.
+"""Live data ingestion for open_trading_algo.
 
 This module provides interfaces for fetching live financial data from various APIs,
 with support for bulk requests, rate limiting, and caching.
 """
 
-from tradingview_algo.fin_data_apis.fetchers import (
+from open_trading_algo.fin_data_apis.fetchers import (
     fetch_yahoo,
     fetch_finnhub,
     fetch_fmp,
@@ -15,9 +15,9 @@ from tradingview_algo.fin_data_apis.fetchers import (
     fetch_alpha_vantage_bulk,
     fetch_twelve_data_bulk,
 )
-from tradingview_algo.fin_data_apis.config import LiveDataConfig
-from tradingview_algo.cache.data_cache import DataCache
-from tradingview_algo.fin_data_apis.secure_api import get_api_key
+from open_trading_algo.fin_data_apis.config import LiveDataConfig
+from open_trading_algo.cache.data_cache import DataCache
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
 import threading
 import time
 from pathlib import Path
@@ -33,7 +33,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 import yaml
 
-from tradingview_algo.fin_data_apis.secure_api import get_api_key
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
 
 try:
     import yfinance as yf

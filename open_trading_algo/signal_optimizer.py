@@ -1,4 +1,4 @@
-"""Signal optimization for TradingViewAlgoDev.
+"""Signal optimization for open_trading_algo.
 
 This module provides classes for optimizing trading signals and backtesting strategies.
 """

@@ -1,4 +1,4 @@
-"""V8 model implementation for TradingViewAlgoDev.
+"""V8 model implementation for open_trading_algo.
 
 This module implements the V8 trading model with indicators and signals.
 

@@ -52,7 +52,7 @@ stocktwits:
     - 200 API calls per minute, 10,000 per day for free accounts.
     - Register for a free API key at https://stocktwits.com/developers.
     - Used for social sentiment.
-# API endpoint configuration and rate limits for TradingViewAlgoDev
+# API endpoint configuration and rate limits for open_trading_algo
 
 finnhub:
   name: Finnhub

@@ -1,5 +1,5 @@
 """
-TradingViewAlgoDev package initialization.
+open_trading_algo package initialization.
 
 This package provides tools for financial data analysis, signal generation, backtesting,
 and live data ingestion from various APIs. It includes modules for indicators, alerts,

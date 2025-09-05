@@ -1,6 +1,6 @@
-# TradingViewAlgoDev Documentation
+# open_trading_algo Documentation
 
-Welcome to the comprehensive documentation for TradingViewAlgoDev - a robust Python library for algorithmic trading, technical analysis, and financial data processing.
+Welcome to the comprehensive documentation for open_trading_algo - a robust Python library for algorithmic trading, technical analysis, and financial data processing.
 
 ## Table of Contents
 
@@ -35,7 +35,7 @@ Welcome to the comprehensive documentation for TradingViewAlgoDev - a robust Pyt
 
 ## Library Overview
 
-TradingViewAlgoDev is designed as a modular, production-ready framework for:
+open_trading_algo is designed as a modular, production-ready framework for:
 
 - **Multi-source data aggregation** from Yahoo Finance, Finnhub, Alpha Vantage, FMP, Twelve Data, Polygon, and Tiingo
 - **Advanced technical analysis** with 50+ indicators including custom oscillators and trend filters
@@ -79,7 +79,7 @@ TradingViewAlgoDev is designed as a modular, production-ready framework for:
 ## Architecture
 
 ```
-TradingViewAlgoDev/
+open_trading_algo/
 ├── open_trading_algo/           # Main library package
 │   ├── fin_data_apis/         # Data source integrations
 │   ├── indicators/            # Technical analysis indicators

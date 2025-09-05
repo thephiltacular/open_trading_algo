@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-This guide will get you up and running with TradingViewAlgoDev in minutes.
+This guide will get you up and running with open_trading_algo in minutes.
 
 ## Basic Data Fetching
 

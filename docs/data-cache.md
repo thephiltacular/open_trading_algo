@@ -1,6 +1,6 @@
 # Data Cache System
 
-The TradingViewAlgoDev cache system provides persistent local storage for financial data, signals, and computed indicators. It uses SQLite for zero-configuration setup while offering enterprise-grade performance and reliability.
+The open_trading_algo cache system provides persistent local storage for financial data, signals, and computed indicators. It uses SQLite for zero-configuration setup while offering enterprise-grade performance and reliability.
 
 ## Overview
 

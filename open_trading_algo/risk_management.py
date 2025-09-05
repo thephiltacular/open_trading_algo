@@ -1,4 +1,4 @@
-"""Risk management utilities for TradingViewAlgoDev.
+"""Risk management utilities for open_trading_algo.
 
 This module provides functions for position sizing, stop-loss logic, and portfolio hedging.
 """

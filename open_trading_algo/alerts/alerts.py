@@ -1,4 +1,4 @@
-"""Alert utilities for TradingViewAlgoDev.
+"""Alert utilities for open_trading_algo.
 
 This module provides functions for parsing and aggregating alerts.
 """

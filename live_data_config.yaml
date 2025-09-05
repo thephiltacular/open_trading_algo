@@ -1,4 +1,4 @@
-# Live data configuration for TradingViewAlgoDev
+# Live data configuration for open_trading_algo
 #
 # update_rate: polling interval in seconds
 # tickers: list of ETF or stock symbols to fetch

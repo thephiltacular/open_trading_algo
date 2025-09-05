@@ -1,4 +1,4 @@
-"""API rate limiting utilities for TradingViewAlgoDev.
+"""API rate limiting utilities for open_trading_algo.
 
 This module provides a thread-safe `RateLimiter` base class and API-specific subclasses
 for enforcing per-minute and per-day rate limits on external API calls. It also includes

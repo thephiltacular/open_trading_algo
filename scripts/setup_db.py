@@ -1,5 +1,5 @@
 """
-Script to set up the SQLite database for TradingViewAlgoDev.
+Script to set up the SQLite database for open_trading_algo.
 Creates the database and tables if not present, unless a custom path is specified in config.
 """
 import os
@@ -8,7 +8,7 @@ import yaml
 
 
 def main():
-    print("Setting up TradingViewAlgoDev SQLite database...")
+    print("Setting up open_trading_algo SQLite database...")
     cache = DataCache()  # Uses config if present, else default
     print(f"Database setup complete at: {cache.db_path}")
     cache.close()

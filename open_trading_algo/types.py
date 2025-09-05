@@ -1,4 +1,4 @@
-"""Type definitions for TradingViewAlgoDev.
+"""Type definitions for open_trading_algo.
 
 This module defines type aliases and data structures used throughout the package.
 

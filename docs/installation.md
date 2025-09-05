@@ -10,8 +10,8 @@
 ### From Source (Recommended)
 
 ```bash
-git clone https://github.com/thephiltacular/TradingViewAlgoDev.git
-cd TradingViewAlgoDev
+git clone https://github.com/thephiltacular/open_trading_algo.git
+cd open_trading_algo
 pip install -e .
 ```
 
@@ -188,8 +188,8 @@ For contributors and advanced users:
 
 ```bash
 # Clone repository
-git clone https://github.com/thephiltacular/TradingViewAlgoDev.git
-cd TradingViewAlgoDev
+git clone https://github.com/thephiltacular/open_trading_algo.git
+cd open_trading_algo
 
 # Create virtual environment
 python -m venv venv
