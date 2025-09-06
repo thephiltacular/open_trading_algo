@@ -39,7 +39,7 @@ latest_init = datetime.datetime(1980, 1, 1, 0, 0, 0, 000000, tzinfo=tzutc())
 oldest_init = datetime.datetime.now(pytz.utc)
 # trading_day = datetime.datetime(2023, 3, 7, tzinfo=tzutc())
 class Model:
-    def __init__(self):
+    def __init__(self, folder_path):
         data_folder = "data/"
         self.data_dict = {"data": {}, "alerts": {}}
 
@@ -61,10 +61,10 @@ class Model:
                         self.data_dict["data"][name] = df_temp
                         # print(name)
         print("Reading in cols_model with excel labels....")
-        with open("cols_model.yaml", "r") as file:
+        with open("config/cols_model.yaml", "r") as file:
             self.cols = yaml.safe_load(file)
         print("Reading in cols_alerts with excel labels....")
-        with open("cols_alerts.yaml", "r") as file:
+        with open("config/cols_alerts.yaml", "r") as file:
             self.cols_alerts = yaml.safe_load(file)
 
         # print(self.cols)

@@ -4,7 +4,7 @@ Tiingo API interface for OHLCV data with rate limit tracking and pandas integrat
 import requests
 import pandas as pd
 import time
-from tradingview_algo.fin_data_apis.secure_api import get_api_key
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
 
 
 class TiingoRateLimiter:

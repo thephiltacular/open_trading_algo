@@ -5,9 +5,9 @@ Best practices: Use multiple sources, aggregate, and normalize scores.
 import requests
 from typing import List, Dict, Any
 import pandas as pd
-from tradingview_algo.data_cache import DataCache, is_caching_enabled
-from tradingview_algo.fin_data_apis.secure_api import get_api_key
-from tradingview_algo.fin_data_apis.rate_limit import rate_limit
+from open_trading_algo.cache.data_cache import DataCache, is_caching_enabled
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
+from open_trading_algo.fin_data_apis.rate_limit import rate_limit
 
 
 def fetch_bulk_twitter_sentiment(tickers: list, api_key: str = None) -> pd.DataFrame:

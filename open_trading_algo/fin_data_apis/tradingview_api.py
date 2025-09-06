@@ -2,8 +2,8 @@
 TradingView API interface using secure_api for API key management.
 """
 import requests
-from tradingview_algo.fin_data_apis.secure_api import get_api_key
-from tradingview_algo.fin_data_apis.rate_limit import rate_limit
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
+from open_trading_algo.fin_data_apis.rate_limit import rate_limit
 
 
 class TradingViewAPI:

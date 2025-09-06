@@ -12,7 +12,7 @@ try:
 except Exception:  # pragma: no cover - only for environments without pandas
     pd = None  # type: ignore
 
-from tradingview_algo import ModelPipeline
+from open_trading_algo import ModelPipeline
 
 
 def make_df_lib():

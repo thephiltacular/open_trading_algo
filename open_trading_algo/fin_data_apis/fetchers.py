@@ -6,17 +6,17 @@ Handles rate limiting, caching, and concurrent requests where appropriate.
 """
 from pathlib import Path
 from typing import Any, Dict, List
-from tradingview_algo.fin_data_apis.secure_api import get_api_key
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
 import concurrent.futures
 import requests
 import yfinance as yf
-from tradingview_algo.cache.data_cache import DataCache
+from open_trading_algo.cache.data_cache import DataCache
 
 # ...existing fetch_yahoo, fetch_finnhub, fetch_fmp, fetch_alpha_vantage, fetch_twelve_data, and their bulk variants...
 # (To be filled in next step)
 
 # --- Live data fetchers and bulk fetchers ---
-from tradingview_algo.fin_data_apis.rate_limit import rate_limit_check
+from open_trading_algo.fin_data_apis.rate_limit import rate_limit_check
 
 
 def fetch_finnhub_bulk(
