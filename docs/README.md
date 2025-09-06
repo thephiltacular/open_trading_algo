@@ -13,6 +13,7 @@ Welcome to the comprehensive documentation for open_trading_algo - a robust Pyth
 - [Data APIs & Fetchers](data-apis.md) - Financial data retrieval from multiple sources
 - [Data Cache System](data-cache.md) - Local database caching for performance
 - [Technical Indicators](indicators.md) - Comprehensive technical analysis indicators
+- [Trading Models](models.md) - Modular trading strategy implementations
 - [Signal Generation](signals.md) - Long, short, options, and sentiment signals
 - [Risk Management](risk-management.md) - Position sizing and risk controls
 - [Backtesting](backtesting.md) - Historical strategy testing and optimization
@@ -63,6 +64,7 @@ open_trading_algo is designed as a modular, production-ready framework for:
 - Options trading signals (calls/puts)
 - Sentiment-based signals from social media and analyst ratings
 - Machine learning ensemble methods
+- Modular trading models with extensible strategy framework
 
 ### ⚖️ Risk Management
 - Dynamic position sizing based on volatility
@@ -83,6 +85,11 @@ open_trading_algo/
 ├── open_trading_algo/           # Main library package
 │   ├── fin_data_apis/         # Data source integrations
 │   ├── indicators/            # Technical analysis indicators
+│   ├── models/                # Trading strategy models
+│   │   ├── base_model.py      # Abstract base class
+│   │   ├── momentum_model.py  # Momentum strategies
+│   │   ├── mean_reversion_model.py # Mean reversion
+│   │   └── trend_following_model.py # Trend following
 │   ├── cache/                 # Local data caching
 │   ├── sentiment/             # Sentiment analysis
 │   ├── alerts/                # Signal alerting system

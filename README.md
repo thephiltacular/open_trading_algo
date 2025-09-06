@@ -32,6 +32,7 @@ This means managing API query rates, storing as much data as possible locally, a
 - **Options trading signals** for calls and puts
 - **Sentiment-based signals** from social media and analyst ratings
 - **Machine learning ensemble** methods
+- **Modular trading models** combining indicators and strategies
 
 ### ⚖️ Risk Management
 - **Dynamic position sizing** based on volatility
@@ -92,6 +93,11 @@ open_trading_algo/
 │   ├── long_signals.py   # Long position signals
 │   ├── short_signals.py  # Short position signals
 │   └── options_signals.py # Options trading signals
+├── 🤖 models/            # Trading strategy models
+│   ├── base_model.py     # Abstract base class for all models
+│   ├── momentum_model.py # Momentum-based strategies
+│   ├── mean_reversion_model.py # Mean reversion strategies
+│   └── trend_following_model.py # Trend following strategies
 ├── 💾 cache/            # High-performance local storage
 ├── 🎯 sentiment/        # Sentiment analysis integration
 ├── ⚖️ risk_management.py # Position sizing and risk controls

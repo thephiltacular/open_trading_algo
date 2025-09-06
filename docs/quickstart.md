@@ -145,6 +145,48 @@ support_break = breaking_support(df["Close"], df["Volume"])
 print(f"Support Break Signal: {support_break.iloc[-1]}")
 ```
 
+## Trading Models
+
+### Using Pre-built Models
+
+```python
+from open_trading_algo.models import MomentumModel, MeanReversionModel
+import yfinance as yf
+
+# Get historical data
+df = yf.Ticker("AAPL").history(period="6mo")
+
+# Use Momentum Model
+momentum_model = MomentumModel()
+momentum_signals = momentum_model.generate_signals(df)
+print(f"Momentum signals generated: {len(momentum_signals[momentum_signals['signal'] != 0])}")
+
+# Use Mean Reversion Model
+mr_model = MeanReversionModel()
+mr_signals = mr_model.generate_signals(df)
+print(f"Mean reversion signals: {len(mr_signals[mr_signals['signal'] != 0])}")
+```
+
+### Custom Model Configuration
+
+```python
+from open_trading_algo.models import TrendFollowingModel
+
+# Configure model parameters
+config = {
+    'sma_fast': 20,
+    'sma_slow': 50,
+    'adx_period': 14,
+    'adx_threshold': 25
+}
+
+trend_model = TrendFollowingModel(config=config)
+signals = trend_model.generate_signals(df)
+
+# View signal distribution
+print(signals['signal'].value_counts())
+```
+
 ## Data Caching
 
 ### Using the Cache System

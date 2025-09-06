@@ -3,7 +3,7 @@ open_trading_algo package initialization.
 
 This package provides tools for financial data analysis, signal generation, backtesting,
 and live data ingestion from various APIs. It includes modules for indicators, alerts,
-backtesting, caching, and financial data APIs.
+backtesting, caching, financial data APIs, and trading models.
 
 Modules:
     - alerts: Alert utilities.
@@ -11,6 +11,7 @@ Modules:
     - cache: Data caching and secure API key management.
     - fin_data_apis: Interfaces to financial data APIs.
     - indicators: Technical indicators and signals.
+    - models: Trading models combining indicators and data sources.
     - sentiment: Sentiment analysis from social and analyst sources.
 
 TradingView Algo Dev – modular utilities extracted from `data_processing.py`.
