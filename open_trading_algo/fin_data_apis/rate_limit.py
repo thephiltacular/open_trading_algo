@@ -22,7 +22,7 @@ from collections import defaultdict, deque
 from pathlib import Path
 
 # Load API rate limit config
-API_CONFIG_PATH = Path(__file__).parent.parent.parent / "api_config.yaml"
+API_CONFIG_PATH = Path(__file__).parent.parent.parent / "config" / "api_config.yaml"
 with open(API_CONFIG_PATH, "r", encoding="utf-8") as f:
     API_CONFIG = yaml.safe_load(f)
 
