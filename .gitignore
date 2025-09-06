@@ -198,3 +198,6 @@ secrets.*
 *.yaml~
 
 !secrets.env.example
+
+# Ignore local sqlite database files
+*.sqlite3

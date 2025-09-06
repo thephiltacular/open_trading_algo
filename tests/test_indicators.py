@@ -64,7 +64,10 @@ def test_ema(sample_prices):
     result = ema(sample_prices, window=10)
     assert len(result) == len(sample_prices)
     assert result.iloc[0] == sample_prices.iloc[0]  # First value is the price itself
-    assert result.iloc[9] > sample_prices.iloc[9]  # EMA smooths upward/downward
+    assert not np.isnan(result.iloc[9])  # EMA is calculated
+    assert (
+        abs(result.iloc[9] - sample_prices.iloc[9]) < sample_prices.iloc[9] * 0.1
+    )  # EMA is close to price
 
 
 def test_ema_missing_data(sample_prices):

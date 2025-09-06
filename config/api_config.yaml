@@ -13,8 +13,8 @@ tiingo:
 yahoo:
   name: Yahoo Finance (yfinance)
   docs: https://github.com/ranaroussi/yfinance
-  free_limit_per_minute: ~60
-  free_limit_per_day: ~2000
+  free_limit_per_minute: 60
+  free_limit_per_day: 2000
   notes: |
     - No official documented rate limits, but practical limits are ~60/min and ~2,000/day.
     - Exceeding these may result in 429 errors or temporary bans.

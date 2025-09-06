@@ -21,7 +21,16 @@ def extract_ticker(cell: str) -> str:
     if not cell:
         return ""
     try:
-        return cell[5 : cell.find(",")] if "," in cell and len(cell) > 5 else cell.strip()
+        if "," in cell and len(cell) > 5:
+            ticker = cell[5 : cell.find(",")]
+            return ticker if ticker else ""
+        elif len(cell) > 5 and cell.startswith("ALRT:"):
+            ticker = cell[5:].strip()
+            return ticker if ticker else ""
+        elif cell.startswith("ALRT:"):
+            return ""  # Handle "ALRT:" case
+        else:
+            return cell.strip()
     except Exception:
         return cell.strip()
 
@@ -31,7 +40,13 @@ def is_positive_alert(description: Optional[str]) -> bool:
 
     if description is None:
         return False
-    return "positive" in description.lower()
+    desc_lower = description.lower()
+    # Check for negative keywords first - if negative, it's not positive
+    negative_keywords = ["negative", "sell", "bearish", "strong sell", "bear", "divergence"]
+    if any(keyword in desc_lower for keyword in negative_keywords):
+        return False
+    positive_keywords = ["positive", "buy", "bullish", "strong buy", "bull", "momentum"]
+    return any(keyword in desc_lower for keyword in positive_keywords)
 
 
 def is_negative_alert(description: Optional[str]) -> bool:
@@ -39,7 +54,8 @@ def is_negative_alert(description: Optional[str]) -> bool:
 
     if description is None:
         return False
-    return "negative" in description.lower()
+    negative_keywords = ["negative", "sell", "bearish", "strong sell", "divergence", "bear", "down"]
+    return any(keyword in description.lower() for keyword in negative_keywords)
 
 
 @dataclass
