@@ -8,20 +8,52 @@ from open_trading_algo.cache.data_cache import DataCache, is_caching_enabled
 
 
 def signal_undervalued(df: pd.DataFrame) -> pd.Series:
+    """Generate undervalued signal based on PE ratio and earnings growth.
+
+    Args:
+        df (pd.DataFrame): DataFrame with financial data columns.
+
+    Returns:
+        pd.Series: Boolean series indicating undervalued signals.
+    """
     pe_ok = df.get("pe_ratio", pd.Series(100, index=df.index)) < 15
     earnings_growth = df.get("earnings_growth", pd.Series(0, index=df.index)) > 0.10
     return pe_ok & earnings_growth
 
 
 def signal_high_roe(df: pd.DataFrame) -> pd.Series:
+    """Generate high ROE signal.
+
+    Args:
+        df (pd.DataFrame): DataFrame with financial data columns.
+
+    Returns:
+        pd.Series: Boolean series indicating high ROE signals.
+    """
     return df.get("roe", pd.Series(0, index=df.index)) > 0.15
 
 
 def signal_positive_earnings_revision(df: pd.DataFrame) -> pd.Series:
+    """Generate positive earnings revision signal.
+
+    Args:
+        df (pd.DataFrame): DataFrame with financial data columns.
+
+    Returns:
+        pd.Series: Boolean series indicating positive earnings revision signals.
+    """
     return df.get("earnings_revision", pd.Series(0, index=df.index)) > 0
 
 
 def signal_sma_trend(df: pd.DataFrame) -> pd.Series:
+    """Generate SMA trend signal based on multiple moving averages.
+
+    Args:
+        df (pd.DataFrame): DataFrame with 'close' price column.
+
+    Returns:
+        pd.Series: Boolean series indicating SMA trend signals.
+    """
     sma10 = df["close"].rolling(10).mean()
     sma50 = df["close"].rolling(50).mean()
     sma200 = df["close"].rolling(200).mean()
@@ -29,10 +61,26 @@ def signal_sma_trend(df: pd.DataFrame) -> pd.Series:
 
 
 def signal_positive_momentum(df: pd.DataFrame) -> pd.Series:
+    """Generate positive momentum signal based on 20-day price change.
+
+    Args:
+        df (pd.DataFrame): DataFrame with 'close' price column.
+
+    Returns:
+        pd.Series: Boolean series indicating positive momentum signals.
+    """
     return df["close"].pct_change(20) > 0
 
 
 def signal_rsi_macd(df: pd.DataFrame) -> pd.Series:
+    """Generate RSI and MACD combined signal.
+
+    Args:
+        df (pd.DataFrame): DataFrame with 'close' price column.
+
+    Returns:
+        pd.Series: Boolean series indicating RSI-MACD signals.
+    """
     delta = df["close"].diff()
     gain = (delta.where(delta > 0, 0)).rolling(14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
@@ -47,19 +95,51 @@ def signal_rsi_macd(df: pd.DataFrame) -> pd.Series:
 
 
 def signal_breakout(df: pd.DataFrame) -> pd.Series:
+    """Generate breakout signal based on 50-day high.
+
+    Args:
+        df (pd.DataFrame): DataFrame with 'close' and 'high' price columns.
+
+    Returns:
+        pd.Series: Boolean series indicating breakout signals.
+    """
     high50 = df["high"].rolling(50).max()
     return df["close"] > high50.shift(1)
 
 
 def signal_positive_news(df: pd.DataFrame) -> pd.Series:
+    """Generate positive news sentiment signal.
+
+    Args:
+        df (pd.DataFrame): DataFrame with news sentiment data.
+
+    Returns:
+        pd.Series: Boolean series indicating positive news signals.
+    """
     return df.get("news_sentiment", pd.Series(0, index=df.index)) > 0
 
 
 def signal_analyst_upgrades(df: pd.DataFrame) -> pd.Series:
+    """Generate analyst upgrade signal.
+
+    Args:
+        df (pd.DataFrame): DataFrame with analyst upgrade data.
+
+    Returns:
+        pd.Series: Boolean series indicating analyst upgrade signals.
+    """
     return df.get("analyst_upgrades", pd.Series(0, index=df.index)) > 0
 
 
 def signal_social_sentiment(df: pd.DataFrame) -> pd.Series:
+    """Generate positive social sentiment signal.
+
+    Args:
+        df (pd.DataFrame): DataFrame with social sentiment data.
+
+    Returns:
+        pd.Series: Boolean series indicating positive social sentiment signals.
+    """
     sentiment = df.get("social_sentiment", pd.Series(0, index=df.index))
     return sentiment.diff() > 0
 
@@ -79,6 +159,16 @@ long_signals = {
 
 
 def compute_and_cache_long_signals(ticker: str, df: pd.DataFrame, timeframe: str):
+    """Compute and cache combined long signals for a ticker.
+
+    Args:
+        ticker (str): Stock ticker symbol.
+        df (pd.DataFrame): DataFrame with required columns for signal computation.
+        timeframe (str): Timeframe identifier for caching.
+
+    Returns:
+        pd.DataFrame: DataFrame with combined signal values.
+    """
     signal_type = "long_trend"
     if is_caching_enabled():
         cache = DataCache()
