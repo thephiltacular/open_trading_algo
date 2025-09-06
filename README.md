@@ -11,7 +11,8 @@ This means managing API query rates, storing as much data as possible locally, a
 - **[⚡ Quick Start Guide](docs/quickstart.md)** - Get up and running in minutes
 - **[🔧 Installation & Setup](docs/installation.md)** - Installation instructions and configuration
 - **[📊 Data APIs Guide](docs/data-apis.md)** - Multi-source financial data fetching
-- **[💾 Cache System](docs/data-cache.md)** - Local data storage and optimization
+- **[� Technical Indicators](docs/indicators.md)** - Complete guide to 50+ indicators with charts and accuracy data
+- **[�💾 Cache System](docs/data-cache.md)** - Local data storage and optimization
 
 ## Key Features
 
