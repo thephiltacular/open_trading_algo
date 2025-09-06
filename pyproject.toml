@@ -1,7 +1,7 @@
 
 [tool.poetry]
 name = "open_trading_algo"
-version = "1.0.0"
+version = "0.1.0"
 description = "A modular, portable trading and backtesting framework with signal, risk, and data enrichment support."
 authors = ["Philip Mai <philip.e.mai@gmail.com>"]
 readme = "README.md"
