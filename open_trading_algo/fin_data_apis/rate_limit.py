@@ -38,8 +38,7 @@ class RateLimiter:
     """
 
     def __init__(self, endpoint: str, per_minute: int = None, per_day: int = None):
-        """
-        Initialize a RateLimiter for a specific endpoint.
+        """Initialize a RateLimiter for a specific endpoint.
 
         Args:
             endpoint (str): The API endpoint name.
@@ -55,8 +54,7 @@ class RateLimiter:
         self._dq_day = deque()
 
     def check(self):
-        """
-        Enforce the rate limit for the endpoint.
+        """Enforce the rate limit for the endpoint.
 
         Sleeps if the per-minute limit is reached. Raises RuntimeError if the per-day limit is reached.
         """
@@ -131,8 +129,7 @@ _api_lock = threading.Lock()
 
 
 def rate_limit_check(endpoint: str):
-    """
-    Checks and enforces API rate limits for a given endpoint.
+    """Check and enforce API rate limits for a given endpoint.
 
     This function manages both per-minute and per-day rate limits for API calls.
     It uses internal tracking to determine if the current request exceeds the allowed
@@ -170,8 +167,13 @@ def rate_limit_check(endpoint: str):
 
 
 def rate_limit(endpoint: str):
-    """
-    Decorator to enforce rate limiting on API call functions for a given endpoint.
+    """Create a decorator to enforce rate limiting on API call functions.
+
+    Args:
+        endpoint (str): The API endpoint name.
+
+    Returns:
+        callable: Decorator function.
 
     Usage:
         @rate_limit("finnhub")

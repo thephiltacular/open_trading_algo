@@ -42,6 +42,12 @@ class TiingoAPI:
     BASE_URL = "https://api.tiingo.com/tiingo/daily"
 
     def __init__(self, api_key=None, rate_limiter=None):
+        """Initialize TiingoAPI with API key and rate limiter.
+
+        Args:
+            api_key (str, optional): Tiingo API key. If not provided, attempts to load from environment.
+            rate_limiter (TiingoRateLimiter, optional): Rate limiter instance. Defaults to new TiingoRateLimiter.
+        """
         if not api_key:
             api_key = get_api_key("tiingo")
         if not api_key:
@@ -50,8 +56,16 @@ class TiingoAPI:
         self.rate_limiter = rate_limiter or TiingoRateLimiter()
 
     def get_ohlcv(self, ticker, start_date=None, end_date=None, resample_freq="daily"):
-        """
-        Fetch OHLCV data for a ticker as a pandas DataFrame.
+        """Fetch OHLCV data for a ticker as a pandas DataFrame.
+
+        Args:
+            ticker (str): Stock ticker symbol.
+            start_date (str, optional): Start date in YYYY-MM-DD format. Defaults to None.
+            end_date (str, optional): End date in YYYY-MM-DD format. Defaults to None.
+            resample_freq (str, optional): Resampling frequency. Defaults to "daily".
+
+        Returns:
+            pd.DataFrame: DataFrame with OHLCV data, indexed by date.
         """
         self.rate_limiter.check()
         url = f"{self.BASE_URL}/{ticker}/prices"

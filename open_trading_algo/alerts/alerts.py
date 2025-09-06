@@ -14,8 +14,11 @@ from dateutil import parser
 def extract_ticker(cell: str) -> str:
     """Extract the ticker symbol from an alerts cell string.
 
-    The original code used slicing up to the first comma after skipping 5 chars.
-    Example cell: "ALRT:TSLA, some text" -> "TSLA"
+    Args:
+        cell (str): Alert cell string (e.g., "ALRT:TSLA, some text").
+
+    Returns:
+        str: Extracted ticker symbol.
     """
 
     if not cell:
@@ -36,8 +39,14 @@ def extract_ticker(cell: str) -> str:
 
 
 def is_positive_alert(description: Optional[str]) -> bool:
-    """Return True if description mentions a Positive signal."""
+    """Return True if description mentions a Positive signal.
 
+    Args:
+        description (Optional[str]): Alert description text.
+
+    Returns:
+        bool: True if the description indicates a positive signal.
+    """
     if description is None:
         return False
     desc_lower = description.lower()
@@ -50,8 +59,14 @@ def is_positive_alert(description: Optional[str]) -> bool:
 
 
 def is_negative_alert(description: Optional[str]) -> bool:
-    """Return True if description mentions a Negative signal."""
+    """Return True if description mentions a Negative signal.
 
+    Args:
+        description (Optional[str]): Alert description text.
+
+    Returns:
+        bool: True if the description indicates a negative signal.
+    """
     if description is None:
         return False
     negative_keywords = ["negative", "sell", "bearish", "strong sell", "divergence", "bear", "down"]
@@ -88,11 +103,11 @@ def summarize_alerts(
 ) -> Dict[str, TickerAlertCounts]:
     """Compute per-ticker positive/negative counts and latest timestamp.
 
-    Parameters
-    - events: iterable of (ticker, time_str, description)
+    Args:
+        events: Iterable of (ticker, time_str, description) tuples.
 
-    Returns
-    - dict[ticker] -> TickerAlertCounts
+    Returns:
+        Dict[str, TickerAlertCounts]: Dictionary mapping tickers to alert counts.
     """
 
     summary: Dict[str, TickerAlertCounts] = {}

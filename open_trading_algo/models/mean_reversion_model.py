@@ -20,6 +20,11 @@ class MeanReversionModel(BaseTradingModel):
     """
 
     def __init__(self, config: Optional[Dict] = None):
+        """Initialize the mean reversion model.
+
+        Args:
+            config (Optional[Dict]): Model configuration parameters. Defaults to None.
+        """
         super().__init__(config)
         # Default configuration
         self.config.update(
@@ -33,14 +38,13 @@ class MeanReversionModel(BaseTradingModel):
         )
 
     def generate_signals(self, data: pd.DataFrame) -> pd.Series:
-        """
-        Generate mean reversion signals.
+        """Generate mean reversion signals.
 
         Args:
-            data: OHLCV DataFrame with indicators
+            data (pd.DataFrame): OHLCV DataFrame with indicators.
 
         Returns:
-            Series of signals (1=BUY, -1=SELL, 0=HOLD)
+            pd.Series: Series of signals (1=BUY, -1=SELL, 0=HOLD).
         """
         signals = pd.Series(0, index=data.index)
 
@@ -90,15 +94,14 @@ class MeanReversionModel(BaseTradingModel):
         return signals
 
     def calculate_position_size(self, capital: float, risk_per_trade: float = 0.02) -> float:
-        """
-        Calculate position size based on deviation from mean.
+        """Calculate position size based on deviation from mean.
 
         Args:
-            capital: Available trading capital
-            risk_per_trade: Risk per trade as fraction of capital
+            capital (float): Available trading capital.
+            risk_per_trade (float, optional): Risk per trade as fraction of capital. Defaults to 0.02.
 
         Returns:
-            Position size
+            float: Position size.
         """
         # For mean reversion, position size could be based on
         # how far price has deviated from the mean
@@ -108,7 +111,11 @@ class MeanReversionModel(BaseTradingModel):
         return base_risk
 
     def get_model_info(self) -> Dict:
-        """Get mean reversion model information."""
+        """Get mean reversion model information.
+
+        Returns:
+            Dict: Dictionary with model information.
+        """
         info = super().get_model_info()
         info.update(
             {

@@ -19,124 +19,114 @@ import pandas as pd
 
 
 def sma(series: pd.Series, window: int) -> pd.Series:
-    """Simple Moving Average
+    """Simple Moving Average.
 
     Calculates the average price over a specified period. Used to identify trends
     and support/resistance levels.
 
-    See Also
-    --------
-    indicators.md : [Simple Moving Average](../docs/indicators.md#simple-moving-average-sma)
-        Complete documentation with charts, accuracy data, and usage examples.
+    Args:
+        series (pd.Series): Input price series.
+        window (int): Number of periods for the calculation.
+
+    Returns:
+        pd.Series: Simple moving average values.
+
+    See Also:
+        indicators.md: [Simple Moving Average](../docs/indicators.md#simple-moving-average-sma)
+            Complete documentation with charts, accuracy data, and usage examples.
     """
     return series.rolling(window=window, min_periods=1).mean()
 
 
 def ema(series: pd.Series, window: int) -> pd.Series:
-    """Exponential Moving Average
+    """Exponential Moving Average.
 
     Gives more weight to recent prices, making it more responsive to price changes
     than SMA.
 
-    See Also
-    --------
-    indicators.md : [Exponential Moving Average](../docs/indicators.md#exponential-moving-average-ema)
-        Complete documentation with charts, accuracy data, and usage examples.
+    Args:
+        series (pd.Series): Input price series.
+        window (int): Number of periods for the calculation.
+
+    Returns:
+        pd.Series: Exponential moving average values.
+
+    See Also:
+        indicators.md: [Exponential Moving Average](../docs/indicators.md#exponential-moving-average-ema)
+            Complete documentation with charts, accuracy data, and usage examples.
     """
     return series.ewm(span=window, adjust=False).mean()
 
 
 def sma(series: pd.Series, window: int) -> pd.Series:
-    """Simple Moving Average
+    """Simple Moving Average.
 
     Calculates the average price over a specified period. Used to identify trends
     and support/resistance levels.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    window : int
-        Number of periods for the calculation
+    Args:
+        series (pd.Series): Input price series.
+        window (int): Number of periods for the calculation.
 
-    Returns
-    -------
-    pd.Series
-        Simple moving average values
+    Returns:
+        pd.Series: Simple moving average values.
 
-    See Also
-    --------
-    indicators.md : [Simple Moving Average](../docs/indicators.md#simple-moving-average-sma)
-        Complete documentation with charts, accuracy data, and usage examples.
+    See Also:
+        indicators.md: [Simple Moving Average](../docs/indicators.md#simple-moving-average-sma)
+            Complete documentation with charts, accuracy data, and usage examples.
     """
     return series.rolling(window=window, min_periods=1).mean()
 
 
 def ema(series: pd.Series, window: int) -> pd.Series:
-    """Exponential Moving Average
+    """Exponential Moving Average.
 
     Gives more weight to recent prices, making it more responsive to price changes
     than SMA.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    window : int
-        Number of periods for the calculation
+    Args:
+        series (pd.Series): Input price series.
+        window (int): Number of periods for the calculation.
 
-    Returns
-    -------
-    pd.Series
-        Exponential moving average values
+    Returns:
+        pd.Series: Exponential moving average values.
 
-    See Also
-    --------
-    indicators.md : [Exponential Moving Average](../docs/indicators.md#exponential-moving-average-ema)
-        Complete documentation with charts, accuracy data, and usage examples.
+    See Also:
+        indicators.md: [Exponential Moving Average](../docs/indicators.md#exponential-moving-average-ema)
+            Complete documentation with charts, accuracy data, and usage examples.
     """
     return series.ewm(span=window, adjust=False).mean()
 
 
 def wma(series: pd.Series, window: int) -> pd.Series:
-    """Weighted Moving Average
+    """Weighted Moving Average.
 
     Assigns greater weight to more recent data points in the calculation.
     Uses linear weights where the most recent price gets the highest weight.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    window : int
-        Number of periods for the calculation
+    Args:
+        series (pd.Series): Input price series.
+        window (int): Number of periods for the calculation.
 
-    Returns
-    -------
-    pd.Series
-        Weighted moving average values
+    Returns:
+        pd.Series: Weighted moving average values.
     """
     weights = np.arange(1, window + 1)
     return series.rolling(window).apply(lambda x: np.dot(x, weights) / weights.sum(), raw=True)
 
 
 def dema(series: pd.Series, window: int) -> pd.Series:
-    """Double Exponential Moving Average
+    """Double Exponential Moving Average.
 
     Reduces lag in EMA by applying EMA twice and subtracting the result from double EMA.
     This mathematical manipulation reduces the inherent lag in traditional EMAs.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    window : int
-        Number of periods for the calculation
+    Args:
+        series (pd.Series): Input price series.
+        window (int): Number of periods for the calculation.
 
-    Returns
-    -------
-    pd.Series
-        Double exponential moving average values
+    Returns:
+        pd.Series: Double exponential moving average values.
     """
     ema1 = ema(series, window)
     ema2 = ema(ema1, window)
@@ -144,22 +134,17 @@ def dema(series: pd.Series, window: int) -> pd.Series:
 
 
 def tema(series: pd.Series, window: int) -> pd.Series:
-    """Triple Exponential Moving Average
+    """Triple Exponential Moving Average.
 
     Further reduces lag by applying EMA three times, designed to be smoother
     and more responsive.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    window : int
-        Number of periods for the calculation
+    Args:
+        series (pd.Series): Input price series.
+        window (int): Number of periods for the calculation.
 
-    Returns
-    -------
-    pd.Series
-        Triple exponential moving average values
+    Returns:
+        pd.Series: Triple exponential moving average values.
     """
     ema1 = ema(series, window)
     ema2 = ema(ema1, window)
@@ -168,43 +153,33 @@ def tema(series: pd.Series, window: int) -> pd.Series:
 
 
 def trima(series: pd.Series, window: int) -> pd.Series:
-    """Triangular Moving Average
+    """Triangular Moving Average.
 
     A smoothed version of the SMA that applies averaging twice.
     Creates a smoother curve with reduced noise.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    window : int
-        Number of periods for the calculation
+    Args:
+        series (pd.Series): Input price series.
+        window (int): Number of periods for the calculation.
 
-    Returns
-    -------
-    pd.Series
-        Triangular moving average values
+    Returns:
+        pd.Series: Triangular moving average values.
     """
     return series.rolling(window, min_periods=1).mean().rolling(window, min_periods=1).mean()
 
 
 def trix(series: pd.Series, window: int = 14) -> pd.Series:
-    """TRIX (Triple Exponential Average)
+    """TRIX (Triple Exponential Average).
 
     Shows the rate of change of a triple exponentially smoothed moving average.
     Values above zero indicate upward momentum, below zero indicate downward momentum.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    window : int, default 14
-        Number of periods for the calculation
+    Args:
+        series (pd.Series): Input price series.
+        window (int, optional): Number of periods for the calculation. Defaults to 14.
 
-    Returns
-    -------
-    pd.Series
-        TRIX values as percentage change
+    Returns:
+        pd.Series: TRIX values as percentage change.
     """
     ema1 = ema(series, window)
     ema2 = ema(ema1, window)
@@ -213,33 +188,24 @@ def trix(series: pd.Series, window: int = 14) -> pd.Series:
 
 
 def macd(series: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9):
-    """MACD, MACD Signal, MACD Histogram
+    """MACD, MACD Signal, MACD Histogram.
 
     Shows relationship between two moving averages, used to identify momentum changes.
     Returns MACD line, signal line, and histogram.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    fast : int, default 12
-        Number of periods for fast EMA
-    slow : int, default 26
-        Number of periods for slow EMA
-    signal : int, default 9
-        Number of periods for signal line EMA
+    Args:
+        series (pd.Series): Input price series.
+        fast (int, optional): Number of periods for fast EMA. Defaults to 12.
+        slow (int, optional): Number of periods for slow EMA. Defaults to 26.
+        signal (int, optional): Number of periods for signal line EMA. Defaults to 9.
 
-    Returns
-    -------
-    tuple of (pd.Series, pd.Series, pd.Series)
-        macd_line : MACD line (fast EMA - slow EMA)
-        signal_line : Signal line (EMA of MACD line)
-        histogram : MACD histogram (MACD line - signal line)
+    Returns:
+        tuple of (pd.Series, pd.Series, pd.Series): MACD line (fast EMA - slow EMA),
+            signal line (EMA of MACD line), histogram (MACD line - signal line).
 
-    See Also
-    --------
-    indicators.md : [MACD](../docs/indicators.md#macd-moving-average-convergence-divergence)
-        Complete documentation with charts, accuracy data, and usage examples.
+    See Also:
+        indicators.md: [MACD](../docs/indicators.md#macd-moving-average-convergence-divergence)
+            Complete documentation with charts, accuracy data, and usage examples.
     """
     macd_line = ema(series, fast) - ema(series, slow)
     signal_line = ema(macd_line, signal)
@@ -248,27 +214,21 @@ def macd(series: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9):
 
 
 def rsi(series: pd.Series, window: int = 14) -> pd.Series:
-    """Relative Strength Index
+    """Relative Strength Index.
 
     Measures price momentum on a scale of 0-100, indicating overbought (>70)
     or oversold (<30) conditions.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    window : int, default 14
-        Number of periods for the calculation
+    Args:
+        series (pd.Series): Input price series.
+        window (int, optional): Number of periods for the calculation. Defaults to 14.
 
-    Returns
-    -------
-    pd.Series
-        RSI values (0-100)
+    Returns:
+        pd.Series: RSI values (0-100).
 
-    See Also
-    --------
-    indicators.md : [RSI](../docs/indicators.md#rsi-relative-strength-index)
-        Complete documentation with charts, accuracy data, and usage examples.
+    See Also:
+        indicators.md: [RSI](../docs/indicators.md#rsi-relative-strength-index)
+            Complete documentation with charts, accuracy data, and usage examples.
     """
     delta = series.diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=window, min_periods=1).mean()
@@ -285,26 +245,19 @@ def rsi(series: pd.Series, window: int = 14) -> pd.Series:
 
 
 def willr(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
-    """Williams %R
+    """Williams %R.
 
     Similar to Stochastic Oscillator, measures overbought/oversold levels
     on a -100 to 0 scale.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High prices
-    low : pd.Series
-        Low prices
-    close : pd.Series
-        Close prices
-    window : int, default 14
-        Number of periods for the calculation
+    Args:
+        high (pd.Series): High prices.
+        low (pd.Series): Low prices.
+        close (pd.Series): Close prices.
+        window (int, optional): Number of periods for the calculation. Defaults to 14.
 
-    Returns
-    -------
-    pd.Series
-        Williams %R values (-100 to 0)
+    Returns:
+        pd.Series: Williams %R values (-100 to 0).
     """
     highest_high = high.rolling(window).max()
     lowest_low = low.rolling(window).min()
@@ -312,26 +265,19 @@ def willr(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -
 
 
 def cci(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 20) -> pd.Series:
-    """Commodity Channel Index
+    """Commodity Channel Index.
 
     Identifies cyclical trends in commodities, but applicable to stocks;
     measures deviation from mean price.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High prices
-    low : pd.Series
-        Low prices
-    close : pd.Series
-        Close prices
-    window : int, default 20
-        Number of periods for the calculation
+    Args:
+        high (pd.Series): High prices.
+        low (pd.Series): Low prices.
+        close (pd.Series): Close prices.
+        window (int, optional): Number of periods for the calculation. Defaults to 20.
 
-    Returns
-    -------
-    pd.Series
-        CCI values
+    Returns:
+        pd.Series: CCI values.
     """
     tp = (high + low + close) / 3
     ma = tp.rolling(window).mean()
@@ -340,25 +286,18 @@ def cci(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 20) -> 
 
 
 def atr(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
-    """Average True Range
+    """Average True Range.
 
     Measures volatility by calculating the average range between high and low prices.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High prices
-    low : pd.Series
-        Low prices
-    close : pd.Series
-        Close prices
-    window : int, default 14
-        Number of periods for the calculation
+    Args:
+        high (pd.Series): High prices.
+        low (pd.Series): Low prices.
+        close (pd.Series): Close prices.
+        window (int, optional): Number of periods for the calculation. Defaults to 14.
 
-    Returns
-    -------
-    pd.Series
-        Average True Range values
+    Returns:
+        pd.Series: Average True Range values.
     """
     prev_close = close.shift(1)
     tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(
@@ -368,50 +307,37 @@ def atr(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> 
 
 
 def natr(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
-    """Normalized Average True Range
+    """Normalized Average True Range.
 
     ATR normalized to percentage of closing price, useful for comparing
     volatility across different price levels.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High prices
-    low : pd.Series
-        Low prices
-    close : pd.Series
-        Close prices
-    window : int, default 14
-        Number of periods for the calculation
+    Args:
+        high (pd.Series): High prices.
+        low (pd.Series): Low prices.
+        close (pd.Series): Close prices.
+        window (int, optional): Number of periods for the calculation. Defaults to 14.
 
-    Returns
-    -------
-    pd.Series
-        Normalized ATR values as percentage
+    Returns:
+        pd.Series: Normalized ATR values as percentage.
     """
     atr_val = atr(high, low, close, window)
     return 100 * atr_val / close
 
 
 def trange(high: pd.Series, low: pd.Series, close: pd.Series) -> pd.Series:
-    """True Range
+    """True Range.
 
     The greatest of: current high - current low, |current high - previous close|,
     |current low - previous close|.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High prices
-    low : pd.Series
-        Low prices
-    close : pd.Series
-        Close prices
+    Args:
+        high (pd.Series): High prices.
+        low (pd.Series): Low prices.
+        close (pd.Series): Close prices.
 
-    Returns
-    -------
-    pd.Series
-        True Range values
+    Returns:
+        pd.Series: True Range values.
     """
     prev_close = close.shift(1)
     tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(
@@ -426,21 +352,16 @@ def trange(high: pd.Series, low: pd.Series, close: pd.Series) -> pd.Series:
 
 
 def obv(close: pd.Series, volume: pd.Series) -> pd.Series:
-    """On Balance Volume
+    """On Balance Volume.
 
     Cumulative volume indicator that adds volume on up days and subtracts on down days.
 
-    Parameters
-    ----------
-    close : pd.Series
-        Close prices
-    volume : pd.Series
-        Volume data
+    Args:
+        close (pd.Series): Close prices.
+        volume (pd.Series): Volume data.
 
-    Returns
-    -------
-    pd.Series
-        On Balance Volume values
+    Returns:
+        pd.Series: On Balance Volume values.
     """
     direction = np.sign(close.diff()).fillna(0)
     return (volume * direction).cumsum()
@@ -449,27 +370,19 @@ def obv(close: pd.Series, volume: pd.Series) -> pd.Series:
 def mfi(
     high: pd.Series, low: pd.Series, close: pd.Series, volume: pd.Series, window: int = 14
 ) -> pd.Series:
-    """Money Flow Index
+    """Money Flow Index.
 
     Volume-weighted RSI that measures buying/selling pressure.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High prices
-    low : pd.Series
-        Low prices
-    close : pd.Series
-        Close prices
-    volume : pd.Series
-        Volume data
-    window : int, default 14
-        Number of periods for the calculation
+    Args:
+        high (pd.Series): High prices.
+        low (pd.Series): Low prices.
+        close (pd.Series): Close prices.
+        volume (pd.Series): Volume data.
+        window (int, optional): Number of periods for the calculation. Defaults to 14.
 
-    Returns
-    -------
-    pd.Series
-        Money Flow Index values (0-100)
+    Returns:
+        pd.Series: Money Flow Index values (0-100).
     """
     typical_price = (high + low + close) / 3
     raw_money_flow = typical_price * volume
@@ -490,71 +403,52 @@ def mfi(
 
 
 def roc(series: pd.Series, window: int = 12) -> pd.Series:
-    """Rate of Change
+    """Rate of Change.
 
     Shows percentage change in price over a specified period.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    window : int, default 12
-        Number of periods for the calculation
+    Args:
+        series (pd.Series): Input price series.
+        window (int, optional): Number of periods for the calculation. Defaults to 12.
 
-    Returns
-    -------
-    pd.Series
-        Rate of Change values as percentage
+    Returns:
+        pd.Series: Rate of Change values as percentage.
     """
     return series.pct_change(periods=window) * 100
 
 
 def mom(series: pd.Series, window: int = 10) -> pd.Series:
-    """Momentum
+    """Momentum.
 
     Difference between current price and price n periods ago.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    window : int, default 10
-        Number of periods for the calculation
+    Args:
+        series (pd.Series): Input price series.
+        window (int, optional): Number of periods for the calculation. Defaults to 10.
 
-    Returns
-    -------
-    pd.Series
-        Momentum values
+    Returns:
+        pd.Series: Momentum values.
     """
     return series.diff(window)
 
 
 def bbands(series: pd.Series, window: int = 20, num_std: float = 2.0):
-    """Bollinger Bands: returns (middle, upper, lower)
+    """Bollinger Bands: returns (middle, upper, lower).
 
     Price channels plotted at standard deviation levels around a moving average.
     Used for volatility analysis, mean reversion trading, and identifying breakouts.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series (typically closing prices)
-    window : int, default 20
-        Rolling window size for moving average and standard deviation calculation
-    num_std : float, default 2.0
-        Number of standard deviations for upper and lower bands
+    Args:
+        series (pd.Series): Input price series (typically closing prices).
+        window (int, optional): Rolling window size for moving average and standard deviation calculation. Defaults to 20.
+        num_std (float, optional): Number of standard deviations for upper and lower bands. Defaults to 2.0.
 
-    Returns
-    -------
-    tuple of (pd.Series, pd.Series, pd.Series)
-        middle : Moving average (center line)
-        upper : Upper band (MA + n * std)
-        lower : Lower band (MA - n * std)
+    Returns:
+        tuple of (pd.Series, pd.Series, pd.Series): Middle (moving average), upper, lower bands.
 
-    See Also
-    --------
-    indicators.md : [Bollinger Bands](../docs/indicators.md#bollinger-bands)
-        Complete documentation with charts, accuracy data, and usage examples.
+    See Also:
+        indicators.md: [Bollinger Bands](../docs/indicators.md#bollinger-bands)
+            Complete documentation with charts, accuracy data, and usage examples.
     """
     ma = series.rolling(window).mean()
     std = series.rolling(window).std()
@@ -564,49 +458,46 @@ def bbands(series: pd.Series, window: int = 20, num_std: float = 2.0):
 
 
 def midpoint(series: pd.Series, window: int = 14) -> pd.Series:
-    """MidPoint over period
+    """MidPoint over period.
 
     Calculates the midpoint between the maximum and minimum values over a rolling window.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    window : int, default 14
-        Rolling window size for calculating max and min values
+    Args:
+        series (pd.Series): Input price series.
+        window (int, optional): Rolling window size for calculating max and min values. Defaults to 14.
 
-    Returns
-    -------
-    pd.Series
-        Midpoint values calculated as (max + min) / 2 over the rolling window
+    Returns:
+        pd.Series: Midpoint values calculated as (max + min) / 2 over the rolling window.
     """
     return (series.rolling(window).max() + series.rolling(window).min()) / 2
 
 
 def midprice(high: pd.Series, low: pd.Series, window: int = 14) -> pd.Series:
-    """Midpoint Price over period
+    """Midpoint Price over period.
 
     Calculates the midpoint price between high and low values over a rolling window.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High price series
-    low : pd.Series
-        Low price series
-    window : int, default 14
-        Rolling window size for calculating max high and min low values
+    Args:
+        high (pd.Series): High price series.
+        low (pd.Series): Low price series.
+        window (int, optional): Rolling window size for calculating max high and min low values. Defaults to 14.
 
-    Returns
-    -------
-    pd.Series
-        Midpoint price values calculated as (max_high + min_low) / 2 over the rolling window
+    Returns:
+        pd.Series: Midpoint price values calculated as (max_high + min_low) / 2 over the rolling window.
     """
     return (high.rolling(window).max() + low.rolling(window).min()) / 2
 
 
 def plus_dm(high: pd.Series, low: pd.Series) -> pd.Series:
-    """Plus Directional Movement"""
+    """Plus Directional Movement.
+
+    Args:
+        high (pd.Series): High prices.
+        low (pd.Series): Low prices.
+
+    Returns:
+        pd.Series: Plus Directional Movement values.
+    """
     high_diff = high.diff()
     low_diff = low.diff()
     plus_dm = np.where((high_diff > low_diff) & (high_diff > 0), high_diff, 0)
@@ -614,7 +505,15 @@ def plus_dm(high: pd.Series, low: pd.Series) -> pd.Series:
 
 
 def minus_dm(high: pd.Series, low: pd.Series) -> pd.Series:
-    """Minus Directional Movement"""
+    """Minus Directional Movement.
+
+    Args:
+        high (pd.Series): High prices.
+        low (pd.Series): Low prices.
+
+    Returns:
+        pd.Series: Minus Directional Movement values.
+    """
     high_diff = high.diff()
     low_diff = low.diff()
     minus_dm = np.where((low_diff > high_diff) & (low_diff > 0), low_diff, 0)
@@ -622,26 +521,19 @@ def minus_dm(high: pd.Series, low: pd.Series) -> pd.Series:
 
 
 def plus_di(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
-    """Plus Directional Indicator
+    """Plus Directional Indicator.
 
     Measures the strength of upward price movement over a specified period.
     Part of the Directional Movement System used in ADX calculations.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High price series
-    low : pd.Series
-        Low price series
-    close : pd.Series
-        Close price series
-    window : int, default 14
-        Rolling window size for smoothing the directional movement
+    Args:
+        high (pd.Series): High price series.
+        low (pd.Series): Low price series.
+        close (pd.Series): Close price series.
+        window (int, optional): Rolling window size for smoothing the directional movement. Defaults to 14.
 
-    Returns
-    -------
-    pd.Series
-        Plus Directional Indicator values as a percentage (0-100)
+    Returns:
+        pd.Series: Plus Directional Indicator values as a percentage (0-100).
     """
     tr = trange(high, low, close)
     plus_dm_val = plus_dm(high, low)
@@ -649,26 +541,19 @@ def plus_di(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14)
 
 
 def minus_di(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
-    """Minus Directional Indicator
+    """Minus Directional Indicator.
 
     Measures the strength of downward price movement over a specified period.
     Part of the Directional Movement System used in ADX calculations.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High price series
-    low : pd.Series
-        Low price series
-    close : pd.Series
-        Close price series
-    window : int, default 14
-        Rolling window size for smoothing the directional movement
+    Args:
+        high (pd.Series): High price series.
+        low (pd.Series): Low price series.
+        close (pd.Series): Close price series.
+        window (int, optional): Rolling window size for smoothing the directional movement. Defaults to 14.
 
-    Returns
-    -------
-    pd.Series
-        Minus Directional Indicator values as a percentage (0-100)
+    Returns:
+        pd.Series: Minus Directional Indicator values as a percentage (0-100).
     """
     tr = trange(high, low, close)
     minus_dm_val = minus_dm(high, low)
@@ -676,26 +561,19 @@ def minus_di(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14
 
 
 def dx(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
-    """Directional Movement Index
+    """Directional Movement Index.
 
     Measures the strength of a trend regardless of direction.
     Calculated as the absolute difference between +DI and -DI divided by their sum.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High price series
-    low : pd.Series
-        Low price series
-    close : pd.Series
-        Close price series
-    window : int, default 14
-        Rolling window size for smoothing the directional indicators
+    Args:
+        high (pd.Series): High price series.
+        low (pd.Series): Low price series.
+        close (pd.Series): Close price series.
+        window (int, optional): Rolling window size for smoothing the directional indicators. Defaults to 14.
 
-    Returns
-    -------
-    pd.Series
-        Directional Movement Index values as a percentage (0-100)
+    Returns:
+        pd.Series: Directional Movement Index values as a percentage (0-100).
     """
     plus_di_val = plus_di(high, low, close, window)
     minus_di_val = minus_di(high, low, close, window)
@@ -710,32 +588,23 @@ def ultosc(
     medium_period: int = 14,
     long_period: int = 28,
 ) -> pd.Series:
-    """Ultimate Oscillator
+    """Ultimate Oscillator.
 
     A momentum oscillator that combines short-term, medium-term, and long-term
     price action into one oscillator. Uses three different time frames to
     reduce false signals and provide more reliable buy/sell signals.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High price series
-    low : pd.Series
-        Low price series
-    close : pd.Series
-        Close price series
-    short_period : int, default 7
-        Short period for calculating buying pressure average
-    medium_period : int, default 14
-        Medium period for calculating buying pressure average
-    long_period : int, default 28
-        Long period for calculating buying pressure average
+    Args:
+        high (pd.Series): High price series.
+        low (pd.Series): Low price series.
+        close (pd.Series): Close price series.
+        short_period (int, optional): Short period for calculating buying pressure average. Defaults to 7.
+        medium_period (int, optional): Medium period for calculating buying pressure average. Defaults to 14.
+        long_period (int, optional): Long period for calculating buying pressure average. Defaults to 28.
 
-    Returns
-    -------
-    pd.Series
-        Ultimate Oscillator values (0-100), where values above 70 indicate
-        overbought conditions and below 30 indicate oversold conditions
+    Returns:
+        pd.Series: Ultimate Oscillator values (0-100), where values above 70 indicate
+            overbought conditions and below 30 indicate oversold conditions.
     """
     # Calculate True Range
     tr = trange(high, low, close)
@@ -760,29 +629,21 @@ def sar(
     acceleration: float = 0.02,
     max_acceleration: float = 0.2,
 ) -> pd.Series:
-    """Parabolic SAR
+    """Parabolic SAR.
 
     Parabolic Stop and Reverse indicator that provides trailing stop levels
     for long and short positions. The indicator follows price movement and
     accelerates as the trend develops.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High price series
-    low : pd.Series
-        Low price series
-    close : pd.Series
-        Close price series (used for trend initialization)
-    acceleration : float, default 0.02
-        Initial acceleration factor increment
-    max_acceleration : float, default 0.2
-        Maximum acceleration factor limit
+    Args:
+        high (pd.Series): High price series.
+        low (pd.Series): Low price series.
+        close (pd.Series): Close price series (used for trend initialization).
+        acceleration (float, optional): Initial acceleration factor increment. Defaults to 0.02.
+        max_acceleration (float, optional): Maximum acceleration factor limit. Defaults to 0.2.
 
-    Returns
-    -------
-    pd.Series
-        Parabolic SAR values that act as trailing stop levels
+    Returns:
+        pd.Series: Parabolic SAR values that act as trailing stop levels.
     """
     sar = pd.Series(index=high.index, dtype=float)
 
@@ -836,26 +697,16 @@ def stoch(
     The Stochastic Oscillator compares a closing price to its price range over a given time period.
     Used to identify overbought and oversold conditions.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High price series
-    low : pd.Series
-        Low price series
-    close : pd.Series
-        Close price series
-    fastk_period : int, default 14
-        Period for %K calculation (lookback window)
-    slowk_period : int, default 3
-        Smoothing period for %K line
-    slowd_period : int, default 3
-        Smoothing period for %D line
+    Args:
+        high (pd.Series): High price series.
+        low (pd.Series): Low price series.
+        close (pd.Series): Close price series.
+        fastk_period (int, optional): Period for %K calculation (lookback window). Defaults to 14.
+        slowk_period (int, optional): Smoothing period for %K line. Defaults to 3.
+        slowd_period (int, optional): Smoothing period for %D line. Defaults to 3.
 
-    Returns
-    -------
-    tuple of (pd.Series, pd.Series)
-        slowk : Slow %K line (smoothed fast %K)
-        slowd : Slow %D line (smoothed slow %K)
+    Returns:
+        tuple of (pd.Series, pd.Series): Slow %K line (smoothed fast %K), slow %D line (smoothed slow %K).
     """
     # Calculate Fast %K
     lowest_low = low.rolling(fastk_period).min()
@@ -879,24 +730,15 @@ def stochf(
     A faster version of the Stochastic Oscillator with less smoothing.
     Provides more responsive signals but may generate more false signals.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High price series
-    low : pd.Series
-        Low price series
-    close : pd.Series
-        Close price series
-    fastk_period : int, default 14
-        Period for %K calculation (lookback window)
-    fastd_period : int, default 3
-        Smoothing period for %D line
+    Args:
+        high (pd.Series): High price series.
+        low (pd.Series): Low price series.
+        close (pd.Series): Close price series.
+        fastk_period (int, optional): Period for %K calculation (lookback window). Defaults to 14.
+        fastd_period (int, optional): Smoothing period for %D line. Defaults to 3.
 
-    Returns
-    -------
-    tuple of (pd.Series, pd.Series)
-        fastk : Fast %K line (raw stochastic calculation)
-        fastd : Fast %D line (smoothed fast %K)
+    Returns:
+        tuple of (pd.Series, pd.Series): Fast %K line (raw stochastic calculation), fast %D line (smoothed fast %K).
     """
     # Calculate Fast %K
     lowest_low = low.rolling(fastk_period).min()
@@ -921,24 +763,15 @@ def stochrsi(
     Applies the Stochastic Oscillator formula to RSI values instead of price.
     Combines momentum and range-bound oscillator for more refined signals.
 
-    Parameters
-    ----------
-    series : pd.Series
-        Input price series
-    rsi_period : int, default 14
-        Period for RSI calculation
-    stoch_period : int, default 14
-        Period for Stochastic calculation on RSI values
-    k_period : int, default 3
-        Smoothing period for %K line
-    d_period : int, default 3
-        Smoothing period for %D line
+    Args:
+        series (pd.Series): Input price series.
+        rsi_period (int, optional): Period for RSI calculation. Defaults to 14.
+        stoch_period (int, optional): Period for Stochastic calculation on RSI values. Defaults to 14.
+        k_period (int, optional): Smoothing period for %K line. Defaults to 3.
+        d_period (int, optional): Smoothing period for %D line. Defaults to 3.
 
-    Returns
-    -------
-    tuple of (pd.Series, pd.Series)
-        stochrsi_k : Stochastic RSI %K line
-        stochrsi_d : Stochastic RSI %D line (smoothed %K)
+    Returns:
+        tuple of (pd.Series, pd.Series): Stochastic RSI %K line, stochastic RSI %D line (smoothed %K).
     """
     # Calculate RSI first
     rsi_values = rsi(series, rsi_period)
@@ -962,25 +795,19 @@ def stochrsi(
 
 
 def aroon(high: pd.Series, low: pd.Series, window: int = 14) -> tuple[pd.Series, pd.Series]:
-    """Aroon Indicator: returns (aroon_up, aroon_down)
+    """Aroon Indicator: returns (aroon_up, aroon_down).
 
     Measures the time elapsed since the highest high and lowest low within a given period.
     Used to identify trend changes and the strength of a trend.
 
-    Parameters
-    ----------
-    high : pd.Series
-        High price series
-    low : pd.Series
-        Low price series
-    window : int, default 14
-        Lookback period for calculating Aroon values
+    Args:
+        high (pd.Series): High price series.
+        low (pd.Series): Low price series.
+        window (int, optional): Lookback period for calculating Aroon values. Defaults to 14.
 
-    Returns
-    -------
-    tuple of (pd.Series, pd.Series)
-        aroon_up : Aroon Up indicator (0-100), measures upward trend strength
-        aroon_down : Aroon Down indicator (0-100), measures downward trend strength
+    Returns:
+        tuple of (pd.Series, pd.Series): Aroon Up indicator (0-100), measures upward trend strength,
+            aroon Down indicator (0-100), measures downward trend strength.
     """
     # Days since highest high
     high_max_idx = high.rolling(window).apply(lambda x: window - np.argmax(x) - 1, raw=True)

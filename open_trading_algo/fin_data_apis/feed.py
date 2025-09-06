@@ -36,6 +36,14 @@ class LiveDataFeed:
         on_update: Optional[Callable[[Dict[str, Dict[str, Any]]], None]] = None,
         cache: Optional[DataCache] = None,
     ):
+        """Initialize the LiveDataFeed with configuration and optional callback.
+
+        Args:
+            config_path (Path): Path to the YAML configuration file.
+            on_update (Optional[Callable[[Dict[str, Dict[str, Any]]], None]]):
+                Callback function called when new data is fetched. Defaults to None.
+            cache (Optional[DataCache]): Data cache instance. Defaults to None.
+        """
         self.config = LiveDataConfig(config_path)
         # If API key is not set in config, try to load from .env or environment
         if not self.config.api_key and self.config.source.lower() in {
@@ -52,11 +60,11 @@ class LiveDataFeed:
         self.cache = cache or DataCache()
 
     def start(self):
-        """
-        Starts the background thread to run the data feed if it is not already running.
+        """Start the background thread to run the data feed.
 
-        If the thread is already alive, this method does nothing. Otherwise, it clears the stop event,
-        creates a new daemon thread targeting the internal _run method, and starts the thread.
+        If the thread is already alive, this method does nothing. Otherwise, it clears
+        the stop event, creates a new daemon thread targeting the internal _run method,
+        and starts the thread.
         """
         if self._thread and self._thread.is_alive():
             return
@@ -65,8 +73,7 @@ class LiveDataFeed:
         self._thread.start()
 
     def stop(self):
-        """
-        Stops the background data feed thread.
+        """Stop the background data feed thread.
 
         Sets the stop event to signal the thread to terminate and waits for the thread to join.
         """
@@ -75,8 +82,7 @@ class LiveDataFeed:
             self._thread.join()
 
     def _run(self):
-        """
-        Internal method that runs the data fetching loop in the background thread.
+        """Run the data fetching loop in the background thread.
 
         Continuously fetches data from the configured source at the specified update rate,
         updates the latest_data dictionary, and calls the on_update callback if provided.
@@ -113,8 +119,7 @@ class LiveDataFeed:
             time.sleep(self.config.update_rate)
 
     def get_latest(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Returns the most recent data fetched by the feed.
+        """Return the most recent data fetched by the feed.
 
         Returns:
             Dict[str, Dict[str, Any]]: A dictionary mapping ticker symbols to their latest field data.

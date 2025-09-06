@@ -10,7 +10,14 @@ load_dotenv(dotenv_path=Path(__file__).parent.parent / "secrets.env")
 
 
 def get_api_key(service: str) -> Optional[str]:
-    """Get API key for a given service from environment variables (.env or system env)."""
+    """Get API key for a given service from environment variables.
+
+    Args:
+        service (str): The service name (e.g., 'finnhub', 'fmp', 'alpha_vantage').
+
+    Returns:
+        Optional[str]: The API key if found, None otherwise.
+    """
     env_map = {
         "finnhub": "FINNHUB_API_KEY",
         "fmp": "FMP_API_KEY",

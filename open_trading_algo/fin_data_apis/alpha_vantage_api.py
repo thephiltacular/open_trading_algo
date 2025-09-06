@@ -95,7 +95,17 @@ class AlphaVantageAPI:
         outputsize: str = "compact",
         return_format: str = "json",
     ):
-        """Fetch stock time series (INTRADAY, DAILY, WEEKLY, MONTHLY). return_format: 'json' or 'df'"""
+        """Fetch stock time series (INTRADAY, DAILY, WEEKLY, MONTHLY).
+
+        Args:
+            symbol (str): Stock symbol (e.g., 'AAPL').
+            interval (str): Time interval ('intraday', 'daily', 'weekly', 'monthly'). Defaults to 'daily'.
+            outputsize (str): Output size ('compact' or 'full'). Defaults to 'compact'.
+            return_format (str): Return format ('json' or 'df'). Defaults to 'json'.
+
+        Returns:
+            dict or pd.DataFrame: Stock time series data.
+        """
         import pandas as pd
 
         function_map = {
@@ -128,9 +138,14 @@ class AlphaVantageAPI:
 
     @rate_limit("alpha_vantage")
     def insider_transactions(self, symbol: str, return_format: str = "json"):
-        """
-        Fetch insider transactions for a given symbol using the Alpha Vantage API.
-        return_format: 'json' or 'df'.
+        """Fetch insider transactions for a given symbol.
+
+        Args:
+            symbol (str): Stock symbol (e.g., 'AAPL').
+            return_format (str): Return format ('json' or 'df'). Defaults to 'json'.
+
+        Returns:
+            dict or pd.DataFrame: Insider transactions data.
         """
         import pandas as pd
 
@@ -154,7 +169,16 @@ class AlphaVantageAPI:
     def alpha_intelligence(
         self, symbol: str, function: str = "NEWS_SENTIMENT", return_format: str = "json"
     ):
-        """Fetch Alpha Intelligence endpoints (e.g., news sentiment, analyst upgrades/downgrades). return_format: 'json' or 'df'"""
+        """Fetch Alpha Intelligence endpoints (news sentiment, analyst upgrades/downgrades).
+
+        Args:
+            symbol (str): Stock symbol (e.g., 'AAPL').
+            function (str): Alpha Intelligence function (e.g., 'NEWS_SENTIMENT'). Defaults to 'NEWS_SENTIMENT'.
+            return_format (str): Return format ('json' or 'df'). Defaults to 'json'.
+
+        Returns:
+            dict or pd.DataFrame: Alpha Intelligence data.
+        """
         import pandas as pd
 
         params = {
@@ -175,7 +199,16 @@ class AlphaVantageAPI:
 
     @rate_limit("alpha_vantage")
     def fundamental_data(self, symbol: str, function: str = "OVERVIEW", return_format: str = "json"):
-        """Fetch fundamental data (OVERVIEW, INCOME_STATEMENT, BALANCE_SHEET, CASH_FLOW, EARNINGS, LISTING_STATUS, etc.). return_format: 'json' or 'df'"""
+        """Fetch fundamental data (OVERVIEW, INCOME_STATEMENT, BALANCE_SHEET, etc.).
+
+        Args:
+            symbol (str): Stock symbol (e.g., 'AAPL').
+            function (str): Fundamental data function (e.g., 'OVERVIEW'). Defaults to 'OVERVIEW'.
+            return_format (str): Return format ('json' or 'df'). Defaults to 'json'.
+
+        Returns:
+            dict or pd.DataFrame: Fundamental data.
+        """
         import pandas as pd
 
         params = {
@@ -204,7 +237,19 @@ class AlphaVantageAPI:
         series_type: str = "close",
         return_format: str = "json",
     ):
-        """Fetch any free technical indicator (see Alpha Vantage docs for indicator names). return_format: 'json' or 'df'"""
+        """Fetch technical indicators from Alpha Vantage.
+
+        Args:
+            symbol (str): Stock symbol (e.g., 'AAPL').
+            indicator (str): Technical indicator name (e.g., 'RSI', 'SMA').
+            interval (str): Time interval. Defaults to 'daily'.
+            time_period (int): Time period for indicator calculation. Defaults to 14.
+            series_type (str): Series type ('close', 'open', 'high', 'low'). Defaults to 'close'.
+            return_format (str): Return format ('json' or 'df'). Defaults to 'json'.
+
+        Returns:
+            dict or pd.DataFrame: Technical indicator data.
+        """
         import pandas as pd
 
         params = {

@@ -44,6 +44,7 @@ class LiveDataFeed:
         self.cache = cache or DataCache()
 
     def start(self):
+        """Start the live data feed thread."""
         if self._thread and self._thread.is_alive():
             return
         self._stop.clear()
@@ -51,11 +52,13 @@ class LiveDataFeed:
         self._thread.start()
 
     def stop(self):
+        """Stop the live data feed thread."""
         self._stop.set()
         if self._thread:
             self._thread.join()
 
     def _run(self):
+        """Run the main data fetching loop."""
         while not self._stop.is_set():
             src = self.config.source.lower()
             if src == "yahoo":
@@ -87,4 +90,9 @@ class LiveDataFeed:
             time.sleep(self.config.update_rate)
 
     def get_latest(self) -> Dict[str, Dict[str, Any]]:
+        """Get the latest fetched data.
+
+        Returns:
+            Dict[str, Dict[str, Any]]: Latest data for all tickers.
+        """
         return self.latest_data

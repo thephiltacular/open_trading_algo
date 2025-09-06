@@ -46,7 +46,16 @@ import concurrent.futures
 def fetch_finnhub_bulk(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Finnhub using parallel requests (no true bulk endpoint)."""
+    """Fetch latest data for tickers from Finnhub using parallel requests.
+
+    Args:
+        tickers (List[str]): List of ticker symbols to fetch data for.
+        fields (List[str]): List of fields to retrieve for each ticker.
+        api_key (str): Finnhub API key for authentication.
+
+    Returns:
+        Dict[str, Dict[str, Any]]: Dictionary mapping tickers to their data.
+    """
 
     def fetch_one(ticker):
         return ticker, fetch_finnhub([ticker], fields, api_key).get(ticker, {})
@@ -60,14 +69,32 @@ def fetch_finnhub_bulk(
 
 
 def fetch_fmp_bulk(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from FMP using a single bulk request."""
+    """Fetch latest data for tickers from FMP using a single bulk request.
+
+    Args:
+        tickers (List[str]): List of ticker symbols to fetch data for.
+        fields (List[str]): List of fields to retrieve for each ticker.
+        api_key (str): FMP API key for authentication.
+
+    Returns:
+        Dict[str, Dict[str, Any]]: Dictionary mapping tickers to their data.
+    """
     return fetch_fmp(tickers, fields, api_key)
 
 
 def fetch_alpha_vantage_bulk(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Alpha Vantage using parallel requests (no true bulk endpoint)."""
+    """Fetch latest data for tickers from Alpha Vantage using parallel requests.
+
+    Args:
+        tickers (List[str]): List of ticker symbols to fetch data for.
+        fields (List[str]): List of fields to retrieve for each ticker.
+        api_key (str): Alpha Vantage API key for authentication.
+
+    Returns:
+        Dict[str, Dict[str, Any]]: Dictionary mapping tickers to their data.
+    """
 
     def fetch_one(ticker):
         return ticker, fetch_alpha_vantage([ticker], fields, api_key).get(ticker, {})
@@ -83,7 +110,16 @@ def fetch_alpha_vantage_bulk(
 def fetch_twelve_data_bulk(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Twelve Data using parallel requests (no true bulk endpoint)."""
+    """Fetch latest data for tickers from Twelve Data using parallel requests.
+
+    Args:
+        tickers (List[str]): List of ticker symbols to fetch data for.
+        fields (List[str]): List of fields to retrieve for each ticker.
+        api_key (str): Twelve Data API key for authentication.
+
+    Returns:
+        Dict[str, Dict[str, Any]]: Dictionary mapping tickers to their data.
+    """
 
     def fetch_one(ticker):
         return ticker, fetch_twelve_data([ticker], fields, api_key).get(ticker, {})
@@ -98,6 +134,11 @@ def fetch_twelve_data_bulk(
 
 class LiveDataConfig:
     def __init__(self, config_path: Path):
+        """Initialize LiveDataConfig from YAML configuration file.
+
+        Args:
+            config_path (Path): Path to the YAML configuration file.
+        """
         with config_path.open("r", encoding="utf-8") as f:
             cfg = yaml.safe_load(f)
         self.update_rate = int(cfg.get("update_rate", 300))
@@ -110,7 +151,17 @@ class LiveDataConfig:
 def fetch_yahoo(
     tickers: List[str], fields: List[str], batch_size: int = 80, cache: DataCache = None
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Yahoo Finance, using cache to minimize requests."""
+    """Fetch latest data for tickers from Yahoo Finance, using cache to minimize requests.
+
+    Args:
+        tickers (List[str]): List of ticker symbols to fetch data for.
+        fields (List[str]): List of fields to retrieve for each ticker.
+        batch_size (int): Number of tickers to fetch in each batch. Defaults to 80.
+        cache (DataCache): Optional cache instance for storing/retrieving data.
+
+    Returns:
+        Dict[str, Dict[str, Any]]: Dictionary mapping tickers to their data.
+    """
     import math
 
     data = {}
@@ -210,7 +261,16 @@ import requests
 
 
 def fetch_finnhub(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Finnhub."""
+    """Fetch latest data for tickers from Finnhub.
+
+    Args:
+        tickers (List[str]): List of ticker symbols to fetch data for.
+        fields (List[str]): List of fields to retrieve for each ticker.
+        api_key (str): Finnhub API key for authentication.
+
+    Returns:
+        Dict[str, Dict[str, Any]]: Dictionary mapping tickers to their data.
+    """
     url = "https://finnhub.io/api/v1/quote"
     data = {}
     for ticker in tickers:
@@ -240,7 +300,16 @@ def fetch_finnhub(tickers: List[str], fields: List[str], api_key: str) -> Dict[s
 
 
 def fetch_fmp(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Financial Modeling Prep (FMP)."""
+    """Fetch latest data for tickers from Financial Modeling Prep (FMP).
+
+    Args:
+        tickers (List[str]): List of ticker symbols to fetch data for.
+        fields (List[str]): List of fields to retrieve for each ticker.
+        api_key (str): FMP API key for authentication.
+
+    Returns:
+        Dict[str, Dict[str, Any]]: Dictionary mapping tickers to their data.
+    """
     url = "https://financialmodelingprep.com/api/v3/quote/{}"
     data = {}
     try:
@@ -280,7 +349,16 @@ def fetch_fmp(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, 
 def fetch_alpha_vantage(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Alpha Vantage (batch quotes)."""
+    """Fetch latest data for tickers from Alpha Vantage (batch quotes).
+
+    Args:
+        tickers (List[str]): List of ticker symbols to fetch data for.
+        fields (List[str]): List of fields to retrieve for each ticker.
+        api_key (str): Alpha Vantage API key for authentication.
+
+    Returns:
+        Dict[str, Dict[str, Any]]: Dictionary mapping tickers to their data.
+    """
     url = "https://www.alphavantage.co/query"
     data = {}
     for ticker in tickers:
@@ -314,7 +392,16 @@ def fetch_alpha_vantage(
 def fetch_twelve_data(
     tickers: List[str], fields: List[str], api_key: str
 ) -> Dict[str, Dict[str, Any]]:
-    """Fetch latest data for tickers from Twelve Data."""
+    """Fetch latest data for tickers from Twelve Data.
+
+    Args:
+        tickers (List[str]): List of ticker symbols to fetch data for.
+        fields (List[str]): List of fields to retrieve for each ticker.
+        api_key (str): Twelve Data API key for authentication.
+
+    Returns:
+        Dict[str, Dict[str, Any]]: Dictionary mapping tickers to their data.
+    """
     url = "https://api.twelvedata.com/quote"
     data = {}
     for ticker in tickers:
@@ -354,6 +441,13 @@ class LiveDataFeed:
         on_update: Optional[Callable[[Dict[str, Dict[str, Any]]], None]] = None,
         cache: Optional[DataCache] = None,
     ):
+        """Initialize LiveDataFeed with configuration and optional callback.
+
+        Args:
+            config_path (Path): Path to the configuration file.
+            on_update (Optional[Callable]): Callback function called on data updates.
+            cache (Optional[DataCache]): Cache instance for data storage.
+        """
         self.config = LiveDataConfig(config_path)
         # If API key is not set in config, try to load from .env or environment
         if not self.config.api_key and self.config.source.lower() in {
@@ -370,6 +464,7 @@ class LiveDataFeed:
         self.cache = cache or DataCache()
 
     def start(self):
+        """Start the live data feed thread."""
         if self._thread and self._thread.is_alive():
             return
         self._stop.clear()
@@ -377,11 +472,13 @@ class LiveDataFeed:
         self._thread.start()
 
     def stop(self):
+        """Stop the live data feed thread."""
         self._stop.set()
         if self._thread:
             self._thread.join()
 
     def _run(self):
+        """Run the main data fetching loop."""
         while not self._stop.is_set():
             src = self.config.source.lower()
             if src == "yahoo":
@@ -413,4 +510,9 @@ class LiveDataFeed:
             time.sleep(self.config.update_rate)
 
     def get_latest(self) -> Dict[str, Dict[str, Any]]:
+        """Get the latest fetched data.
+
+        Returns:
+            Dict[str, Dict[str, Any]]: Latest data for all tickers.
+        """
         return self.latest_data

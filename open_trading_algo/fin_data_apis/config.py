@@ -5,6 +5,11 @@ import yaml
 
 class LiveDataConfig:
     def __init__(self, config_path: Path):
+        """Initialize LiveDataConfig from YAML configuration file.
+
+        Args:
+            config_path (Path): Path to the YAML configuration file.
+        """
         with config_path.open("r", encoding="utf-8") as f:
             cfg = yaml.safe_load(f)
         self.update_rate = int(cfg.get("update_rate", 300))

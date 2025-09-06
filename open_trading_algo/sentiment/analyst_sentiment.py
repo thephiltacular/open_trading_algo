@@ -12,9 +12,14 @@ from open_trading_algo.fin_data_apis.rate_limit import rate_limit
 
 
 def fetch_bulk_finnhub_analyst_sentiment(tickers: list, api_key: str) -> pd.DataFrame:
-    """
-    Fetch Finnhub analyst sentiment for multiple tickers (one call per ticker, as bulk not supported).
-    Returns a DataFrame indexed by [date, ticker].
+    """Fetch Finnhub analyst sentiment for multiple tickers.
+
+    Args:
+        tickers (list): List of ticker symbols to fetch data for.
+        api_key (str): Finnhub API key for authentication.
+
+    Returns:
+        pd.DataFrame: DataFrame indexed by [date, ticker] with analyst sentiment data.
     """
     cache = DataCache() if is_caching_enabled() else None
     signal_type = "analyst_finnhub_sentiment"
@@ -38,9 +43,14 @@ def fetch_bulk_finnhub_analyst_sentiment(tickers: list, api_key: str) -> pd.Data
 
 
 def fetch_bulk_fmp_analyst_price_targets(tickers: list, api_key: str) -> pd.DataFrame:
-    """
-    Fetch FMP analyst price targets for multiple tickers (one call per ticker, as bulk not supported).
-    Returns a DataFrame indexed by [date, ticker].
+    """Fetch FMP analyst price targets for multiple tickers.
+
+    Args:
+        tickers (list): List of ticker symbols to fetch data for.
+        api_key (str): FMP API key for authentication.
+
+    Returns:
+        pd.DataFrame: DataFrame indexed by [date, ticker] with price target data.
     """
     cache = DataCache() if is_caching_enabled() else None
     signal_type = "analyst_fmp_price_targets"
@@ -65,9 +75,14 @@ def fetch_bulk_fmp_analyst_price_targets(tickers: list, api_key: str) -> pd.Data
 
 # Example 1: Fetch analyst recommendations from Finnhub (requires API key)
 def fetch_finnhub_analyst_sentiment(ticker: str, api_key: str) -> Dict[str, Any]:
-    """
-    Fetch analyst recommendations and target price from Finnhub.
-    Returns a dict with buy/hold/sell counts and consensus.
+    """Fetch analyst recommendations and target price from Finnhub.
+
+    Args:
+        ticker (str): Ticker symbol to fetch data for.
+        api_key (str): Finnhub API key for authentication.
+
+    Returns:
+        Dict[str, Any]: Dictionary with buy/hold/sell counts and consensus.
     """
     if not api_key:
         api_key = get_api_key("finnhub")
@@ -116,9 +131,14 @@ def fetch_finnhub_analyst_sentiment(ticker: str, api_key: str) -> Dict[str, Any]
 
 # Example 2: Fetch analyst price targets from Financial Modeling Prep (FMP)
 def fetch_fmp_analyst_price_targets(ticker: str, api_key: str) -> Dict[str, Any]:
-    """
-    Fetch analyst price targets from FMP.
-    Returns a dict with target price and details.
+    """Fetch analyst price targets from FMP.
+
+    Args:
+        ticker (str): Ticker symbol to fetch data for.
+        api_key (str): FMP API key for authentication.
+
+    Returns:
+        Dict[str, Any]: Dictionary with target price and details.
     """
     if not api_key:
         api_key = get_api_key("fmp")
@@ -165,9 +185,15 @@ def fetch_fmp_analyst_price_targets(ticker: str, api_key: str) -> Dict[str, Any]
 
 # Example 3: Aggregate analyst sentiment from multiple sources
 def aggregate_analyst_sentiment(ticker: str, finnhub_key: str, fmp_key: str) -> Dict[str, Any]:
-    """
-    Aggregate analyst sentiment from Finnhub and FMP.
-    Returns a dict with consensus and price targets.
+    """Aggregate analyst sentiment from Finnhub and FMP.
+
+    Args:
+        ticker (str): Ticker symbol to fetch data for.
+        finnhub_key (str): Finnhub API key for authentication.
+        fmp_key (str): FMP API key for authentication.
+
+    Returns:
+        Dict[str, Any]: Dictionary with consensus and price targets.
     """
     finnhub_df = fetch_finnhub_analyst_sentiment(ticker, finnhub_key)
     fmp_df = fetch_fmp_analyst_price_targets(ticker, fmp_key)

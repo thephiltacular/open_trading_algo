@@ -40,51 +40,47 @@ class BaseTradingModel(ABC):
     """
 
     def __init__(self, config: Optional[Dict] = None):
-        """
-        Initialize the trading model.
+        """Initialize the trading model.
 
         Args:
-            config: Model configuration parameters
+            config (Optional[Dict]): Model configuration parameters. Defaults to None.
         """
         self.config = config or {}
         self.indicators_cache = {}
 
     @abstractmethod
     def generate_signals(self, data: pd.DataFrame) -> pd.Series:
-        """
-        Generate trading signals from market data.
+        """Generate trading signals from market data.
 
         Args:
-            data: OHLCV DataFrame with indicators
+            data (pd.DataFrame): OHLCV DataFrame with indicators.
 
         Returns:
-            Series of signals (1=BUY, -1=SELL, 0=HOLD)
+            pd.Series: Series of signals (1=BUY, -1=SELL, 0=HOLD).
         """
         pass
 
     @abstractmethod
     def calculate_position_size(self, capital: float, risk_per_trade: float = 0.02) -> float:
-        """
-        Calculate position size based on risk management.
+        """Calculate position size based on risk management.
 
         Args:
-            capital: Available trading capital
-            risk_per_trade: Risk per trade as fraction of capital
+            capital (float): Available trading capital.
+            risk_per_trade (float, optional): Risk per trade as fraction of capital. Defaults to 0.02.
 
         Returns:
-            Position size
+            float: Position size.
         """
         pass
 
     def prepare_data(self, raw_data: pd.DataFrame) -> pd.DataFrame:
-        """
-        Prepare and enrich raw market data with indicators.
+        """Prepare and enrich raw market data with indicators.
 
         Args:
-            raw_data: Raw OHLCV data
+            raw_data (pd.DataFrame): Raw OHLCV data.
 
         Returns:
-            DataFrame with calculated indicators
+            pd.DataFrame: DataFrame with calculated indicators.
         """
         data = raw_data.copy()
 
@@ -111,16 +107,15 @@ class BaseTradingModel(ABC):
         return data
 
     def get_indicator_value(self, data: pd.DataFrame, indicator: str, **kwargs) -> pd.Series:
-        """
-        Get or calculate an indicator value.
+        """Get or calculate an indicator value.
 
         Args:
-            data: Market data
-            indicator: Indicator name
-            **kwargs: Indicator parameters
+            data (pd.DataFrame): Market data.
+            indicator (str): Indicator name.
+            **kwargs: Indicator parameters.
 
         Returns:
-            Indicator values
+            pd.Series: Indicator values.
         """
         cache_key = f"{indicator}_{kwargs}"
 
@@ -153,24 +148,22 @@ class BaseTradingModel(ABC):
         return self.indicators_cache[cache_key]
 
     def validate_data(self, data: pd.DataFrame) -> bool:
-        """
-        Validate that data has required columns.
+        """Validate that data has required columns.
 
         Args:
-            data: Market data to validate
+            data (pd.DataFrame): Market data to validate.
 
         Returns:
-            True if data is valid
+            bool: True if data is valid.
         """
         required_columns = ["open", "high", "low", "close", "volume"]
         return all(col in data.columns for col in required_columns)
 
     def get_model_info(self) -> Dict:
-        """
-        Get information about the model.
+        """Get information about the model.
 
         Returns:
-            Dictionary with model information
+            Dict: Dictionary with model information.
         """
         return {
             "name": self.__class__.__name__,

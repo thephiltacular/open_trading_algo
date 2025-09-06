@@ -20,6 +20,11 @@ class TrendFollowingModel(BaseTradingModel):
     """
 
     def __init__(self, config: Optional[Dict] = None):
+        """Initialize the trend following model.
+
+        Args:
+            config (Optional[Dict]): Model configuration parameters. Defaults to None.
+        """
         super().__init__(config)
         # Default configuration
         self.config.update(
@@ -32,14 +37,13 @@ class TrendFollowingModel(BaseTradingModel):
         )
 
     def generate_signals(self, data: pd.DataFrame) -> pd.Series:
-        """
-        Generate trend following signals.
+        """Generate trend following signals.
 
         Args:
-            data: OHLCV DataFrame with indicators
+            data (pd.DataFrame): OHLCV DataFrame with indicators.
 
         Returns:
-            Series of signals (1=BUY, -1=SELL, 0=HOLD)
+            pd.Series: Series of signals (1=BUY, -1=SELL, 0=HOLD).
         """
         signals = pd.Series(0, index=data.index)
 
@@ -82,15 +86,14 @@ class TrendFollowingModel(BaseTradingModel):
         return signals
 
     def calculate_position_size(self, capital: float, risk_per_trade: float = 0.02) -> float:
-        """
-        Calculate position size based on trend strength.
+        """Calculate position size based on trend strength.
 
         Args:
-            capital: Available trading capital
-            risk_per_trade: Risk per trade as fraction of capital
+            capital (float): Available trading capital.
+            risk_per_trade (float, optional): Risk per trade as fraction of capital. Defaults to 0.02.
 
         Returns:
-            Position size
+            float: Position size.
         """
         # For trend following, position size could be based on
         # trend strength and volatility
@@ -100,7 +103,11 @@ class TrendFollowingModel(BaseTradingModel):
         return base_risk
 
     def get_model_info(self) -> Dict:
-        """Get trend following model information."""
+        """Get trend following model information.
+
+        Returns:
+            Dict: Dictionary with model information.
+        """
         info = super().get_model_info()
         info.update(
             {

@@ -107,9 +107,13 @@ class DataCache:
         self.conn.commit()
 
     def store_signals(self, ticker: str, timeframe: str, signal_type: str, df: pd.DataFrame):
-        """
-        Store signals for a ticker, timeframe, and signal_type.
-        df must have index as datetime and a column 'signal_value'.
+        """Store signals for a ticker, timeframe, and signal_type.
+
+        Args:
+            ticker (str): Ticker symbol.
+            timeframe (str): Timeframe for the signals.
+            signal_type (str): Type of signal.
+            df (pd.DataFrame): DataFrame with datetime index and 'signal_value' column.
         """
         if df.empty:
             return
@@ -135,9 +139,17 @@ class DataCache:
         start: Optional[str] = None,
         end: Optional[str] = None,
     ) -> pd.DataFrame:
-        """
-        Retrieve signals for a ticker, timeframe, and signal_type.
-        Returns a DataFrame with datetime index and 'signal_value' column.
+        """Retrieve signals for a ticker, timeframe, and signal_type.
+
+        Args:
+            ticker (str): Ticker symbol.
+            timeframe (str): Timeframe for the signals.
+            signal_type (str): Type of signal.
+            start (Optional[str]): Start date for filtering.
+            end (Optional[str]): End date for filtering.
+
+        Returns:
+            pd.DataFrame: DataFrame with datetime index and 'signal_value' column.
         """
         c = self.conn.cursor()
         query = "SELECT datetime, signal_value FROM signals WHERE ticker = ? AND timeframe = ? AND signal_type = ?"
@@ -165,6 +177,18 @@ class DataCache:
         start: Optional[str] = None,
         end: Optional[str] = None,
     ) -> bool:
+        """Check if signals exist for a ticker, timeframe, and signal_type.
+
+        Args:
+            ticker (str): Ticker symbol.
+            timeframe (str): Timeframe for the signals.
+            signal_type (str): Type of signal.
+            start (Optional[str]): Start date for filtering.
+            end (Optional[str]): End date for filtering.
+
+        Returns:
+            bool: True if signals exist, False otherwise.
+        """
         c = self.conn.cursor()
         query = "SELECT 1 FROM signals WHERE ticker = ? AND timeframe = ? AND signal_type = ?"
         params = [ticker, timeframe, signal_type]
@@ -178,6 +202,12 @@ class DataCache:
         return c.execute(query, params).fetchone() is not None
 
     def store_price_data(self, ticker: str, df: pd.DataFrame):
+        """Store price data for a ticker.
+
+        Args:
+            ticker (str): Ticker symbol.
+            df (pd.DataFrame): DataFrame with OHLCV data.
+        """
         if df.empty:
             return
         records = [
@@ -197,6 +227,16 @@ class DataCache:
     def get_price_data(
         self, ticker: str, start: Optional[str] = None, end: Optional[str] = None
     ) -> pd.DataFrame:
+        """Retrieve price data for a ticker.
+
+        Args:
+            ticker (str): Ticker symbol.
+            start (Optional[str]): Start date for filtering.
+            end (Optional[str]): End date for filtering.
+
+        Returns:
+            pd.DataFrame: DataFrame with OHLCV data.
+        """
         c = self.conn.cursor()
         query = "SELECT datetime, open, high, low, close, volume FROM price_data WHERE ticker = ?"
         params = [ticker]
@@ -216,6 +256,16 @@ class DataCache:
         return df
 
     def has_data(self, ticker: str, start: Optional[str] = None, end: Optional[str] = None) -> bool:
+        """Check if price data exists for a ticker.
+
+        Args:
+            ticker (str): Ticker symbol.
+            start (Optional[str]): Start date for filtering.
+            end (Optional[str]): End date for filtering.
+
+        Returns:
+            bool: True if data exists, False otherwise.
+        """
         c = self.conn.cursor()
         query = "SELECT 1 FROM price_data WHERE ticker = ?"
         params = [ticker]
@@ -229,4 +279,5 @@ class DataCache:
         return c.execute(query, params).fetchone() is not None
 
     def close(self):
+        """Close the database connection."""
         self.conn.close()

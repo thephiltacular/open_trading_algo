@@ -13,7 +13,11 @@ from typing import Iterable, List
 def percent_rank(values: Iterable[float]) -> List[float]:
     """Compute percent-rank for each value among the values list.
 
-    Output values are in [0, 1]. If all values are equal, returns 0.5 for all.
+    Args:
+        values (Iterable[float]): Input values to rank.
+
+    Returns:
+        List[float]: Percent-rank values in [0, 1]. If all values are equal, returns 0.5 for all.
     """
 
     vals = list(values)
@@ -36,8 +40,14 @@ def percent_rank(values: Iterable[float]) -> List[float]:
 
 
 def minmax(values: Iterable[float]) -> List[float]:
-    """Min-max normalize to [0, 1]. If constant, returns 0.5 for all."""
+    """Min-max normalize to [0, 1].
 
+    Args:
+        values (Iterable[float]): Input values to normalize.
+
+    Returns:
+        List[float]: Normalized values in [0, 1]. If constant, returns 0.5 for all.
+    """
     vals = list(values)
     if not vals:
         return []

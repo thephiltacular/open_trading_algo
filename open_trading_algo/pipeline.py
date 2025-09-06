@@ -35,6 +35,15 @@ class ModelPipeline:
 
     # ----------------------------- Utility helpers ----------------------------
     def _has_columns(self, day: DayKey, columns: list[str]) -> bool:
+        """Check if all specified columns exist in the day's data.
+
+        Args:
+            day (DayKey): The day key for data processing.
+            columns (list[str]): List of column names to check.
+
+        Returns:
+            bool: True if all columns exist, False otherwise.
+        """
         df = self.data[day]
         try:
             cols = set(df.columns)  # pandas-like

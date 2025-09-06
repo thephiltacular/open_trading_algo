@@ -11,9 +11,14 @@ from open_trading_algo.fin_data_apis.rate_limit import rate_limit
 
 
 def fetch_bulk_twitter_sentiment(tickers: list, api_key: str = None) -> pd.DataFrame:
-    """
-    Fetch Twitter/X sentiment for multiple tickers using LunarCrush bulk API.
-    Returns a DataFrame indexed by [date, ticker].
+    """Fetch Twitter/X sentiment for multiple tickers using LunarCrush bulk API.
+
+    Args:
+        tickers (list): List of ticker symbols to fetch data for.
+        api_key (str, optional): LunarCrush API key for authentication.
+
+    Returns:
+        pd.DataFrame: DataFrame indexed by [date, ticker] with sentiment data.
     """
     if not api_key:
         api_key = get_api_key("lunarcrush")
@@ -75,9 +80,14 @@ def fetch_bulk_twitter_sentiment(tickers: list, api_key: str = None) -> pd.DataF
 
 # Example 1: Fetch Twitter/X sentiment using a third-party API (e.g., Twitter API, or a service like StockTwits)
 def fetch_twitter_sentiment(ticker: str, api_key: str = None) -> Dict[str, Any]:
-    """
-    Fetch sentiment for a ticker from Twitter/X using a third-party API.
-    Returns a dict with sentiment score and sample data.
+    """Fetch sentiment for a ticker from Twitter/X using a third-party API.
+
+    Args:
+        ticker (str): Ticker symbol to fetch data for.
+        api_key (str, optional): API key for authentication.
+
+    Returns:
+        Dict[str, Any]: Dictionary with sentiment score and sample data.
     """
     # Placeholder: Replace with real API call or use a service like StockTwits, LunarCrush, or Twitter API
     # Example: Use LunarCrush public API (no key required for basic usage)
@@ -115,11 +125,14 @@ def fetch_twitter_sentiment(ticker: str, api_key: str = None) -> Dict[str, Any]:
 # Example 2: Fetch Reddit sentiment using a public API or Pushshift
 # (Pushshift is often used for Reddit data, but may require a proxy or paid API)
 def fetch_reddit_sentiment(ticker: str) -> Dict[str, Any]:
-    """
-    Fetch Reddit sentiment for a ticker using a public API (Pushshift or similar).
-    Returns a dict with mention count and placeholder sentiment.
-    """
+    """Fetch Reddit sentiment for a ticker using a public API.
 
+    Args:
+        ticker (str): Ticker symbol to fetch data for.
+
+    Returns:
+        Dict[str, Any]: Dictionary with mention count and sentiment score.
+    """
     cache = DataCache() if is_caching_enabled() else None
     signal_type = "social_reddit_sentiment"
     timeframe = "1d"
@@ -154,9 +167,14 @@ def fetch_reddit_sentiment(ticker: str) -> Dict[str, Any]:
 
 # Example 3: Aggregate social sentiment from multiple sources
 def aggregate_social_sentiment(ticker: str, api_key: str = None) -> Dict[str, Any]:
-    """
-    Aggregate social sentiment from Twitter/X and Reddit.
-    Returns a dict with combined score and details.
+    """Aggregate social sentiment from Twitter/X and Reddit.
+
+    Args:
+        ticker (str): Ticker symbol to fetch data for.
+        api_key (str, optional): API key for authentication.
+
+    Returns:
+        Dict[str, Any]: Dictionary with combined score and details.
     """
     twitter_df = fetch_twitter_sentiment(ticker, api_key)
     reddit_df = fetch_reddit_sentiment(ticker)

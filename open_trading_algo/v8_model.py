@@ -89,6 +89,11 @@ class V8Model:
 
     # ----------------------------- Step utilities ----------------------------
     def _compute_ema_diffs(self, day: str) -> None:
+        """Compute EMA pairwise differences for the given day.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         pairs = [
             (
                 "D-Exponential Moving Average (100/200)",
@@ -138,6 +143,11 @@ class V8Model:
                     df[out] = [(r - l) * -1.0 for l, r in zip(df[left], df[right])]
 
     def _compute_macd_flags(self, day: str) -> None:
+        """Compute MACD trend flags for the given day.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         # TD: in original, ML "MACD TD" from AV (Change %) vs FM (MACD L>S SU)
         df = self.pipeline.data[day]
         if "Change %" in getattr(df, "columns", []) and "MACD L>S SU" in getattr(df, "columns", []):
@@ -169,6 +179,9 @@ class V8Model:
         Rule: For any desired output column name that starts with "PR-", if the
         base column name (after stripping the prefix) exists in the DataFrame,
         compute the percent-rank across the day and assign the result.
+
+        Args:
+            day (str): The day key for data processing.
         """
 
         df = self.pipeline.data[day]
@@ -190,6 +203,9 @@ class V8Model:
         Requires presence of:
         - Volume ("Volume") and Average Volume (10/30/60/90 day)
         - Relative Volume (optional) to compute D-Relative Volume ~ (RV - 1)
+
+        Args:
+            day (str): The day key for data processing.
         """
 
         df = self.pipeline.data[day]
@@ -300,6 +316,11 @@ class V8Model:
                         ]
 
     def _compute_band_distances(self, day: str) -> None:
+        """Compute band distances and widths for Bollinger and Keltner channels.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         price_col = "Price"
@@ -329,6 +350,11 @@ class V8Model:
                 df["Keltner Price/Upper-1"] = [p - u for p, u in zip(df[price_col], df[ku])]
 
     def _compute_price_high_low_div_atr(self, day: str) -> None:
+        """Compute price high/low distances divided by ATR.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         atr = "Average True Range (14)"
@@ -366,6 +392,11 @@ class V8Model:
                         ]
 
     def _compute_adx_filtered_flags(self, day: str) -> None:
+        """Compute ADX > 25 flag.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         if "Average Directional Index (14)" in cols:
@@ -375,6 +406,11 @@ class V8Model:
                 df["ADX > 25"] = [int(v > 25) for v in df["Average Directional Index (14)"]]
 
     def _compute_fibonacci_min(self, day: str) -> None:
+        """Compute Fibonacci minimum from pivot levels.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         pivots = [
@@ -396,6 +432,11 @@ class V8Model:
 
     # ------------------------------ SU/SD families ----------------------------
     def _compute_trends_SU(self, day: str) -> None:
+        """Compute SU (Setup Up) trend family indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         AV = "Change %"
@@ -444,6 +485,11 @@ class V8Model:
                 ]
 
     def _compute_avg_trends_SU(self, day: str) -> None:
+        """Compute average SU (Setup Up) trend indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = [
             "# SU",
@@ -473,6 +519,11 @@ class V8Model:
                 df["Avg SU"] = [sum(r) / float(len(present)) for r in rows]
 
     def _compute_avg_PR_trends_SU(self, day: str) -> None:
+        """Compute average PR SU (Setup Up) trend indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         pr_cols = [
             "PR-# SU",
@@ -504,6 +555,11 @@ class V8Model:
                 df["Avg-# SU"] = [sum(r) / float(len(present)) for r in rows]
 
     def _compute_trends_SD(self, day: str) -> None:
+        """Compute SD (Setup Down) trend indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         AV = "Change %"
@@ -553,10 +609,9 @@ class V8Model:
     def _compute_macd_crosses(self, day: str) -> None:
         """Compute MACD cross flags used by SU/SD families.
 
-        - FM: MACD L>S SU (MACD Level > MACD Signal)
-        - HA: MACD L<S SD (MACD Level < MACD Signal)
+        Args:
+            day (str): The day key for data processing.
         """
-
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         if "MACD Level (12, 26)" in cols and "MACD Signal (12, 26)" in cols:
@@ -574,6 +629,11 @@ class V8Model:
                 df["MACD L<S SD"] = [int(a < b) for a, b in zip(ml, ms)]
 
     def _compute_os_family(self, day: str) -> None:
+        """Compute oversold (OS) family indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         # Flags
@@ -608,6 +668,11 @@ class V8Model:
                 df["Avg OS"] = [s / float(len(made)) for s in sums]
 
     def _compute_ob_family(self, day: str) -> None:
+        """Compute overbought (OB) family indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         mapping = {
@@ -708,6 +773,11 @@ class V8Model:
                 df["Avg MD"] = [s / float(len(made)) for s in sums]
 
     def _compute_avg_trends_SD(self, day: str) -> None:
+        """Compute average SD (Setup Down) trend indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = [
             "# SD",
@@ -737,6 +807,11 @@ class V8Model:
                 df["Avg SD"] = [sum(r) / float(len(present)) for r in rows]
 
     def _compute_avg_PR_trends_SD(self, day: str) -> None:
+        """Compute average PR SD (Setup Down) trend indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         pr_cols = [
             "PR-# SD",
@@ -769,6 +844,11 @@ class V8Model:
 
     # ------------------------------ TU/TD families ----------------------------
     def _compute_trends_TU(self, day: str) -> None:
+        """Compute trend up (TU) family indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         AV = "Change %"
@@ -862,6 +942,11 @@ class V8Model:
                 df["Avg-# TU"] = [sum(r) / float(len(cols_tu)) for r in rows]
 
     def _compute_trends_TD(self, day: str) -> None:
+        """Compute trend down (TD) family indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         AV = "Change %"
@@ -958,6 +1043,11 @@ class V8Model:
 
     # ------------------------------ Reversals --------------------------------
     def _compute_reversals(self, day: str) -> None:
+        """Compute reversal indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         # Bottom reversal average DY from CV, DD, DH, DP when present
@@ -994,6 +1084,11 @@ class V8Model:
 
     # ----------------------------- Trigger scores ----------------------------
     def _compute_trigger_scores(self, day: str) -> None:
+        """Compute trigger score indicators.
+
+        Args:
+            day (str): The day key for data processing.
+        """
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
         # DS Avg Trigger Score from a basket of PR metrics if present

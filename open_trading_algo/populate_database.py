@@ -51,6 +51,7 @@ class DatabasePopulator:
         self._load_config()
 
     def _load_config(self):
+        """Load configuration from YAML files."""
         with open(self.config_path, "r") as f:
             config = yaml.safe_load(f)
         self.fields = config.get("fields", ["price", "volume", "open", "high", "low", "close"])
@@ -63,6 +64,15 @@ class DatabasePopulator:
             self.tickers = yaml.safe_load(f)["tickers"]
 
     def _tickers_to_fetch(self, start=None, end=None):
+        """Check which tickers are missing or incomplete in the DB for the date range.
+
+        Args:
+            start (str, optional): Start date.
+            end (str, optional): End date.
+
+        Returns:
+            list: List of tickers to fetch.
+        """
         # Check which tickers are missing or incomplete in the DB for the date range
         to_fetch = []
         for ticker in self.tickers:
@@ -71,6 +81,14 @@ class DatabasePopulator:
         return to_fetch
 
     def _split_apis(self, tickers):
+        """Assign tickers to APIs for concurrent fetching, avoiding repeats.
+
+        Args:
+            tickers (list): List of tickers to assign to APIs.
+
+        Returns:
+            dict: Dictionary mapping API names to ticker lists.
+        """
         # Assign tickers to APIs for concurrent fetching, avoiding repeats
         apis = {}
         # Yahoo (no key, batch)
@@ -88,6 +106,17 @@ class DatabasePopulator:
         return apis
 
     def _fetch_and_store(self, api, tickers, start, end):
+        """Fetch OHLCV for all tickers in as few API calls as possible, return a single DataFrame.
+
+        Args:
+            api (str): API name to use for fetching.
+            tickers (list): List of tickers to fetch.
+            start (str): Start date.
+            end (str): End date.
+
+        Returns:
+            list: List of DataFrames with fetched data.
+        """
         # Fetch OHLCV for all tickers in as few API calls as possible, return a single DataFrame
         def normalize_df(df, ticker):
             col_map = {
@@ -238,9 +267,13 @@ class DatabasePopulator:
             print("No new data fetched.")
 
     def calculate_indicators(self, all_data):
-        """
-        Given a DataFrame indexed by [date, ticker] with columns open, high, low, close, volume,
-        calculate technical indicators for each ticker and merge into the DataFrame.
+        """Calculate technical indicators for each ticker and merge into the DataFrame.
+
+        Args:
+            all_data (pd.DataFrame): DataFrame indexed by [date, ticker] with OHLCV columns.
+
+        Returns:
+            pd.DataFrame: DataFrame with calculated indicators merged in.
         """
         av_key = get_api_key("alpha_vantage")
         if not av_key:

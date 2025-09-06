@@ -21,10 +21,12 @@ class SignalOptimizer:
         indicators: Dict[str, Callable],
         signal_generators: Dict[str, Callable],
     ):
-        """
-        data: Dict[ticker, DataFrame] - historical price data for each ticker
-        indicators: Dict[name, func] - indicator functions (func(df) -> pd.Series)
-        signal_generators: Dict[name, func] - signal functions (func(df, indicators) -> pd.Series)
+        """Initialize SignalOptimizer with data, indicators, and signal generators.
+
+        Args:
+            data (Dict[str, pd.DataFrame]): Historical price data for each ticker.
+            indicators (Dict[str, Callable]): Indicator functions (func(df) -> pd.Series).
+            signal_generators (Dict[str, Callable]): Signal functions (func(df, indicators) -> pd.Series).
         """
         self.data = data
         self.indicators = indicators
@@ -48,11 +50,12 @@ class SignalOptimizer:
                 self.signal_results[ticker][name] = func(df, self.indicator_results[ticker])
 
     def set_risk_management(self, position_size_func=None, stop_loss_func=None, hedge_func=None):
-        """
-        Register risk management functions for use in backtesting.
-        position_size_func: (account_value, risk_per_trade, stop_distance) -> float
-        stop_loss_func: (df) -> pd.Series (stop-loss price per row)
-        hedge_func: (df, market_index, threshold) -> pd.Series (hedge signal)
+        """Register risk management functions for use in backtesting.
+
+        Args:
+            position_size_func (Optional[Callable]): Function for position sizing (account_value, risk_per_trade, stop_distance) -> float.
+            stop_loss_func (Optional[Callable]): Function for stop-loss (df) -> pd.Series (stop-loss price per row).
+            hedge_func (Optional[Callable]): Function for hedging (df, market_index, threshold) -> pd.Series (hedge signal).
         """
         self.position_size_func = position_size_func
         self.stop_loss_func = stop_loss_func
@@ -65,9 +68,18 @@ class SignalOptimizer:
         account_value: float = 100000,
         risk_per_trade: float = 0.01,
     ):
-        """
-        Backtest selected signals for all tickers and return performance metrics.
+        """Backtest selected signals for all tickers and return performance metrics.
+
         Now supports position sizing and stop-loss if risk management is set.
+
+        Args:
+            trade_type (str, optional): Type of trade ("long" or "short"). Defaults to "long".
+            signal_names (List[str], optional): List of signal names to use. Defaults to all signals.
+            account_value (float, optional): Starting account value. Defaults to 100000.
+            risk_per_trade (float, optional): Risk per trade as fraction. Defaults to 0.01.
+
+        Returns:
+            Dict: Performance results for each ticker.
         """
         if signal_names is None:
             signal_names = list(self.signal_generators.keys())
@@ -137,7 +149,15 @@ class SignalOptimizer:
         return self.results[trade_type]
 
     def optimize_signals(self, trade_type: str = "long", max_signals: int = 3):
-        """Find best combination of signals for given trade type."""
+        """Find best combination of signals for given trade type.
+
+        Args:
+            trade_type (str, optional): Type of trade ("long" or "short"). Defaults to "long".
+            max_signals (int, optional): Maximum number of signals to combine. Defaults to 3.
+
+        Returns:
+            Tuple: Best signal combination and its performance.
+        """
         best_combo = None
         best_perf = -float("inf")
         signal_names = list(self.signal_generators.keys())
@@ -178,11 +198,16 @@ class SignalOptimizer:
         window: int = 252,
         step: int = 21,
     ):
-        """
-        Walk-forward optimization: rolling out-of-sample backtest.
-        window: lookback period (e.g., 252 trading days)
-        step: step size for rolling window (e.g., 21 trading days)
-        Returns performance metrics for each window.
+        """Walk-forward optimization: rolling out-of-sample backtest.
+
+        Args:
+            trade_type (str, optional): Type of trade ("long" or "short"). Defaults to "long".
+            signal_names (List[str], optional): List of signal names to use. Defaults to all signals.
+            window (int, optional): Lookback period in trading days. Defaults to 252.
+            step (int, optional): Step size for rolling window in trading days. Defaults to 21.
+
+        Returns:
+            List[Dict]: Performance metrics for each window.
         """
         if signal_names is None:
             signal_names = list(self.signal_generators.keys())
@@ -202,10 +227,15 @@ class SignalOptimizer:
     def monte_carlo_backtest(
         self, trade_type: str = "long", signal_names: List[str] = None, n_sim: int = 1000
     ):
-        """
-        Monte Carlo simulation: randomize trade sequences to estimate risk/return distribution.
-        n_sim: number of simulations
-        Returns distribution of total returns.
+        """Monte Carlo simulation: randomize trade sequences to estimate risk/return distribution.
+
+        Args:
+            trade_type (str, optional): Type of trade ("long" or "short"). Defaults to "long".
+            signal_names (List[str], optional): List of signal names to use. Defaults to all signals.
+            n_sim (int, optional): Number of simulations. Defaults to 1000.
+
+        Returns:
+            List[Dict]: Distribution of total returns for each ticker.
         """
         import numpy as np
 
@@ -251,9 +281,14 @@ class SignalOptimizer:
         return results
 
     def risk_parity_backtest(self, trade_type: str = "long", signal_names: List[str] = None):
-        """
-        Multi-factor portfolio backtest using risk parity allocation.
-        Returns portfolio performance metrics.
+        """Multi-factor portfolio backtest using risk parity allocation.
+
+        Args:
+            trade_type (str, optional): Type of trade ("long" or "short"). Defaults to "long".
+            signal_names (List[str], optional): List of signal names to use. Defaults to all signals.
+
+        Returns:
+            Dict: Portfolio performance metrics.
         """
         import numpy as np
 
@@ -282,10 +317,15 @@ class SignalOptimizer:
     def regime_switching_backtest(
         self, trade_type: str = "long", signal_names: List[str] = None, n_states: int = 2
     ):
-        """
-        Regime-switching model (e.g., Markov regime switching) for signal backtesting.
-        n_states: number of market regimes
-        Returns performance by regime.
+        """Regime-switching model (e.g., Markov regime switching) for signal backtesting.
+
+        Args:
+            trade_type (str, optional): Type of trade ("long" or "short"). Defaults to "long".
+            signal_names (List[str], optional): List of signal names to use. Defaults to all signals.
+            n_states (int, optional): Number of market regimes. Defaults to 2.
+
+        Returns:
+            List[Dict]: Performance by regime for each ticker.
         """
         from sklearn.mixture import GaussianMixture
 
@@ -313,9 +353,15 @@ class SignalOptimizer:
         signal_names: List[str] = None,
         model_type: str = "RandomForest",
     ):
-        """
-        Machine learning ensemble (RandomForest, GradientBoosting) for signal generation and backtesting.
-        Returns out-of-sample performance.
+        """Machine learning ensemble (RandomForest, GradientBoosting) for signal generation and backtesting.
+
+        Args:
+            trade_type (str, optional): Type of trade ("long" or "short"). Defaults to "long".
+            signal_names (List[str], optional): List of signal names to use. Defaults to all signals.
+            model_type (str, optional): ML model type ("RandomForest" or "GradientBoosting"). Defaults to "RandomForest".
+
+        Returns:
+            List[Dict]: Out-of-sample performance for each ticker.
         """
         from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 
@@ -348,10 +394,15 @@ class SignalOptimizer:
         signal_names: List[str] = None,
         cost_per_trade: float = 0.0005,
     ):
-        """
-        Backtest with transaction cost and slippage modeling.
-        cost_per_trade: fraction of trade value lost to costs
-        Returns net performance.
+        """Backtest with transaction cost and slippage modeling.
+
+        Args:
+            trade_type (str, optional): Type of trade ("long" or "short"). Defaults to "long".
+            signal_names (List[str], optional): List of signal names to use. Defaults to all signals.
+            cost_per_trade (float, optional): Fraction of trade value lost to costs. Defaults to 0.0005.
+
+        Returns:
+            List[Dict]: Net performance for each ticker.
         """
         if signal_names is None:
             signal_names = list(self.signal_generators.keys())
@@ -384,25 +435,33 @@ class SignalOptimizer:
         return results
 
     def add_short_signals(self, short_signals: Dict[str, Callable]):
-        """
-        Add or update short signal generators for short position testing.
+        """Add or update short signal generators for short position testing.
+
+        Args:
+            short_signals (Dict[str, Callable]): Dictionary of short signal generators.
         """
         self.signal_generators.update(short_signals)
 
     def add_long_signals(self, long_signals: Dict[str, Callable]):
-        """
-        Add or update long signal generators for long position testing.
+        """Add or update long signal generators for long position testing.
+
+        Args:
+            long_signals (Dict[str, Callable]): Dictionary of long signal generators.
         """
         self.signal_generators.update(long_signals)
 
     def add_options_signals(self, options_signals: Dict[str, Callable]):
-        """
-        Add or update options signal generators for options trading strategies.
+        """Add or update options signal generators for options trading strategies.
+
+        Args:
+            options_signals (Dict[str, Callable]): Dictionary of options signal generators.
         """
         self.signal_generators.update(options_signals)
 
     def add_sentiment_signals(self, sentiment_signals: Dict[str, Callable]):
-        """
-        Add or update sentiment signal generators for all trade types.
+        """Add or update sentiment signal generators for all trade types.
+
+        Args:
+            sentiment_signals (Dict[str, Callable]): Dictionary of sentiment signal generators.
         """
         self.signal_generators.update(sentiment_signals)

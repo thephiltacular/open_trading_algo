@@ -8,6 +8,11 @@ from open_trading_algo.fin_data_apis.rate_limit import rate_limit
 
 class TradingViewAPI:
     def __init__(self, api_key: str = None):
+        """Initialize TradingViewAPI with API key.
+
+        Args:
+            api_key (str, optional): TradingView API key. If not provided, attempts to load from environment.
+        """
         if not api_key:
             api_key = get_api_key("tradingview")
         if not api_key:
@@ -19,7 +24,14 @@ class TradingViewAPI:
 
     @rate_limit("tradingview")
     def get_symbol_info(self, symbol: str):
-        """Fetch symbol info from TradingView API."""
+        """Fetch symbol info from TradingView API.
+
+        Args:
+            symbol (str): Stock ticker symbol.
+
+        Returns:
+            dict: JSON response containing symbol information.
+        """
         url = f"{self.base_url}/symbol_info/{symbol}"
         headers = {"Authorization": f"Bearer {self.api_key}"}
         resp = requests.get(url, headers=headers, timeout=10)
@@ -28,7 +40,16 @@ class TradingViewAPI:
 
     @rate_limit("tradingview")
     def get_chart_data(self, symbol: str, interval: str = "1d", limit: int = 100):
-        """Fetch chart data (candles) for a symbol."""
+        """Fetch chart data (candles) for a symbol.
+
+        Args:
+            symbol (str): Stock ticker symbol.
+            interval (str, optional): Time interval for candles. Defaults to "1d".
+            limit (int, optional): Maximum number of data points. Defaults to 100.
+
+        Returns:
+            dict: JSON response containing chart data.
+        """
         url = f"{self.base_url}/chart/{symbol}?interval={interval}&limit={limit}"
         headers = {"Authorization": f"Bearer {self.api_key}"}
         resp = requests.get(url, headers=headers, timeout=10)

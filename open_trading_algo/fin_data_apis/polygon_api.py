@@ -8,6 +8,11 @@ from open_trading_algo.fin_data_apis.rate_limit import rate_limit
 
 class PolygonAPI:
     def __init__(self, api_key: str = None):
+        """Initialize PolygonAPI with API key.
+
+        Args:
+            api_key (str, optional): Polygon API key. If not provided, attempts to load from environment.
+        """
         if not api_key:
             api_key = get_api_key("polygon")
         if not api_key:
@@ -24,7 +29,18 @@ class PolygonAPI:
         to_date: str = None,
         limit: int = 100,
     ):
-        """Fetch aggregate (OHLCV) bars for a stock symbol."""
+        """Fetch aggregate (OHLCV) bars for a stock symbol.
+
+        Args:
+            symbol (str): Stock ticker symbol.
+            timespan (str, optional): Timespan for bars. Defaults to "day".
+            from_date (str, optional): Start date in YYYY-MM-DD format. Defaults to None.
+            to_date (str, optional): End date in YYYY-MM-DD format. Defaults to None.
+            limit (int, optional): Maximum number of results. Defaults to 100.
+
+        Returns:
+            dict: JSON response containing aggregate bars data.
+        """
         url = f"{self.base_url}/v2/aggs/ticker/{symbol}/range/1/{timespan}/{from_date}/{to_date}"
         params = {"apiKey": self.api_key, "limit": limit}
         resp = requests.get(url, params=params, timeout=10)
@@ -35,7 +51,17 @@ class PolygonAPI:
     def get_option_chain(
         self, underlying: str, expiration: str = None, option_type: str = None, limit: int = 100
     ):
-        """Fetch option chain for an underlying symbol."""
+        """Fetch option chain for an underlying symbol.
+
+        Args:
+            underlying (str): Underlying stock ticker symbol.
+            expiration (str, optional): Expiration date in YYYY-MM-DD format. Defaults to None.
+            option_type (str, optional): Option type ('call' or 'put'). Defaults to None.
+            limit (int, optional): Maximum number of results. Defaults to 100.
+
+        Returns:
+            dict: JSON response containing option chain data.
+        """
         url = f"{self.base_url}/v3/reference/options/contracts"
         params = {"underlying_ticker": underlying, "apiKey": self.api_key, "limit": limit}
         if expiration:
@@ -55,7 +81,18 @@ class PolygonAPI:
         to_date: str = None,
         limit: int = 100,
     ):
-        """Fetch aggregate (OHLCV) bars for an index symbol."""
+        """Fetch aggregate (OHLCV) bars for an index symbol.
+
+        Args:
+            symbol (str): Index ticker symbol.
+            timespan (str, optional): Timespan for bars. Defaults to "day".
+            from_date (str, optional): Start date in YYYY-MM-DD format. Defaults to None.
+            to_date (str, optional): End date in YYYY-MM-DD format. Defaults to None.
+            limit (int, optional): Maximum number of results. Defaults to 100.
+
+        Returns:
+            dict: JSON response containing aggregate bars data.
+        """
         url = f"{self.base_url}/v2/aggs/ticker/{symbol}/range/1/{timespan}/{from_date}/{to_date}"
         params = {"apiKey": self.api_key, "limit": limit}
         resp = requests.get(url, params=params, timeout=10)

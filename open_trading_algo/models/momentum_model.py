@@ -20,6 +20,11 @@ class MomentumModel(BaseTradingModel):
     """
 
     def __init__(self, config: Optional[Dict] = None):
+        """Initialize the momentum model.
+
+        Args:
+            config (Optional[Dict]): Model configuration parameters. Defaults to None.
+        """
         super().__init__(config)
         # Set default configuration first
         default_config = {
@@ -34,14 +39,13 @@ class MomentumModel(BaseTradingModel):
         self.config = default_config
 
     def generate_signals(self, data: pd.DataFrame) -> pd.Series:
-        """
-        Generate momentum-based trading signals.
+        """Generate momentum-based trading signals.
 
         Args:
-            data: OHLCV DataFrame with indicators
+            data (pd.DataFrame): OHLCV DataFrame with indicators.
 
         Returns:
-            Series of signals (1=BUY, -1=SELL, 0=HOLD)
+            pd.Series: Series of signals (1=BUY, -1=SELL, 0=HOLD).
         """
         signals = pd.Series(0, index=data.index)
 
@@ -88,15 +92,14 @@ class MomentumModel(BaseTradingModel):
         return signals
 
     def calculate_position_size(self, capital: float, risk_per_trade: float = 0.02) -> float:
-        """
-        Calculate position size based on momentum strength.
+        """Calculate position size based on momentum strength.
 
         Args:
-            capital: Available trading capital
-            risk_per_trade: Risk per trade as fraction of capital
+            capital (float): Available trading capital.
+            risk_per_trade (float, optional): Risk per trade as fraction of capital. Defaults to 0.02.
 
         Returns:
-            Position size
+            float: Position size.
         """
         # For momentum models, we might want to size positions
         # based on the strength of the momentum signal
@@ -107,7 +110,11 @@ class MomentumModel(BaseTradingModel):
         return base_risk
 
     def get_model_info(self) -> Dict:
-        """Get momentum model information."""
+        """Get momentum model information.
+
+        Returns:
+            Dict: Dictionary with model information.
+        """
         info = super().get_model_info()
         info.update(
             {
