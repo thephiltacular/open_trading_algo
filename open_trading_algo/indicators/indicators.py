@@ -54,6 +54,14 @@ def trima(series: pd.Series, window: int) -> pd.Series:
     return series.rolling(window, min_periods=1).mean().rolling(window, min_periods=1).mean()
 
 
+def trix(series: pd.Series, window: int = 14) -> pd.Series:
+    """1-day Rate-Of-Change (ROC) of a Triple Smooth EMA"""
+    ema1 = ema(series, window)
+    ema2 = ema(ema1, window)
+    ema3 = ema(ema2, window)
+    return ema3.pct_change() * 100
+
+
 def macd(series: pd.Series, fast: int = 12, slow: int = 26, signal: int = 9):
     """MACD, MACD Signal, MACD Histogram"""
     macd_line = ema(series, fast) - ema(series, slow)
@@ -96,10 +104,47 @@ def atr(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> 
     return tr.rolling(window).mean()
 
 
+def natr(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
+    """Normalized Average True Range"""
+    atr_val = atr(high, low, close, window)
+    return 100 * atr_val / close
+
+
+def trange(high: pd.Series, low: pd.Series, close: pd.Series) -> pd.Series:
+    """True Range"""
+    prev_close = close.shift(1)
+    tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(
+        axis=1
+    )
+    return tr
+
+
 def obv(close: pd.Series, volume: pd.Series) -> pd.Series:
     """On Balance Volume"""
     direction = np.sign(close.diff()).fillna(0)
     return (volume * direction).cumsum()
+
+
+def mfi(
+    high: pd.Series, low: pd.Series, close: pd.Series, volume: pd.Series, window: int = 14
+) -> pd.Series:
+    """Money Flow Index"""
+    typical_price = (high + low + close) / 3
+    raw_money_flow = typical_price * volume
+
+    # Positive and negative money flow
+    money_flow_direction = np.sign(typical_price.diff()).fillna(0)
+    positive_flow = raw_money_flow.where(money_flow_direction > 0, 0)
+    negative_flow = raw_money_flow.where(money_flow_direction < 0, 0)
+
+    # Money flow ratio
+    positive_mf = positive_flow.rolling(window).sum()
+    negative_mf = negative_flow.rolling(window).sum()
+    money_flow_ratio = positive_mf / negative_mf.replace(0, np.nan)
+
+    # Money Flow Index
+    mfi = 100 - (100 / (1 + money_flow_ratio))
+    return mfi.fillna(50)
 
 
 def roc(series: pd.Series, window: int = 12) -> pd.Series:
@@ -129,6 +174,112 @@ def midpoint(series: pd.Series, window: int = 14) -> pd.Series:
 def midprice(high: pd.Series, low: pd.Series, window: int = 14) -> pd.Series:
     """Midpoint Price over period"""
     return (high.rolling(window).max() + low.rolling(window).min()) / 2
+
+
+def plus_dm(high: pd.Series, low: pd.Series) -> pd.Series:
+    """Plus Directional Movement"""
+    high_diff = high.diff()
+    low_diff = low.diff()
+    plus_dm = np.where((high_diff > low_diff) & (high_diff > 0), high_diff, 0)
+    return pd.Series(plus_dm, index=high.index)
+
+
+def minus_dm(high: pd.Series, low: pd.Series) -> pd.Series:
+    """Minus Directional Movement"""
+    high_diff = high.diff()
+    low_diff = low.diff()
+    minus_dm = np.where((low_diff > high_diff) & (low_diff > 0), low_diff, 0)
+    return pd.Series(minus_dm, index=high.index)
+
+
+def plus_di(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
+    """Plus Directional Indicator"""
+    tr = trange(high, low, close)
+    plus_dm_val = plus_dm(high, low)
+    return 100 * plus_dm_val.rolling(window).sum() / tr.rolling(window).sum()
+
+
+def minus_di(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
+    """Minus Directional Indicator"""
+    tr = trange(high, low, close)
+    minus_dm_val = minus_dm(high, low)
+    return 100 * minus_dm_val.rolling(window).sum() / tr.rolling(window).sum()
+
+
+def dx(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
+    """Directional Movement Index"""
+    plus_di_val = plus_di(high, low, close, window)
+    minus_di_val = minus_di(high, low, close, window)
+    return 100 * abs(plus_di_val - minus_di_val) / (plus_di_val + minus_di_val).replace(0, np.nan)
+
+
+def ultosc(
+    high: pd.Series,
+    low: pd.Series,
+    close: pd.Series,
+    short_period: int = 7,
+    medium_period: int = 14,
+    long_period: int = 28,
+) -> pd.Series:
+    """Ultimate Oscillator"""
+    # Calculate True Range
+    tr = trange(high, low, close)
+
+    # Calculate Buying Pressure (BP)
+    bp = close - low.rolling(2).min().shift(1)
+
+    # Calculate averages for different periods
+    avg7 = bp.rolling(short_period).sum() / tr.rolling(short_period).sum()
+    avg14 = bp.rolling(medium_period).sum() / tr.rolling(medium_period).sum()
+    avg28 = bp.rolling(long_period).sum() / tr.rolling(long_period).sum()
+
+    # Ultimate Oscillator
+    ultosc = 100 * (4 * avg7 + 2 * avg14 + avg28) / 7
+    return ultosc
+
+
+def sar(
+    high: pd.Series,
+    low: pd.Series,
+    close: pd.Series,
+    acceleration: float = 0.02,
+    max_acceleration: float = 0.2,
+) -> pd.Series:
+    """Parabolic SAR"""
+    sar = pd.Series(index=high.index, dtype=float)
+
+    # Initialize first SAR value
+    if len(high) > 0:
+        sar.iloc[0] = low.iloc[0]
+
+    # Track trend direction
+    trend = 1  # 1 = uptrend, -1 = downtrend
+    ep = high.iloc[0] if trend == 1 else low.iloc[0]  # Extreme point
+    af = acceleration  # Acceleration factor
+
+    for i in range(1, len(high)):
+        if trend == 1:  # Uptrend
+            sar.iloc[i] = sar.iloc[i - 1] + af * (ep - sar.iloc[i - 1])
+            if high.iloc[i] > ep:
+                ep = high.iloc[i]
+                af = min(af + acceleration, max_acceleration)
+            if sar.iloc[i] >= low.iloc[i]:
+                trend = -1
+                sar.iloc[i] = ep
+                ep = low.iloc[i]
+                af = acceleration
+        else:  # Downtrend
+            sar.iloc[i] = sar.iloc[i - 1] + af * (ep - sar.iloc[i - 1])
+            if low.iloc[i] < ep:
+                ep = low.iloc[i]
+                af = min(af + acceleration, max_acceleration)
+            if sar.iloc[i] <= high.iloc[i]:
+                trend = 1
+                sar.iloc[i] = ep
+                ep = high.iloc[i]
+                af = acceleration
+
+    return sar
 
 
 # --- Stochastic Indicators ---
@@ -239,6 +390,25 @@ def stochrsi(
     stochrsi_d = stochrsi_k.rolling(k_period).mean()
 
     return stochrsi_k, stochrsi_d
+
+
+def aroon(high: pd.Series, low: pd.Series, window: int = 14) -> tuple[pd.Series, pd.Series]:
+    """Aroon Indicator: returns (aroon_up, aroon_down)"""
+    # Days since highest high
+    high_max_idx = high.rolling(window).apply(lambda x: window - np.argmax(x) - 1, raw=True)
+    aroon_up = 100 * (window - high_max_idx) / window
+
+    # Days since lowest low
+    low_min_idx = low.rolling(window).apply(lambda x: window - np.argmin(x) - 1, raw=True)
+    aroon_down = 100 * (window - low_min_idx) / window
+
+    return aroon_up, aroon_down
+
+
+def aroonosc(high: pd.Series, low: pd.Series, window: int = 14) -> pd.Series:
+    """Aroon Oscillator"""
+    aroon_up, aroon_down = aroon(high, low, window)
+    return aroon_up - aroon_down
 
 
 # --- Accumulation/Distribution Indicators ---
@@ -676,6 +846,18 @@ def hilbert_trend_vs_cycle(series: pd.Series, cycle_period: int = 20) -> tuple[p
     return trend_component, cycle_component
 
 
+def hilbert_dcphase(series: pd.Series, window: int = 20) -> pd.Series:
+    """Hilbert Transform - Dominant Cycle Phase"""
+    in_phase, quadrature = hilbert_transform(series, window)
+    phase = np.arctan2(quadrature, in_phase)
+    return phase
+
+
+def hilbert_phasor(series: pd.Series, window: int = 20) -> tuple[pd.Series, pd.Series]:
+    """Hilbert Transform - Phasor Components (In-phase and Quadrature)"""
+    return hilbert_transform(series, window)
+
+
 __all__ = [
     "safe_subtract",
     "add_many",
@@ -697,10 +879,26 @@ __all__ = [
     "hilbert_cycle_period",
     "hilbert_instantaneous_trendline",
     "hilbert_trend_vs_cycle",
+    "hilbert_dcphase",
+    "hilbert_phasor",
     "stoch",
     "stochf",
     "stochrsi",
     "ad",
     "adosc",
     "obv",
+    "atr",
+    "natr",
+    "trange",
+    "mfi",
+    "plus_dm",
+    "minus_dm",
+    "plus_di",
+    "minus_di",
+    "dx",
+    "aroon",
+    "aroonosc",
+    "trix",
+    "ultosc",
+    "sar",
 ]

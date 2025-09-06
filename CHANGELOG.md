@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.1] - 2025-09-06
+### Added
+- **Technical Indicators Expansion**: Implemented 13 additional technical indicators to complete Alpha Vantage API compatibility:
+  - **Volatility Indicators**: NATR (Normalized ATR), TRANGE (True Range)
+  - **Volume Indicators**: MFI (Money Flow Index)
+  - **Momentum Indicators**: PLUS_DM, MINUS_DM, PLUS_DI, MINUS_DI, DX (Directional Movement System)
+  - **Trend Indicators**: AROON, AROONOSC, TRIX, ULTOSC, SAR (Parabolic SAR)
+  - **Cycle Indicators**: HT_DCPHASE, HT_PHASOR (additional Hilbert Transform indicators)
+- **Comprehensive Test Coverage**: Added 13 new test functions covering all newly implemented indicators with proper edge case handling and bounds validation
+- **Enhanced Indicator Framework**: Improved error handling for edge cases (NaN values, division by zero) and maintained consistent API patterns
+
+### Changed
+- Updated `__all__` exports in indicators module to include all new indicator functions
+- Enhanced test suite with 61 total tests (48 existing + 13 new) ensuring no regressions
+
+### Fixed
+- Resolved edge cases in Stochastic RSI calculations with proper NaN handling
+- Fixed test assertions for A/D Oscillator convergence testing
+
 ## [0.1.0] - 2025-09-06
 ### Added
 - Reorganized package into focused subpackages: indicators/, fin_data_apis/, cache/, backtest/, sentiment/, alerts/.

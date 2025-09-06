@@ -25,6 +25,19 @@ from open_trading_algo.indicators.indicators import (
     stochrsi,
     ad,
     adosc,
+    natr,
+    trange,
+    mfi,
+    plus_dm,
+    minus_dm,
+    plus_di,
+    minus_di,
+    dx,
+    aroon,
+    aroonosc,
+    trix,
+    ultosc,
+    sar,
 )
 
 # Fixture for synthetic price data (pd.Series)
@@ -614,3 +627,188 @@ def test_adosc_convergence(sample_ohlc):
     # Should oscillate around zero
     mean_value = oscillator.iloc[20:].mean()
     assert abs(mean_value) < oscillator.iloc[20:].std()  # Mean should be within one std dev
+
+
+# --- Additional Indicator Tests ---
+
+
+def test_natr(sample_ohlc):
+    """Test Normalized Average True Range."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+    close = sample_ohlc["close"]
+
+    natr_val = natr(high, low, close, window=14)
+
+    assert isinstance(natr_val, pd.Series)
+    assert len(natr_val) == len(sample_ohlc)
+    # NATR should be positive
+    assert (natr_val.dropna() >= 0).all()
+
+
+def test_trange(sample_ohlc):
+    """Test True Range."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+    close = sample_ohlc["close"]
+
+    tr = trange(high, low, close)
+
+    assert isinstance(tr, pd.Series)
+    assert len(tr) == len(sample_ohlc)
+    # True Range should be non-negative
+    assert (tr >= 0).all()
+
+
+def test_mfi(sample_ohlc):
+    """Test Money Flow Index."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+    close = sample_ohlc["close"]
+    volume = sample_ohlc["volume"]
+
+    mfi_val = mfi(high, low, close, volume, window=14)
+
+    assert isinstance(mfi_val, pd.Series)
+    assert len(mfi_val) == len(sample_ohlc)
+    # MFI should be between 0 and 100
+    valid_mfi = mfi_val.dropna()
+    assert (valid_mfi >= 0).all() and (valid_mfi <= 100).all()
+
+
+def test_plus_dm(sample_ohlc):
+    """Test Plus Directional Movement."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+
+    plus_dm_val = plus_dm(high, low)
+
+    assert isinstance(plus_dm_val, pd.Series)
+    assert len(plus_dm_val) == len(sample_ohlc)
+    # Plus DM should be non-negative
+    assert (plus_dm_val >= 0).all()
+
+
+def test_minus_dm(sample_ohlc):
+    """Test Minus Directional Movement."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+
+    minus_dm_val = minus_dm(high, low)
+
+    assert isinstance(minus_dm_val, pd.Series)
+    assert len(minus_dm_val) == len(sample_ohlc)
+    # Minus DM should be non-negative
+    assert (minus_dm_val >= 0).all()
+
+
+def test_plus_di(sample_ohlc):
+    """Test Plus Directional Indicator."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+    close = sample_ohlc["close"]
+
+    plus_di_val = plus_di(high, low, close, window=14)
+
+    assert isinstance(plus_di_val, pd.Series)
+    assert len(plus_di_val) == len(sample_ohlc)
+    # Plus DI should be non-negative
+    assert (plus_di_val.dropna() >= 0).all()
+
+
+def test_minus_di(sample_ohlc):
+    """Test Minus Directional Indicator."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+    close = sample_ohlc["close"]
+
+    minus_di_val = minus_di(high, low, close, window=14)
+
+    assert isinstance(minus_di_val, pd.Series)
+    assert len(minus_di_val) == len(sample_ohlc)
+    # Minus DI should be non-negative
+    assert (minus_di_val.dropna() >= 0).all()
+
+
+def test_dx(sample_ohlc):
+    """Test Directional Movement Index."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+    close = sample_ohlc["close"]
+
+    dx_val = dx(high, low, close, window=14)
+
+    assert isinstance(dx_val, pd.Series)
+    assert len(dx_val) == len(sample_ohlc)
+    # DX should be between 0 and 100
+    valid_dx = dx_val.dropna()
+    assert (valid_dx >= 0).all() and (valid_dx <= 100).all()
+
+
+def test_aroon(sample_ohlc):
+    """Test Aroon Indicator."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+
+    aroon_up, aroon_down = aroon(high, low, window=14)
+
+    assert isinstance(aroon_up, pd.Series)
+    assert isinstance(aroon_down, pd.Series)
+    assert len(aroon_up) == len(sample_ohlc)
+    assert len(aroon_down) == len(sample_ohlc)
+    # Aroon values should be between 0 and 100
+    assert (aroon_up.dropna() >= 0).all() and (aroon_up.dropna() <= 100).all()
+    assert (aroon_down.dropna() >= 0).all() and (aroon_down.dropna() <= 100).all()
+
+
+def test_aroonosc(sample_ohlc):
+    """Test Aroon Oscillator."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+
+    aroon_osc = aroonosc(high, low, window=14)
+
+    assert isinstance(aroon_osc, pd.Series)
+    assert len(aroon_osc) == len(sample_ohlc)
+    # Aroon Oscillator should be between -100 and 100
+    valid_osc = aroon_osc.dropna()
+    assert (valid_osc >= -100).all() and (valid_osc <= 100).all()
+
+
+def test_trix(sample_prices):
+    """Test TRIX (Triple Exponential Moving Average ROC)."""
+    trix_val = trix(sample_prices, window=14)
+
+    assert isinstance(trix_val, pd.Series)
+    assert len(trix_val) == len(sample_prices)
+    # TRIX should have some variation
+    assert not trix_val.eq(trix_val.iloc[0]).all()
+
+
+def test_ultosc(sample_ohlc):
+    """Test Ultimate Oscillator."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+    close = sample_ohlc["close"]
+
+    ultosc_val = ultosc(high, low, close)
+
+    assert isinstance(ultosc_val, pd.Series)
+    assert len(ultosc_val) == len(sample_ohlc)
+    # Ultimate Oscillator should be between 0 and 100
+    valid_uo = ultosc_val.dropna()
+    assert (valid_uo >= 0).all() and (valid_uo <= 100).all()
+
+
+def test_sar(sample_ohlc):
+    """Test Parabolic SAR."""
+    high = sample_ohlc["high"]
+    low = sample_ohlc["low"]
+    close = sample_ohlc["close"]
+
+    sar_val = sar(high, low, close)
+
+    assert isinstance(sar_val, pd.Series)
+    assert len(sar_val) == len(sample_ohlc)
+    # SAR should be within reasonable bounds
+    assert not sar_val.isna().all()
