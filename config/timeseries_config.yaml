@@ -1,0 +1,16 @@
+# InfluxDB Configuration for Time Series Cache
+influxdb:
+  url: "http://localhost:8086"
+  token: "my-token"
+  org: "trading-org"
+  bucket: "trading-data"
+
+# Data retention policies (in days)
+retention:
+  price_data: 3650  # 10 years
+  signals: 365      # 1 year
+
+# Query optimization settings
+query:
+  default_range: "-365d"
+  max_points_per_query: 100000

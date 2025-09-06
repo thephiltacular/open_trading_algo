@@ -17,7 +17,7 @@ run-model = "open_trading_algo.pipeline:main"
 
 [tool.poetry.dependencies]
 
-python = "^3.8"
+python = "^3.9"
 pandas = [
     {version = "^2.2.3", python = ">=3.9"},
     {version = "^1.5.3", python = "<3.9"}
@@ -32,6 +32,8 @@ scikit-learn = [
 ]
 yfinance = "^0.2.48"
 PyYAML = "^6.0.2"
+pyarrow = "^21.0.0"
+influxdb-client = "^1.49.0"
 
 
 [tool.poetry.group.dev.dependencies]

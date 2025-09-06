@@ -171,10 +171,50 @@ df = cache.get_signals("AAPL", "1d", "long_trend")
 print(df)
 ```
 
+### Advanced Time Series Database (InfluxDB)
+
+For high-performance time series data storage and analytics, open_trading_algo also supports **InfluxDB** as an alternative to SQLite:
+
+#### Key Benefits:
+- **Optimized for Time Series**: Columnar storage designed specifically for financial data
+- **High Performance**: Fast queries for OHLCV data and trading signals
+- **Advanced Analytics**: Built-in aggregation functions and time-based queries
+- **Scalable**: Handles large volumes of high-frequency financial data
+- **SQL-like Queries**: Use Flux language for complex analytical queries
+
+#### Quick Setup:
+
+```bash
+# 1. Install and start InfluxDB
+python open_trading_algo/cache/setup_influxdb.py
+
+# 2. Use the time series cache
+from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
+
+cache = TimeSeriesCache()
+cache.store_price_data('AAPL', ohlcv_df)
+data = cache.get_price_data('AAPL', start='2023-01-01', end='2023-12-31')
+
+# 3. Advanced queries
+weekly_data = cache.get_aggregated_data('AAPL', aggregation='1w')
+stats = cache.get_signal_stats('AAPL', '1d', 'momentum')
+```
+
+#### Features:
+- **Automatic Compression**: Efficient storage with built-in compression
+- **Retention Policies**: Configurable data retention (default: 10 years for price data)
+- **Real-time Analytics**: Aggregate data by time windows (hourly, daily, weekly)
+- **Concurrent Access**: Optimized for multiple concurrent queries
+- **Pandas Integration**: Seamless conversion to/from DataFrames
+
+See the [Time Series Cache Documentation](open_trading_algo/cache/README_TimeSeries.md) for complete setup and usage instructions.
+
 ### Notes
 
-- The database is SQLite for maximum portability and zero setup. For advanced users, you can point `db_path` to a remote or cloud SQLite file.
-- If you ever want to reset the cache, simply delete the `.sqlite3` file and it will be recreated on next use.
+- The default cache uses SQLite for maximum portability and zero setup
+- InfluxDB provides superior performance for large datasets and complex queries
+- Both cache systems maintain the same API for easy switching
+- For advanced users, you can point `db_path` to a remote or cloud database
 
 ## 🤝 Contributing
 
