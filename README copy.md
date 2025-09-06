@@ -85,7 +85,7 @@ All modules will use this path automatically if the config file is present.
 The database is set up automatically on first use. To manually initialize or verify the database, run:
 
 ```bash
-python scripts/setup_db.py
+python -m open_trading_algo.cache.setup_db
 ```
 
 This will create the database and all required tables if they do not exist.

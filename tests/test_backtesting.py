@@ -181,7 +181,7 @@ class TestBacktestValidation:
         data_with_nan.loc[data_with_nan.index[10:15], "close"] = np.nan
 
         # Should handle NaN values gracefully
-        returns = data_with_nan["close"].pct_change().fillna(0)
+        returns = data_with_nan["close"].pct_change(fill_method=None).fillna(0)
         assert len(returns) == len(data_with_nan)
 
     def test_multiple_strategy_comparison(self, sample_backtest_data, sample_signals):

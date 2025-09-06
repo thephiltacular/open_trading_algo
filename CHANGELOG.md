@@ -79,7 +79,8 @@ All notable changes to this project are documented in this file.
 - Added tests covering data enrichment, data cache, live data (mocked), and signal modules. Tests updated to reuse cached yfinance data to avoid rate limits.
 - Created docs/ with detailed guides (quickstart, installation, data-apis, configuration, cache, contribution).
 - Added CONTRIBUTING.md, MIT LICENSE, CHANGES.md, and CHANGES/CHANGELOG structure; updated pyproject.toml and dev dependencies.
-- Added scripts: setup_db.py, cache_aapl_10y.py, run_model.py, and other utility scripts.
+- Added scripts: cache_aapl_10y.py, run_model.py, and other utility scripts.
+- Moved setup_db.py to open_trading_algo/cache/ for better organization.
 
 ### Changed
 - Refactored and cleaned up duplicate/stray function definitions in all signal modules; moved compute_and_cache_* functions into proper function bodies.

@@ -163,7 +163,9 @@ class TestEndToEndWorkflow:
         weights = {ticker: 1.0 / len(tickers) for ticker in tickers}
 
         # Calculate portfolio returns
-        portfolio_returns = pd.Series(index=sample_multi_ticker_integration[tickers[0]].index)
+        portfolio_returns = pd.Series(
+            index=sample_multi_ticker_integration[tickers[0]].index, dtype=float
+        )
 
         for ticker in tickers:
             df = sample_multi_ticker_integration[ticker]

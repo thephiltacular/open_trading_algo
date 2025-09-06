@@ -76,15 +76,24 @@ class TestDatabaseSetup:
     @patch("open_trading_algo.cache.data_cache.DataCache")
     def test_database_initialization(self, mock_cache):
         """Test database initialization."""
+        import sys
+        import os
+        from importlib.util import spec_from_file_location, module_from_spec
+
         mock_cache_instance = MagicMock()
         mock_cache.return_value = mock_cache_instance
         mock_cache_instance.db_path = "/tmp/test_trading_algo.db"
 
-        # Import and run setup
-        from scripts.setup_db import main
+        # Import setup_db module dynamically
+        cache_dir = os.path.join(os.path.dirname(__file__), "..", "open_trading_algo", "cache")
+        setup_db_path = os.path.join(cache_dir, "setup_db.py")
+        spec = spec_from_file_location("setup_db", setup_db_path)
+        setup_db_module = module_from_spec(spec)
+        sys.modules["setup_db"] = setup_db_module
+        spec.loader.exec_module(setup_db_module)
 
         with patch("builtins.print"):  # Suppress print output
-            main()
+            setup_db_module.main()
 
         # Verify cache was initialized
         mock_cache.assert_called_once()
@@ -187,7 +196,7 @@ class TestDataValidation:
         # Create sample signal data
         sample_signals = pd.DataFrame(
             {
-                "timestamp": pd.date_range("2023-01-01", periods=5, freq="H"),
+                "timestamp": pd.date_range("2023-01-01", periods=5, freq="h"),
                 "ticker": ["AAPL"] * 5,
                 "signal_type": ["long", "short", "hold", "long", "short"],
                 "strength": [0.8, -0.6, 0.0, 0.9, -0.7],
@@ -230,27 +239,47 @@ class TestDataValidation:
 class TestSetupScripts:
     """Test setup and installation scripts."""
 
-    @patch("scripts.setup_db.main")
-    def test_setup_db_script_execution(self, mock_main):
+    def test_setup_db_script_execution(self):
         """Test database setup script execution."""
-        # Import the script
-        import scripts.setup_db as setup_script
+        import sys
+        import os
+        from importlib.util import spec_from_file_location, module_from_spec
+        from unittest.mock import patch, MagicMock
+
+        # Import setup_db module dynamically
+        cache_dir = os.path.join(os.path.dirname(__file__), "..", "open_trading_algo", "cache")
+        setup_db_path = os.path.join(cache_dir, "setup_db.py")
+        spec = spec_from_file_location("setup_db", setup_db_path)
+        setup_db_module = module_from_spec(spec)
+        sys.modules["setup_db"] = setup_db_module
+        spec.loader.exec_module(setup_db_module)
 
         # Mock the main function
-        mock_main.return_value = None
+        with patch.object(setup_db_module, "main") as mock_main:
+            mock_main.return_value = None
 
-        # Execute setup
-        setup_script.main()
+            # Execute setup
+            setup_db_module.main()
 
-        # Verify main was called
-        mock_main.assert_called_once()
+            # Verify main was called
+            mock_main.assert_called_once()
 
     def test_setup_script_imports(self):
         """Test that setup scripts can import required modules."""
-        try:
-            import scripts.setup_db
+        import sys
+        import os
+        from importlib.util import spec_from_file_location, module_from_spec
 
-            assert hasattr(scripts.setup_db, "main")
+        try:
+            # Import setup_db module dynamically
+            cache_dir = os.path.join(os.path.dirname(__file__), "..", "open_trading_algo", "cache")
+            setup_db_path = os.path.join(cache_dir, "setup_db.py")
+            spec = spec_from_file_location("setup_db", setup_db_path)
+            setup_db_module = module_from_spec(spec)
+            sys.modules["setup_db"] = setup_db_module
+            spec.loader.exec_module(setup_db_module)
+
+            assert hasattr(setup_db_module, "main")
         except ImportError as e:
             pytest.fail(f"Setup script import failed: {e}")
 

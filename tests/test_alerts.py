@@ -33,7 +33,7 @@ def sample_alert_dataframe():
             "Oversold condition",
             "Bearish divergence",
         ],
-        "timestamp": pd.date_range("2023-01-01", periods=5, freq="H"),
+        "timestamp": pd.date_range("2023-01-01", periods=5, freq="h"),
         "ticker": ["AAPL", "GOOGL", "MSFT", "TSLA", "NFLX"],
     }
     return pd.DataFrame(data)
