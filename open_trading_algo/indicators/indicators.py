@@ -236,12 +236,6 @@ def rsi(series: pd.Series, window: int = 14) -> pd.Series:
     rs = gain / loss.replace(0, np.nan)
     rsi = 100 - (100 / (1 + rs))
     return rsi.fillna(0)
-    delta = series.diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=window, min_periods=1).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window, min_periods=1).mean()
-    rs = gain / loss.replace(0, np.nan)
-    rsi = 100 - (100 / (1 + rs))
-    return rsi.fillna(0)
 
 
 def willr(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> pd.Series:
@@ -339,11 +333,6 @@ def trange(high: pd.Series, low: pd.Series, close: pd.Series) -> pd.Series:
     Returns:
         pd.Series: True Range values.
     """
-    prev_close = close.shift(1)
-    tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(
-        axis=1
-    )
-    return tr
     prev_close = close.shift(1)
     tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(
         axis=1

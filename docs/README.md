@@ -13,6 +13,7 @@ Welcome to the comprehensive documentation for open_trading_algo - a robust Pyth
 - [Data APIs & Fetchers](data-apis.md) - Financial data retrieval from multiple sources
 - [Data Cache System](data-cache.md) - Local database caching for performance
 - [Technical Indicators](indicators.md) - Comprehensive technical analysis indicators
+- [Trading Metrics](metrics.md) - Risk, performance, and analytical metrics
 - [Trading Models](models.md) - Modular trading strategy implementations
 - [Signal Generation](signals.md) - Long, short, options, and sentiment signals
 - [Risk Management](risk-management.md) - Position sizing and risk controls

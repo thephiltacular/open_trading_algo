@@ -145,6 +145,49 @@ support_break = breaking_support(df["Close"], df["Volume"])
 print(f"Support Break Signal: {support_break.iloc[-1]}")
 ```
 
+## Risk & Performance Metrics
+
+### Calculate Risk-Adjusted Performance
+
+```python
+from open_trading_algo.indicators.metrics import (
+    compute_sharpe_ratio,
+    compute_max_drawdown,
+    compute_volatility_ratio,
+)
+
+# Calculate returns
+returns = df["Close"].pct_change().dropna()
+
+# Risk metrics
+sharpe = compute_sharpe_ratio(returns.to_frame())
+max_dd = compute_max_drawdown(df)
+vol_ratio = compute_volatility_ratio(df)
+
+print(f"Sharpe Ratio: {sharpe.iloc[-1]:.3f}")
+print(f"Max Drawdown: {max_dd.iloc[-1]:.3f}")
+print(f"Volatility Ratio: {vol_ratio.iloc[-1]:.3f}")
+```
+
+### Volume & Trend Analysis
+
+```python
+from open_trading_algo.indicators.metrics import (
+    compute_volume_price_trend,
+    compute_trend_strength,
+    compute_vwap,
+)
+
+# Volume analysis
+vpt = compute_volume_price_trend(df)
+vwap = compute_vwap(df)
+trend_strength = compute_trend_strength(df)
+
+print(f"Volume Price Trend: {vpt.iloc[-1]:.4f}")
+print(f"VWAP: ${vwap.iloc[-1]:.2f}")
+print(f"Trend Strength (ADX): {trend_strength.iloc[-1]:.2f}")
+```
+
 ## Trading Models
 
 ### Using Pre-built Models
