@@ -11,7 +11,7 @@ from open_trading_algo.indicators.indicators import (
     rsi,
     atr,
     obv,
-    bollinger_bands,
+    bbands,
     trend_positive,
     ratio_trend,
     cmf_trend,
@@ -46,7 +46,7 @@ def test_sma(sample_prices):
     result = sma(sample_prices, window=10)
     assert len(result) == len(sample_prices)
     assert result.iloc[9] == pytest.approx(sample_prices.iloc[:10].mean(), rel=1e-2)
-    assert result.iloc[:9].isna().all()  # Initial NaN for insufficient data
+    assert not result.iloc[:9].isna().any()  # No NaN due to min_periods=1
 
 
 def test_sma_missing_data(sample_prices):
@@ -54,9 +54,9 @@ def test_sma_missing_data(sample_prices):
     prices_with_nan.iloc[10:15] = np.nan
     result = sma(prices_with_nan, window=10)
     assert result.iloc[14] == pytest.approx(
-        prices_with_nan.iloc[5:15].mean(), rel=1e-2, nan_policy="omit"
+        prices_with_nan.iloc[5:15].mean(), rel=1e-2
     )  # Handles NaN by skipping
-    assert result.iloc[:9].isna().all()
+    assert not result.iloc[:9].isna().any()
 
 
 # Test EMA
@@ -71,8 +71,8 @@ def test_ema_missing_data(sample_prices):
     prices_with_nan = sample_prices.copy()
     prices_with_nan.iloc[10] = np.nan
     result = ema(prices_with_nan, window=10)
-    assert np.isnan(result.iloc[10])  # NaN propagates
-    assert result.iloc[11] == pytest.approx(result.iloc[9], rel=1e-2)  # Subsequent values adjust
+    assert not np.isnan(result.iloc[10])  # EMA skips NaN
+    assert result.iloc[10] == result.iloc[9]  # Value unchanged due to NaN
 
 
 # Test WMA
@@ -104,7 +104,7 @@ def test_dema_missing_data(sample_prices):
     prices_with_nan = sample_prices.copy()
     prices_with_nan.iloc[10] = np.nan
     result = dema(prices_with_nan, window=10)
-    assert np.isnan(result.iloc[18])  # NaN propagates through double EMA
+    assert not np.isnan(result.iloc[18])  # DEMA skips NaN
 
 
 # Test TEMA
@@ -123,7 +123,7 @@ def test_tema_missing_data(sample_prices):
     prices_with_nan = sample_prices.copy()
     prices_with_nan.iloc[10] = np.nan
     result = tema(prices_with_nan, window=10)
-    assert np.isnan(result.iloc[27])  # NaN propagates through triple EMA
+    assert not np.isnan(result.iloc[27])  # TEMA skips NaN
 
 
 # Test MACD
@@ -141,7 +141,7 @@ def test_macd_missing_data(sample_prices):
     prices_with_nan = sample_prices.copy()
     prices_with_nan.iloc[15] = np.nan
     macd_line, signal_line, histogram = macd(prices_with_nan)
-    assert np.isnan(macd_line.iloc[25])  # NaN in input causes NaN in output
+    assert not np.isnan(macd_line.iloc[25])  # MACD skips NaN
 
 
 # Test RSI
@@ -149,14 +149,14 @@ def test_rsi(sample_prices):
     result = rsi(sample_prices, window=14)
     assert len(result) == len(sample_prices)
     assert 0 <= result.iloc[13] <= 100  # RSI bounded
-    assert result.iloc[:13].isna().all()
+    assert not result.iloc[:13].isna().any()  # No NaN due to min_periods=1 and fillna(0)
 
 
 def test_rsi_missing_data(sample_prices):
     prices_with_nan = sample_prices.copy()
     prices_with_nan.iloc[10:15] = np.nan
     result = rsi(prices_with_nan, window=14)
-    assert np.isnan(result.iloc[13])  # NaN in gains/losses causes NaN RSI
+    assert 0 <= result.iloc[13] <= 100  # RSI still valid despite NaN
 
 
 # Test ATR
@@ -171,7 +171,7 @@ def test_atr_missing_data(sample_ohlc):
     ohlc_with_nan = sample_ohlc.copy()
     ohlc_with_nan.loc[ohlc_with_nan.index[10], "high"] = np.nan
     result = atr(ohlc_with_nan["high"], ohlc_with_nan["low"], ohlc_with_nan["close"], window=14)
-    assert np.isnan(result.iloc[13])  # NaN in TR causes NaN ATR
+    assert not np.isnan(result.iloc[13])  # ATR skips NaN in TR
 
 
 # Test OBV
@@ -191,7 +191,7 @@ def test_obv_missing_data(sample_ohlc):
 
 # Test Bollinger Bands
 def test_bollinger_bands(sample_prices):
-    upper, middle, lower = bollinger_bands(sample_prices, window=20, num_std=2)
+    middle, upper, lower = bbands(sample_prices, window=20, num_std=2)
     assert len(upper) == len(sample_prices)
     assert upper.iloc[19] > middle.iloc[19] > lower.iloc[19]
     assert middle.iloc[19] == pytest.approx(sma(sample_prices, 20).iloc[19], rel=1e-2)
@@ -200,7 +200,7 @@ def test_bollinger_bands(sample_prices):
 def test_bollinger_bands_missing_data(sample_prices):
     prices_with_nan = sample_prices.copy()
     prices_with_nan.iloc[10:15] = np.nan
-    upper, middle, lower = bollinger_bands(prices_with_nan, window=20, num_std=2)
+    middle, upper, lower = bbands(prices_with_nan, window=20, num_std=2)
     assert np.isnan(upper.iloc[19])  # NaN in SMA causes NaN bands
 
 

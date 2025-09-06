@@ -170,7 +170,7 @@ def trend_positive(val: float, has_data: bool) -> int:
 
     if not has_data:
         return 0
-    return 1 if (val is not None and val >= 0) else 0
+    return 1 if (val is not None and not np.isnan(val) and val >= 0) else 0
 
 
 def abs_trend_is_negative(val: float, has_data: bool) -> int:
@@ -187,9 +187,9 @@ def ratio_trend(numerator: float, denominator: float, has_data: bool) -> float:
     Returns 0 when missing/invalid.
     """
 
-    if not has_data or denominator in (None, 0):
+    if not has_data or denominator in (None, 0) or np.isnan(denominator):
         return 0.0
-    if numerator is None:
+    if numerator is None or np.isnan(numerator):
         return 0.0
     return float(numerator) / float(denominator)
 
@@ -200,7 +200,7 @@ def ratio_trend(numerator: float, denominator: float, has_data: bool) -> float:
 def cmf_trend(value: float, lower: float, upper: float, has_data: bool) -> int:
     """CMF trend flag is 1 when lower < value < upper and data exists."""
 
-    if not has_data or value is None:
+    if not has_data or value is None or np.isnan(value):
         return 0
     return 1 if (lower < value < upper) else 0
 
