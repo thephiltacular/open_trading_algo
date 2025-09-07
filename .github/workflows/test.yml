@@ -93,8 +93,8 @@ jobs:
 
     - name: Check code formatting
       run: |
-        poetry run black --check --diff open_trading_algo/
-        poetry run isort --check-only --diff open_trading_algo/
+        poetry run black --check --diff --config pyproject.toml open_trading_algo/ tests/ scripts/
+        poetry run isort --check-only --diff --settings-path pyproject.toml open_trading_algo/ tests/ scripts/
 
   build:
     runs-on: ubuntu-latest
