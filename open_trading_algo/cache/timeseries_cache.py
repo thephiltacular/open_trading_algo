@@ -47,9 +47,7 @@ import yaml
 
 def get_config():
     """Load configuration from db_config.yaml if it exists."""
-    config_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config", "db_config.yaml"
-    )
+    config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config", "db_config.yaml")
     if os.path.exists(config_path):
         with open(config_path, "r") as f:
             cfg = yaml.safe_load(f)
@@ -148,9 +146,7 @@ class TimeSeriesCache:
 
             time.sleep(0.5)  # Longer delay to ensure write completes
 
-    def get_price_data(
-        self, ticker: str, start: Optional[str] = None, end: Optional[str] = None
-    ) -> pd.DataFrame:
+    def get_price_data(self, ticker: str, start: Optional[str] = None, end: Optional[str] = None) -> pd.DataFrame:
         """
         Retrieve OHLCV price data for a ticker.
 
@@ -640,9 +636,7 @@ class TimeSeriesCache:
 
         print(f"✅ Stored {len(metrics_df)} metric data points for {ticker}")
 
-    def _calculate_technical_indicators(
-        self, price_data: pd.DataFrame, indicators: list
-    ) -> pd.DataFrame:
+    def _calculate_technical_indicators(self, price_data: pd.DataFrame, indicators: list) -> pd.DataFrame:
         """
         Calculate technical indicators from price data.
 
@@ -709,24 +703,18 @@ class TimeSeriesCache:
                 calculated_indicators["bb_lower"] = sma_20 - (std_20 * 2)
 
             if "bb_width" in indicators:
-                calculated_indicators["bb_width"] = (
-                    sma_20 + (std_20 * 2) - (sma_20 - (std_20 * 2))
-                ) / sma_20
+                calculated_indicators["bb_width"] = (sma_20 + (std_20 * 2) - (sma_20 - (std_20 * 2))) / sma_20
 
         # Volatility
         if "volatility_20" in indicators:
-            calculated_indicators["volatility_20"] = df["close"].pct_change().rolling(
-                window=20
-            ).std() * (252**0.5)
+            calculated_indicators["volatility_20"] = df["close"].pct_change().rolling(window=20).std() * (252**0.5)
 
         # Returns
         if "returns" in indicators:
             calculated_indicators["returns"] = df["close"].pct_change()
 
         if "cumulative_returns" in indicators:
-            calculated_indicators["cumulative_returns"] = (
-                1 + df["close"].pct_change()
-            ).cumprod() - 1
+            calculated_indicators["cumulative_returns"] = (1 + df["close"].pct_change()).cumprod() - 1
 
         # Combine all calculated indicators into a DataFrame
         if calculated_indicators:
@@ -968,9 +956,7 @@ class TimeSeriesCache:
             "timeframe": timeframe,
             "data_points": len(metrics_df),
             "date_range": {
-                "start": metrics_df.index.min().strftime("%Y-%m-%d")
-                if len(metrics_df) > 0
-                else None,
+                "start": (metrics_df.index.min().strftime("%Y-%m-%d") if len(metrics_df) > 0 else None),
                 "end": metrics_df.index.max().strftime("%Y-%m-%d") if len(metrics_df) > 0 else None,
             },
             "available_metrics": list(metrics_df.columns),
@@ -1012,7 +998,3 @@ class TimeSeriesCache:
             print(f"✅ Cleared metrics data for {ticker} ({timeframe})")
         except Exception as e:
             print(f"Error clearing metrics data: {e}")
-
-    def close(self):
-        """Close the InfluxDB client connection."""
-        self.client.close()

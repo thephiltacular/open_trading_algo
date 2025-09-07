@@ -1,6 +1,7 @@
 """
 TradingView API interface using secure_api for API key management.
 """
+
 import requests
 from open_trading_algo.fin_data_apis.secure_api import get_api_key
 from open_trading_algo.fin_data_apis.rate_limit import rate_limit
@@ -18,9 +19,7 @@ class TradingViewAPI:
         if not api_key:
             raise ValueError("TradingView API key not found in environment.")
         self.api_key = api_key
-        self.base_url = (
-            "https://api.tradingview.com"  # Placeholder, update to real endpoint if available
-        )
+        self.base_url = "https://api.tradingview.com"  # Placeholder, update to real endpoint if available
 
     @rate_limit("tradingview")
     def get_symbol_info(self, symbol: str):

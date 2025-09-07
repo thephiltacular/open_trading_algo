@@ -1,0 +1,115 @@
+name: Release and Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Cache Poetry virtual environment
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pypoetry
+        key: poetry-release-${{ hashFiles('**/poetry.lock') }}
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Configure Poetry
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
+
+    - name: Install dependencies
+      run: poetry install --no-interaction
+
+    - name: Run tests
+      run: poetry run pytest --no-cov -v
+
+    - name: Update version in pyproject.toml
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        VERSION=${{ inputs.version }}
+        sed -i "s/^version = \".*\"/version = \"$VERSION\"/" pyproject.toml
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add pyproject.toml
+        git commit -m "chore: bump version to $VERSION"
+        git tag "v$VERSION"
+        git push origin main
+        git push origin "v$VERSION"
+
+    - name: Build package
+      run: poetry build
+
+    - name: Verify package contents
+      run: |
+        echo "📦 Package files:"
+        ls -la dist/
+        echo "📋 Package contents:"
+        tar -tzf dist/*.tar.gz | head -20
+
+    - name: Test package installation
+      run: |
+        pip install dist/open_trading_algo-*.tar.gz
+        python -c "import open_trading_algo; print('✅ Package installation successful')"
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        print-hash: true
+
+    - name: Generate changelog
+      if: github.event_name == 'release'
+      run: |
+        # Extract version from tag
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+        # Generate basic changelog from commits since last tag
+        echo "## Changes in v$VERSION" > changelog.md
+        echo "" >> changelog.md
+
+        # Get commits since last version tag
+        LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+        if [ -n "$LAST_TAG" ]; then
+          git log --pretty=format:"- %s" "$LAST_TAG..HEAD" >> changelog.md
+        else
+          git log --pretty=format:"- %s" --max-count=20 >> changelog.md
+        fi
+
+        echo "" >> changelog.md
+        echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/$LAST_TAG...v$VERSION" >> changelog.md
+
+    - name: Update release notes
+      if: github.event_name == 'release'
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        body_path: changelog.md
+        append_body: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

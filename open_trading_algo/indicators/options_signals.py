@@ -3,6 +3,7 @@ Options trading signal suite for use with SignalOptimizer.
 Includes technical (volatility), fundamental (event-driven), and sentiment-based signals.
 Each function takes a DataFrame (with required columns) and returns a boolean Series.
 """
+
 from open_trading_algo.cache.data_cache import DataCache, is_caching_enabled
 import pandas as pd
 
@@ -155,9 +156,7 @@ def compute_and_cache_options_signals(ticker: str, df: pd.DataFrame, timeframe: 
         cache = DataCache()
         if cache.has_signals(ticker, timeframe, signal_type):
             return cache.get_signals(ticker, timeframe, signal_type)
-    combined = (
-        signal_iv_vs_rv(df) | signal_volatility_breakout(df) | signal_unusual_options_activity(df)
-    )
+    combined = signal_iv_vs_rv(df) | signal_volatility_breakout(df) | signal_unusual_options_activity(df)
     signals_df = pd.DataFrame({"signal_value": combined.astype(int)}, index=df.index)
     if is_caching_enabled():
         cache.store_signals(ticker, timeframe, signal_type, signals_df)

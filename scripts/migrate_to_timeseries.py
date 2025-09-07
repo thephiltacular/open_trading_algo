@@ -32,9 +32,7 @@ def get_all_tickers_from_sqlite(sqlite_cache: DataCache) -> list:
         return []
 
 
-def migrate_price_data(
-    sqlite_cache: DataCache, ts_cache: TimeSeriesCache, tickers: list, batch_size: int = 50
-):
+def migrate_price_data(sqlite_cache: DataCache, ts_cache: TimeSeriesCache, tickers: list, batch_size: int = 50):
     """Migrate price data from SQLite to InfluxDB."""
     print(f"📊 Migrating price data for {len(tickers)} tickers...")
 
@@ -65,7 +63,7 @@ def migrate_price_data(
 
 def migrate_signals(sqlite_cache: DataCache, ts_cache: TimeSeriesCache, tickers: list):
     """Migrate signals data from SQLite to InfluxDB."""
-    print(f"🎯 Migrating signals data...")
+    print("🎯 Migrating signals data...")
 
     # Get all unique signal combinations from SQLite
     try:
@@ -86,9 +84,7 @@ def migrate_signals(sqlite_cache: DataCache, ts_cache: TimeSeriesCache, tickers:
     error_count = 0
 
     for i, (ticker, timeframe, signal_type) in enumerate(signal_combinations):
-        print(
-            f"   Processing {ticker}/{timeframe}/{signal_type} ({i+1}/{len(signal_combinations)})..."
-        )
+        print(f"   Processing {ticker}/{timeframe}/{signal_type} ({i+1}/{len(signal_combinations)})...")
         try:
             # Get signals for this combination from SQLite
             signals_data = sqlite_cache.get_signals(ticker, timeframe, signal_type)
@@ -136,10 +132,7 @@ def verify_migration(sqlite_cache: DataCache, ts_cache: TimeSeriesCache, sample_
     print("-" * 50)
     for result in verification_results:
         status = "✅" if result["match"] else "❌"
-        print(
-            f"{status} {result['ticker']}: SQLite={result['sqlite_points']}, "
-            f"InfluxDB={result['influx_points']}"
-        )
+        print(f"{status} {result['ticker']}: SQLite={result['sqlite_points']}, " f"InfluxDB={result['influx_points']}")
 
     return verification_results
 
@@ -171,10 +164,7 @@ def main():
             print("   You may need to manually specify tickers or check your SQLite database")
             return
 
-        print(
-            f"📋 Found {len(tickers)} tickers: {tickers[:5]}..."
-            f"{' (showing first 5)' if len(tickers) > 5 else ''}"
-        )
+        print(f"📋 Found {len(tickers)} tickers: {tickers[:5]}..." f"{' (showing first 5)' if len(tickers) > 5 else ''}")
 
         # Confirm migration
         response = input(f"\n🚨 This will migrate data for {len(tickers)} tickers. Continue? (y/N): ")

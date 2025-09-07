@@ -43,9 +43,7 @@ class DatabasePopulator:
             tickers_path (str, optional): Path to tickers file.
             db_path (str, optional): Path to database.
         """
-        self.config_path = Path(
-            config_path or Path(__file__).parent.parent / "live_data_config.yaml"
-        )
+        self.config_path = Path(config_path or Path(__file__).parent.parent / "live_data_config.yaml")
         self.tickers_path = Path(tickers_path or Path(__file__).parent.parent / "all_tickers.yaml")
         self.db = DataCache(db_path)
         self._load_config()
@@ -56,9 +54,7 @@ class DatabasePopulator:
             config = yaml.safe_load(f)
         self.fields = config.get("fields", ["price", "volume", "open", "high", "low", "close"])
         self.interval = config.get("interval", "1d")
-        self.date_range = config.get(
-            "date_range", None
-        )  # e.g. {"start": "2023-01-01", "end": "2023-12-31"}
+        self.date_range = config.get("date_range", None)  # e.g. {"start": "2023-01-01", "end": "2023-12-31"}
         # Load tickers
         with open(self.tickers_path, "r") as f:
             self.tickers = yaml.safe_load(f)["tickers"]
@@ -117,6 +113,7 @@ class DatabasePopulator:
         Returns:
             list: List of DataFrames with fetched data.
         """
+
         # Fetch OHLCV for all tickers in as few API calls as possible, return a single DataFrame
         def normalize_df(df, ticker):
             col_map = {
@@ -258,9 +255,7 @@ class DatabasePopulator:
             if indicator_frames:
                 indicators_df = pd.concat(indicator_frames, ignore_index=True)
                 indicators_df = indicators_df.set_index(["date", "ticker"])
-                all_data = all_data.merge(
-                    indicators_df, left_index=True, right_index=True, how="left"
-                )
+                all_data = all_data.merge(indicators_df, left_index=True, right_index=True, how="left")
             all_data.to_parquet("all_data.parquet")
             print("Unified data saved to all_data.parquet (with indicators)")
         else:

@@ -3,7 +3,36 @@
 A comprehensive Python library for algorithmic trading, technical analysis, and financial data processing. Built for performance, reliability, and ease of use in both research and production environments.
 
 The overall goal is to get as much value as possible without paying for api access ;)
-This means managing API query rates, storing as much data as possible locally, and leveraging multiple APIs to get the data we need.
+This means managing API query rates, storing as mSee the [Cache System Documentation](docs/data-cache.md) for complete setup and usage instructions.
+
+## 🔄 CI/CD & Releases
+
+This project uses GitHub Actions for automated testing and publishing:
+
+### 🧪 Continuous Integration
+- **Multi-platform testing**: Ubuntu, macOS, Windows
+- **Multi-Python support**: Python 3.9, 3.10, 3.11, 3.12
+- **Automated testing**: pytest with coverage reporting
+- **Code quality**: Black, isort, flake8, mypy
+- **Security scanning**: detect-secrets
+
+### 🚀 Automated Publishing
+- **Tag-triggered releases**: Push a version tag (`v1.2.3`) to automatically publish to PyPI
+- **Release creation**: GitHub releases automatically trigger PyPI publishing
+- **Quality assurance**: All tests must pass before publishing
+- **Manual publishing**: Use `python3 publish.py` for manual control
+
+### 📦 Release Process
+1. **Update version** in `pyproject.toml`
+2. **Run tests** locally: `poetry run pytest`
+3. **Create GitHub release** or push version tag
+4. **GitHub Actions** handles the rest automatically
+
+See the [Release Process Documentation](docs/RELEASE.md) for detailed instructions.
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) for instructions on how to get started, code style, testing, and submitting pull requests.ata as possible locally, and leveraging multiple APIs to get the data we need.
 
 ## 🚀 Quick Links
 
@@ -14,6 +43,7 @@ This means managing API query rates, storing as much data as possible locally, a
 - **[📈 Technical Indicators](docs/indicators.md)** - Complete guide to 50+ indicators with charts and accuracy data
 - **[📊 Trading Metrics](docs/metrics.md)** - Comprehensive metrics for risk, performance, and analysis
 - **[💾 Cache System](docs/data-cache.md)** - Local data storage and optimization
+- **[📦 Release Process](docs/RELEASE.md)** - How to release new versions
 
 ## Key Features
 

@@ -3,6 +3,7 @@ Sentiment signal suite for all trade types (long, short, options).
 Best practices from investment banking and hedge funds.
 Each function takes a DataFrame (with required columns) and returns a boolean or numeric Series.
 """
+
 import pandas as pd
 from open_trading_algo.cache.data_cache import DataCache, is_caching_enabled
 
@@ -25,9 +26,7 @@ def compute_and_cache_sentiment_signals(ticker: str, df: pd.DataFrame, timeframe
             return cache.get_signals(ticker, timeframe, signal_type)
     combined = news_nlp_sentiment(df).abs() > 0.2 | news_event_sentiment(df) | (
         social_media_trend(df) > 0
-    ) | social_media_influencer_impact(df) | (analyst_consensus_change(df) > 0) | (
-        analyst_rating_change(df) > 0
-    ) | (
+    ) | social_media_influencer_impact(df) | (analyst_consensus_change(df) > 0) | (analyst_rating_change(df) > 0) | (
         options_put_call_ratio(df) > 1.2
     ) | options_unusual_activity(
         df

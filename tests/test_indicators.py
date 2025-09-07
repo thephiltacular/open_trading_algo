@@ -40,6 +40,7 @@ from open_trading_algo.indicators.indicators import (
     sar,
 )
 
+
 # Fixture for synthetic price data (pd.Series)
 @pytest.fixture
 def sample_prices():
@@ -76,9 +77,7 @@ def test_sma_missing_data(sample_prices):
     prices_with_nan = sample_prices.copy()
     prices_with_nan.iloc[10:15] = np.nan
     result = sma(prices_with_nan, window=10)
-    assert result.iloc[14] == pytest.approx(
-        prices_with_nan.iloc[5:15].mean(), rel=1e-2
-    )  # Handles NaN by skipping
+    assert result.iloc[14] == pytest.approx(prices_with_nan.iloc[5:15].mean(), rel=1e-2)  # Handles NaN by skipping
     assert not result.iloc[:9].isna().any()
 
 
@@ -88,9 +87,7 @@ def test_ema(sample_prices):
     assert len(result) == len(sample_prices)
     assert result.iloc[0] == sample_prices.iloc[0]  # First value is the price itself
     assert not np.isnan(result.iloc[9])  # EMA is calculated
-    assert (
-        abs(result.iloc[9] - sample_prices.iloc[9]) < sample_prices.iloc[9] * 0.1
-    )  # EMA is close to price
+    assert abs(result.iloc[9] - sample_prices.iloc[9]) < sample_prices.iloc[9] * 0.1  # EMA is close to price
 
 
 def test_ema_missing_data(sample_prices):
@@ -156,9 +153,7 @@ def test_tema_missing_data(sample_prices):
 def test_macd(sample_prices):
     macd_line, signal_line, histogram = macd(sample_prices)
     assert len(macd_line) == len(sample_prices)
-    assert macd_line.iloc[25] == pytest.approx(
-        ema(sample_prices, 12).iloc[25] - ema(sample_prices, 26).iloc[25], rel=1e-2
-    )
+    assert macd_line.iloc[25] == pytest.approx(ema(sample_prices, 12).iloc[25] - ema(sample_prices, 26).iloc[25], rel=1e-2)
     assert len(signal_line) == len(macd_line)
     assert len(histogram) == len(macd_line)
 
@@ -496,9 +491,7 @@ def test_stochf(sample_ohlc):
 
 def test_stochrsi(sample_prices):
     """Test Stochastic RSI."""
-    stochrsi_k, stochrsi_d = stochrsi(
-        sample_prices, rsi_period=14, stoch_period=14, k_period=3, d_period=3
-    )
+    stochrsi_k, stochrsi_d = stochrsi(sample_prices, rsi_period=14, stoch_period=14, k_period=3, d_period=3)
 
     assert isinstance(stochrsi_k, pd.Series)
     assert isinstance(stochrsi_d, pd.Series)

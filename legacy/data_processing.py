@@ -29,7 +29,7 @@ from dateutil.tz import tzutc
 # generate a set of parameters based on model and store in time series
 # create regression model to optimize parameters for each day
 # df = pd.read_csv(data_path, header=0)
-
+# flake8: noqa
 
 # look at 1 day 1 weeek 2 week 1 month performance
 # which of the indicators is mostly right when predicting an upward/downward tick
@@ -37,6 +37,8 @@ from dateutil.tz import tzutc
 
 latest_init = datetime.datetime(1980, 1, 1, 0, 0, 0, 000000, tzinfo=tzutc())
 oldest_init = datetime.datetime.now(pytz.utc)
+
+
 # trading_day = datetime.datetime(2023, 3, 7, tzinfo=tzutc())
 class Model:
     def __init__(self, folder_path):
@@ -261,9 +263,7 @@ class Model:
         print(cols_to_print)
         for day, df in self.data.items():
             for col_out, col in inputs:
-                self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_lambda(row[col], row["Description"]), axis=1
-                )
+                self.data[day][col_out] = df.apply(lambda row: self.trend_lambda(row[col], row["Description"]), axis=1)
             # print(self.data[day][cols_to_print])
         print("Done!")
 
@@ -300,9 +300,7 @@ class Model:
     def calculate_momentum_MACD(self):
         print("Calculating MACD L>S Mom Up...")
         self.ps(inspect.stack()[0][0].f_code.co_name)
-        inputs = [  # col_out, lower, upper
-            ("MACD L>S Mom Up", "MACD Level (12, 26)", "MACD Signal (12, 26)")
-        ]
+        inputs = [("MACD L>S Mom Up", "MACD Level (12, 26)", "MACD Signal (12, 26)")]  # col_out, lower, upper
         for day, df in self.data.items():
             for col_out, lower, upper in inputs:
                 self.data[day][col_out] = df.apply(
@@ -336,7 +334,7 @@ class Model:
     def add_alerts_to_model(self):
         self.ps(inspect.stack()[0][0].f_code.co_name)
         print("Moving Alerts into model...")
-        inputs = [(self.cols_alerts)]
+        inputs = [self.cols_alerts]
         for day, df_data in self.data.items():
 
             # df_alert = self.alerts[day]
@@ -411,9 +409,7 @@ class Model:
         #     cols_to_print += [col_out_1]
         # print(cols_to_print)
         for day, df in self.alerts.items():
-            self.trading_day = parser.parse(
-                self.alerts[day][self.cols_alerts["E"]][0]
-            ) + datetime.timedelta(days=1)
+            self.trading_day = parser.parse(self.alerts[day][self.cols_alerts["E"]][0]) + datetime.timedelta(days=1)
             self.alerts[day]["Ticker"] = df.apply(
                 # self.data[day][[col_out_1, col_out_2]] = df.apply(
                 lambda row: self.fix_alerts_ticker_lambda(
@@ -425,9 +421,7 @@ class Model:
             # print(self.alerts[day]["Ticker"])
             self.alerts[day][[self.cols_alerts["G"], self.cols_alerts["H"]]] = df.apply(
                 # self.data[day][[col_out_1, col_out_2]] = df.apply(
-                lambda row: self.alerts_count_div_lambda(
-                    ticker=row["Ticker"], description=row["Description"]
-                ),
+                lambda row: self.alerts_count_div_lambda(ticker=row["Ticker"], description=row["Description"]),
                 axis=1,
                 result_type="expand",
             )
@@ -442,9 +436,7 @@ class Model:
                 axis=1,
                 result_type="expand",
             )
-            self.alerts[day][[self.cols_alerts["G"], self.cols_alerts["H"]]] = self.alerts[
-                day
-            ].apply(
+            self.alerts[day][[self.cols_alerts["G"], self.cols_alerts["H"]]] = self.alerts[day].apply(
                 lambda row: self.fix_counts_lambda(
                     ticker=row["Ticker"],
                 ),
@@ -536,18 +528,14 @@ class Model:
             ]
             self.print_inputs(inputs=inputs)
             for col_out_1, a, b, col_out_2 in inputs:
-                self.alerts[day][col_out_1] = self.alerts[day].apply(
-                    lambda row: self.add_lambda(row[a], row[b]), axis=1
-                )
+                self.alerts[day][col_out_1] = self.alerts[day].apply(lambda row: self.add_lambda(row[a], row[b]), axis=1)
                 temp = self.alerts[day][col_out_1].replace(0, np.nan)
                 self.alerts[day][col_out_2] = temp.rank(pct=True)
 
             print("Done!")
             print("Calculating diffs and PRs")
             self.alerts[day][self.cols_alerts["W"]] = self.alerts[day].apply(
-                lambda row: self.subtract_lambda(
-                    row[self.cols_alerts["V"]], row[self.cols_alerts["U"]]
-                ),
+                lambda row: self.subtract_lambda(row[self.cols_alerts["V"]], row[self.cols_alerts["U"]]),
                 axis=1,
             )
             temp = self.alerts[day][self.cols_alerts["W"]].replace(0, np.nan)
@@ -630,24 +618,16 @@ class Model:
         if ticker in self.temp:
             # with self.temp[ticker] as obj:
             obj = self.temp[ticker]
-            dif_neg = (
-                (obj["latest_neg"] - self.trading_day) if obj["latest_neg"] is not latest_init else 0
-            )
-            dif_pos = (
-                (obj["latest_pos"] - self.trading_day) if obj["latest_pos"] is not latest_init else 0
-            )
+            dif_neg = (obj["latest_neg"] - self.trading_day) if obj["latest_neg"] is not latest_init else 0
+            dif_pos = (obj["latest_pos"] - self.trading_day) if obj["latest_pos"] is not latest_init else 0
             # dif_neg = (obj["latest_neg"] - obj["oldest_neg"]) if obj["latest_neg"] is not latest_init and obj["oldest_neg"] is not oldest_init else 0
             # dif_pos = (obj["latest_pos"] - obj["oldest_pos"]) if obj["latest_neg"] is not latest_init and obj["oldest_neg"] is not oldest_init else 0
             if dif_neg != 0 and abs(dif_neg.days) > 8:
                 dif_neg = 0
             if dif_pos != 0 and abs(dif_pos.days) > 8:
                 dif_pos = 0
-            print(
-                "Latest: ", obj["latest"], obj["latest_type"], obj["latest_neg"], obj["latest_pos"]
-            )
-            print(
-                "Oldest: ", obj["oldest"], obj["oldest_type"], obj["oldest_neg"], obj["oldest_pos"]
-            )
+            print("Latest: ", obj["latest"], obj["latest_type"], obj["latest_neg"], obj["latest_pos"])
+            print("Oldest: ", obj["oldest"], obj["oldest_type"], obj["oldest_neg"], obj["oldest_pos"])
             print("Differences[neg, pos] [", dif_neg, dif_pos, "]")
             return (
                 obj["latest"],
@@ -1649,9 +1629,7 @@ class Model:
             for col_out_1, col_out_2, a, b, c, d, e, pr_col_1, pr_col_2 in inputs:
                 # for col_out_1, col_out_2, a, b, c, d, e, f, h, col_3 in inputs:
                 self.data[day][[col_out_1, col_out_2]] = df.apply(
-                    lambda row: self.avg_lambda(
-                        row[a], row[b], row[c], row[d], row[e], description=row["Description"]
-                    ),
+                    lambda row: self.avg_lambda(row[a], row[b], row[c], row[d], row[e], description=row["Description"]),
                     axis=1,
                     result_type="expand",
                 )
@@ -1872,9 +1850,7 @@ class Model:
         for day, df in self.data.items():
             for col_out_1, col_out_2, a, b, c, d, col_3 in inputs:
                 self.data[day][[col_out_1, col_out_2]] = df.apply(
-                    lambda row: self.avg_lambda(
-                        row[a], row[b], row[c], row[d], description=row["Description"]
-                    ),
+                    lambda row: self.avg_lambda(row[a], row[b], row[c], row[d], description=row["Description"]),
                     axis=1,
                     result_type="expand",
                 )
@@ -2155,9 +2131,7 @@ class Model:
         print(cols_to_print)
         for day, df in self.data.items():
             for col_out, col in inputs:
-                self.data[day][col_out] = df.apply(
-                    lambda row: self.abs_trend_lambda(row[col], row["Description"]), axis=1
-                )
+                self.data[day][col_out] = df.apply(lambda row: self.abs_trend_lambda(row[col], row["Description"]), axis=1)
             # print(self.data[day][cols_to_print])
         print("Done!")
 
@@ -2218,9 +2192,7 @@ class Model:
         print(cols_to_print)
         for day, df in self.data.items():
             for col_out, left, right in inputs:
-                self.data[day][col_out] = df.apply(
-                    lambda row: self.neg_diff_lambda(row[left], row[right]), axis=1
-                )
+                self.data[day][col_out] = df.apply(lambda row: self.neg_diff_lambda(row[left], row[right]), axis=1)
             # print(self.data[day][cols_to_print])
         print("Done!")
 
@@ -2254,9 +2226,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, one, two, three in inputs:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.ema_avg_lambda(
-                        row[one], row[two], row[three], row["Description"]
-                    ),
+                    lambda row: self.ema_avg_lambda(row[one], row[two], row[three], row["Description"]),
                     axis=1,
                 )
             # print(self.data[day][cols_to_print].head())
@@ -2341,9 +2311,7 @@ class Model:
         for day, df in self.data.items():
             for col_out_1, col_out_2, left, right in inputs:
                 self.data[day][[col_out_1, col_out_2]] = df.apply(
-                    lambda row: self.avg_lambda(
-                        row[left], row[right], description=row["Description"]
-                    ),
+                    lambda row: self.avg_lambda(row[left], row[right], description=row["Description"]),
                     axis=1,
                     result_type="expand",
                 )
@@ -2518,9 +2486,7 @@ class Model:
         for day, df in self.data.items():
             for col_out_1, col_out_2, a, b, c, d, col_3 in inputs:
                 self.data[day][[col_out_1, col_out_2]] = df.apply(
-                    lambda row: self.avg_lambda(
-                        row[a], row[b], row[c], row[d], description=row["Description"]
-                    ),
+                    lambda row: self.avg_lambda(row[a], row[b], row[c], row[d], description=row["Description"]),
                     axis=1,
                     result_type="expand",
                 )
@@ -2782,9 +2748,7 @@ class Model:
         print(cols_to_print)
         for day, df in self.data.items():
             for col_out, col in inputs:
-                self.data[day][col_out] = df.apply(
-                    lambda row: self.abs_trend_lambda(row[col], row["Description"]), axis=1
-                )
+                self.data[day][col_out] = df.apply(lambda row: self.abs_trend_lambda(row[col], row["Description"]), axis=1)
             # print(self.data[day][cols_to_print])
         print("Done!")
 
@@ -2850,9 +2814,7 @@ class Model:
         for day, df in self.data.items():
             for col_out_1, col_out_2, left, right in inputs:
                 self.data[day][[col_out_1, col_out_2]] = df.apply(
-                    lambda row: self.avg_lambda(
-                        row[left], row[right], description=row["Description"]
-                    ),
+                    lambda row: self.avg_lambda(row[left], row[right], description=row["Description"]),
                     axis=1,
                     result_type="expand",
                 )
@@ -2973,9 +2935,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, numerator, denominator in inputs:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_MC_MG_lambda(
-                        row[numerator], row[denominator], row["Description"]
-                    ),
+                    lambda row: self.trend_MC_MG_lambda(row[numerator], row[denominator], row["Description"]),
                     axis=1,
                 )
             # print(self.data[day][cols_to_print])
@@ -3049,9 +3009,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, numerator, denominator in inputs:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_NH_NM_lambda(
-                        row[numerator], row[denominator], row["Description"]
-                    ),
+                    lambda row: self.trend_NH_NM_lambda(row[numerator], row[denominator], row["Description"]),
                     axis=1,
                 )
             # print(self.data[day][cols_to_print])
@@ -3086,9 +3044,7 @@ class Model:
         for day, df in self.data.items():
             #               col_out     count
             self.data[day][inputs[0]] = df.apply(
-                lambda row: self.avg_PR_OS_lambda(
-                    row[inputs[1]], row[inputs[2]], description=row["Description"]
-                ),
+                lambda row: self.avg_PR_OS_lambda(row[inputs[1]], row[inputs[2]], description=row["Description"]),
                 axis=1,
             )  # , result_type="expand")
             # Calculate PR of the column that we just calculated
@@ -3287,9 +3243,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, val, idx, upper, lower in inputs_1:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_MU_rsi_lambda(
-                        row[val], row[idx], upper, lower, row["Description"]
-                    ),
+                    lambda row: self.trend_MU_rsi_lambda(row[val], row[idx], upper, lower, row["Description"]),
                     axis=1,
                 )
             # print(self.data[day]["UO Oversold"])
@@ -3297,9 +3251,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, val, idx, upper, lower in inputs_2:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_MU_st_rsi_lambda(
-                        row[val], row[idx], upper, lower, row["Description"]
-                    ),
+                    lambda row: self.trend_MU_st_rsi_lambda(row[val], row[idx], upper, lower, row["Description"]),
                     axis=1,
                 )
             # print(self.data[day]["UO Oversold"])
@@ -3340,9 +3292,7 @@ class Model:
         for day, df in self.data.items():
             #               col_out     count
             self.data[day][inputs[0]] = df.apply(
-                lambda row: self.avg_PR_OS_lambda(
-                    row[inputs[1]], row[inputs[2]], description=row["Description"]
-                ),
+                lambda row: self.avg_PR_OS_lambda(row[inputs[1]], row[inputs[2]], description=row["Description"]),
                 axis=1,
             )  # , result_type="expand")
             # Calculate PR of the column that we just calculated
@@ -3541,9 +3491,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, val, idx, upper, lower in inputs_1:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_md_rsi_lambda(
-                        row[val], row[idx], upper, lower, row["Description"]
-                    ),
+                    lambda row: self.trend_md_rsi_lambda(row[val], row[idx], upper, lower, row["Description"]),
                     axis=1,
                 )
             # print(self.data[day]["UO Oversold"])
@@ -3551,9 +3499,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, val, idx, upper, lower in inputs_2:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_md_st_rsi_lambda(
-                        row[val], row[idx], upper, lower, row["Description"]
-                    ),
+                    lambda row: self.trend_md_st_rsi_lambda(row[val], row[idx], upper, lower, row["Description"]),
                     axis=1,
                 )
             # print(self.data[day]["UO Oversold"])
@@ -3595,9 +3541,7 @@ class Model:
         for day, df in self.data.items():
             #               col_out     count
             self.data[day][inputs[0]] = df.apply(
-                lambda row: self.avg_PR_OS_lambda(
-                    row[inputs[1]], row[inputs[2]], description=row["Description"]
-                ),
+                lambda row: self.avg_PR_OS_lambda(row[inputs[1]], row[inputs[2]], description=row["Description"]),
                 axis=1,
             )  # , result_type="expand")
             # Calculate PR of the column that we just calculated
@@ -3800,9 +3744,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, val, idx, upper, lower in inputs_1:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_os_rsi_lambda(
-                        row[val], row[idx], upper, lower, row["Description"]
-                    ),
+                    lambda row: self.trend_os_rsi_lambda(row[val], row[idx], upper, lower, row["Description"]),
                     axis=1,
                 )
             # print(self.data[day]["UO Oversold"])
@@ -3810,9 +3752,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, val, idx, upper, lower in inputs_2:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_ob_st_rsi_lambda(
-                        row[val], row[idx], upper, lower, row["Description"]
-                    ),
+                    lambda row: self.trend_ob_st_rsi_lambda(row[val], row[idx], upper, lower, row["Description"]),
                     axis=1,
                 )
             # print(self.data[day]["UO Oversold"])
@@ -3851,9 +3791,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, price, lower in inputs:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.UO_trend_overbought_lambda(
-                        row[price], lower, row["Description"]
-                    ),
+                    lambda row: self.UO_trend_overbought_lambda(row[price], lower, row["Description"]),
                     axis=1,
                 )
             # print(self.data[day][cols_to_print])
@@ -3889,9 +3827,7 @@ class Model:
         for day, df in self.data.items():
             #               col_out     count
             self.data[day][inputs[0]] = df.apply(
-                lambda row: self.avg_PR_OS_lambda(
-                    row[inputs[1]], row[inputs[2]], description=row["Description"]
-                ),
+                lambda row: self.avg_PR_OS_lambda(row[inputs[1]], row[inputs[2]], description=row["Description"]),
                 axis=1,
             )  # , result_type="expand")
             # Calculate PR of the column that we just calculated
@@ -4171,9 +4107,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, val, idx, lower, upper in inputs_1:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_os_rsi_lambda(
-                        row[val], row[idx], upper, lower, row["Description"]
-                    ),
+                    lambda row: self.trend_os_rsi_lambda(row[val], row[idx], upper, lower, row["Description"]),
                     axis=1,
                 )
             # print(self.data[day]["UO Oversold"])
@@ -4181,9 +4115,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, val, idx, upper in inputs_2:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.trend_os_st_rsi_lambda(
-                        row[val], row[idx], upper, row["Description"]
-                    ),
+                    lambda row: self.trend_os_st_rsi_lambda(row[val], row[idx], upper, row["Description"]),
                     axis=1,
                 )
             # print(self.data[day]["UO Oversold"])
@@ -4348,9 +4280,7 @@ class Model:
         ]
         for day, df in self.data.items():
             for r3, r2, r1, p, s1, s2, s3 in inputs:
-                self.data[day][
-                    ["Fibonacci Minimum", "Closest D-Pivot", "Current Pivot Level"]
-                ] = df.apply(
+                self.data[day][["Fibonacci Minimum", "Closest D-Pivot", "Current Pivot Level"]] = df.apply(
                     lambda row: self.fib_selection_lambda(
                         row[r3],
                         row[r2],
@@ -4416,9 +4346,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, numerator, denominator in inputs:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.n_div_lambda(
-                        row[numerator], row[denominator], row["Description"]
-                    ),
+                    lambda row: self.n_div_lambda(row[numerator], row[denominator], row["Description"]),
                     axis=1,
                 )
             # print(self.data[day][cols_to_print])
@@ -4479,9 +4407,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, numerator, denominator in inputs:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.d_n_lambda(
-                        row[numerator], row[denominator], row["Description"]
-                    ),
+                    lambda row: self.d_n_lambda(row[numerator], row[denominator], row["Description"]),
                     axis=1,
                 )
             # print(self.data[day][cols_to_print])
@@ -4515,9 +4441,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, price, sub, denominator in inputs:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.price_high_low_div_art_lambda(
-                        row[price], row[sub], row[denominator], row["Description"]
-                    ),
+                    lambda row: self.price_high_low_div_art_lambda(row[price], row[sub], row[denominator], row["Description"]),
                     axis=1,
                 )
             # print(self.data[day][cols_to_print])
@@ -4589,9 +4513,7 @@ class Model:
             for col_out, numerator, denominator in inputs:
                 # print(col_out, numerator, denominator)
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.volatility_lambda(
-                        row[numerator], row[denominator], row["Description"]
-                    ),
+                    lambda row: self.volatility_lambda(row[numerator], row[denominator], row["Description"]),
                     axis=1,
                 )
                 # print(self.data[day][col_out])
@@ -4626,9 +4548,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, val, left, right in zip(cols_out, cols_val, cols_left, cols_right):
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.ADX_filtered_RSI_lambda(
-                        row[val], row[left], row[right], row["Description"]
-                    ),
+                    lambda row: self.ADX_filtered_RSI_lambda(row[val], row[left], row[right], row["Description"]),
                     axis=1,
                 )
             # print(self.data[day][cols_to_print])
@@ -4873,9 +4793,7 @@ class Model:
         for day, df in self.data.items():
             for col_out, numerator, denominator in inputs:
                 self.data[day][col_out] = df.apply(
-                    lambda row: self.volatility_lambda(
-                        row[numerator], row[denominator], row["Description"]
-                    ),
+                    lambda row: self.volatility_lambda(row[numerator], row[denominator], row["Description"]),
                     axis=1,
                 )
             # print(self.data[day][cols_to_print])
@@ -4908,9 +4826,7 @@ class Model:
             for col_out, col in zip(cols_out, cols):
                 col_out_name = "Relative Volume" + col_out
                 self.data[day][col_out_name] = df.apply(
-                    lambda row: self.relative_volume_div(
-                        row["Volume"], row[col], row["Description"]
-                    ),
+                    lambda row: self.relative_volume_div(row["Volume"], row[col], row["Description"]),
                     axis=1,
                 )
                 # percentile_rank_col = col_out_name + "(pct rank)"

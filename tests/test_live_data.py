@@ -8,6 +8,7 @@ from open_trading_algo.fin_data_apis.secure_api import get_api_key
 TICKERS = ["AAPL"]
 FIELDS = ["price", "open", "high", "low", "close", "volume", "timestamp"]
 
+
 # Helper to skip tests if API key is missing
 def require_api_key(service):
     key = get_api_key(service)

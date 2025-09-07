@@ -4,15 +4,39 @@ name = "open_trading_algo"
 version = "0.1.3"
 description = "A modular, portable trading and backtesting framework with signal, risk, and data enrichment support."
 authors = ["Philip Mai <philip.e.mai@gmail.com>"]
+maintainers = ["Philip Mai <philip.e.mai@gmail.com>"]
 readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/thephiltacular/open_trading_algo"
+repository = "https://github.com/thephiltacular/open_trading_algo"
+documentation = "https://github.com/thephiltacular/open_trading_algo#readme"
+keywords = ["trading", "algorithmic-trading", "finance", "backtesting", "technical-analysis"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
 packages = [
-	{ include = "open_trading_algo" }
+    { include = "open_trading_algo" }
 ]
 [tool.setuptools]
 packages = ["open_trading_algo"]
 
 [tool.poetry.scripts]
 run-model = "open_trading_algo.pipeline:main"
+
+[tool.poetry.urls]
+"Bug Reports" = "https://github.com/thephiltacular/open_trading_algo/issues"
+"Source" = "https://github.com/thephiltacular/open_trading_algo"
+"Changelog" = "https://github.com/thephiltacular/open_trading_algo/blob/main/CHANGELOG.md"
 
 
 [tool.poetry.dependencies]
@@ -63,8 +87,8 @@ line-length = 101
 
 [tool.flake8]
 max-line-length = 101
-extend-ignore = ['402','F841','F401','E302','E305','E203','W503','C901','W1514', 'F403']
-exclude = ['.git','__pycache__','build','devel','logs','.catkin_tools']
+extend-ignore = ['402','F841','F401','E302','E305','E203','W503','C901','W1514', 'F403','E266']
+exclude = ['.git','__pycache__','build','devel','logs','.catkin_tools','legacy']
 max-complexity = 10
 
 [tool.isosort]

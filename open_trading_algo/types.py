@@ -28,6 +28,7 @@ AlertsByDay = Mapping[DayKey, DataFrameLike]
 Column = Union[str, int]
 Columns = Sequence[Column]
 
+
 # Simple result container for operations that add columns to DataFrames.
 class ColumnAddResult(Dict[str, Any]):
     """A mapping of new column names to their computed data.

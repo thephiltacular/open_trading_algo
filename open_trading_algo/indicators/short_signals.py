@@ -3,6 +3,7 @@ Short position signal suite for use with SignalOptimizer.
 Includes fundamental, technical, and sentiment-based signals.
 Each function takes a DataFrame (with required columns) and returns a boolean Series.
 """
+
 import pandas as pd
 from open_trading_algo.cache.data_cache import DataCache, is_caching_enabled
 
@@ -101,9 +102,7 @@ def signal_support_breakdown(df: pd.DataFrame) -> pd.Series:
     Returns:
         pd.Series: Boolean series indicating support breakdown.
     """
-    return df.get("close", pd.Series(False, index=df.index)) < df.get(
-        "support_level", pd.Series(float("inf"), index=df.index)
-    )
+    return df.get("close", pd.Series(False, index=df.index)) < df.get("support_level", pd.Series(float("inf"), index=df.index))
 
 
 def signal_overbought_rsi(df: pd.DataFrame) -> pd.Series:

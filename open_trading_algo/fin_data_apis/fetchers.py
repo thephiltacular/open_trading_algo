@@ -4,6 +4,7 @@ fetchers.py
 Bulk and single-ticker data fetchers for various financial data APIs (Yahoo, Finnhub, FMP, Alpha Vantage, Twelve Data).
 Handles rate limiting, caching, and concurrent requests where appropriate.
 """
+
 from pathlib import Path
 from typing import Any, Dict, List
 from open_trading_algo.fin_data_apis.secure_api import get_api_key
@@ -19,9 +20,7 @@ from open_trading_algo.cache.data_cache import DataCache
 from open_trading_algo.fin_data_apis.rate_limit import rate_limit_check
 
 
-def fetch_finnhub_bulk(
-    tickers: List[str], fields: List[str], api_key: str
-) -> Dict[str, Dict[str, Any]]:
+def fetch_finnhub_bulk(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
     """
     Fetch data for multiple tickers from Finnhub concurrently.
     Args:
@@ -58,9 +57,7 @@ def fetch_fmp_bulk(tickers: List[str], fields: List[str], api_key: str) -> Dict[
     return fetch_fmp(tickers, fields, api_key)
 
 
-def fetch_alpha_vantage_bulk(
-    tickers: List[str], fields: List[str], api_key: str
-) -> Dict[str, Dict[str, Any]]:
+def fetch_alpha_vantage_bulk(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
     """
     Fetch data for multiple tickers from Alpha Vantage concurrently.
     Args:
@@ -83,9 +80,7 @@ def fetch_alpha_vantage_bulk(
     return data
 
 
-def fetch_twelve_data_bulk(
-    tickers: List[str], fields: List[str], api_key: str
-) -> Dict[str, Dict[str, Any]]:
+def fetch_twelve_data_bulk(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
     """
     Fetch data for multiple tickers from Twelve Data concurrently.
     Args:
@@ -296,9 +291,7 @@ def fetch_fmp(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, 
     return data
 
 
-def fetch_alpha_vantage(
-    tickers: List[str], fields: List[str], api_key: str
-) -> Dict[str, Dict[str, Any]]:
+def fetch_alpha_vantage(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
     """
     Fetch quote data for tickers from Alpha Vantage.
     Args:
@@ -338,9 +331,7 @@ def fetch_alpha_vantage(
     return data
 
 
-def fetch_twelve_data(
-    tickers: List[str], fields: List[str], api_key: str
-) -> Dict[str, Dict[str, Any]]:
+def fetch_twelve_data(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:
     """
     Fetch quote data for tickers from Twelve Data.
     Args:

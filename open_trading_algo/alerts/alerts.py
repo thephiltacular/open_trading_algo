@@ -99,7 +99,7 @@ class TickerAlertCounts:
 
 
 def summarize_alerts(
-    events: Tuple[Tuple[str, Optional[str], Optional[str]], ...]
+    events: Tuple[Tuple[str, Optional[str], Optional[str]], ...],
 ) -> Dict[str, TickerAlertCounts]:
     """Compute per-ticker positive/negative counts and latest timestamp.
 

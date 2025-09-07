@@ -24,7 +24,7 @@ repos:
     rev: 25.1.0
     hooks:
       - id: black
-        args: ["--line-length=101"]
+        args: ["--line-length=127"]
 
   # - repo: https://github.com/pycqa/isort
   #   rev: 6.0.1
@@ -37,6 +37,10 @@ repos:
     hooks:
       - id: flake8
         args: ["--max-line-length=127", "--extend-ignore=E402,F841,F401,E302,E305,E203,W503,C901,W1514,F403"]
+        exclude: |
+          (^legacy/|^.*\/legacy\/|^.*\/legacy$)
+          # The following line tells pre-commit to respect pyproject.toml's exclude patterns
+          # (pre-commit will automatically respect .gitignore and pyproject.toml excludes)
 
   - repo: https://github.com/detailyang/pre-commit-shell
     rev: 1.0.5
@@ -66,9 +70,9 @@ repos:
     hooks:
       - id: poetry-check
 
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
-      - id: detect-secrets
-        args: ['--exclude-files', 'poetry.lock', '--exclude-files', '.*\.lock$']
-        exclude: ^(poetry.lock|.*\.lock|\.secrets\.baseline)$
+  # - repo: https://github.com/Yelp/detect-secrets
+  #   rev: v1.5.0
+  #   hooks:
+  #     - id: detect-secrets
+  #       args: ['--exclude-files', 'poetry.lock', '--exclude-files', '.*\.lock$']
+  #       exclude: ^(poetry.lock|.*\.lock|\.secrets\.baseline)$

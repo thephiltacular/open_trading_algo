@@ -2,6 +2,7 @@
 Methods to fetch and analyze social sentiment for specific tickers and ETFs.
 Best practices: Use multiple sources, aggregate, and normalize scores.
 """
+
 import requests
 from typing import List, Dict, Any
 import pandas as pd
@@ -73,9 +74,7 @@ def fetch_bulk_twitter_sentiment(tickers: list, api_key: str = None) -> pd.DataF
         result.index.names = ["date", "ticker"]
         return result
     # If nothing, return empty DataFrame
-    return pd.DataFrame(columns=["signal_value"]).set_index(
-        [pd.Index([], name="date"), pd.Index([], name="ticker")]
-    )
+    return pd.DataFrame(columns=["signal_value"]).set_index([pd.Index([], name="date"), pd.Index([], name="ticker")])
 
 
 # Example 1: Fetch Twitter/X sentiment using a third-party API (e.g., Twitter API, or a service like StockTwits)

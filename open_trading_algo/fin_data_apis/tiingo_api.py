@@ -1,6 +1,7 @@
 """
 Tiingo API interface for OHLCV data with rate limit tracking and pandas integration.
 """
+
 import requests
 import pandas as pd
 import time

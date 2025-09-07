@@ -2,6 +2,7 @@
 Fetch 10 years of AAPL daily data from yfinance and cache it in the local database.
 Only one request is made; all data is stored for future use.
 """
+
 import yfinance as yf
 import pandas as pd
 from open_trading_algo.cache.data_cache import DataCache
@@ -16,9 +17,7 @@ def main():
     if df.empty:
         print("No data fetched!")
         return
-    df = df.rename(
-        columns={"Open": "Open", "High": "High", "Low": "Low", "Close": "Close", "Volume": "Volume"}
-    )
+    df = df.rename(columns={"Open": "Open", "High": "High", "Low": "Low", "Close": "Close", "Volume": "Volume"})
     print(f"Fetched {len(df)} rows. Caching in database...")
     cache = DataCache()
     cache.store_price_data(ticker, df)

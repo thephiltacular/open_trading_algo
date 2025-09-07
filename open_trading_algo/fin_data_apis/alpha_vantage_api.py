@@ -1,6 +1,7 @@
 """
 Alpha Vantage API interface for stocks, alpha intelligence, fundamental data, and free technical indicators.
 """
+
 import requests
 from open_trading_algo.fin_data_apis.secure_api import get_api_key
 from open_trading_algo.fin_data_apis.rate_limit import rate_limit
@@ -166,9 +167,7 @@ class AlphaVantageAPI:
         return data
 
     @rate_limit("alpha_vantage")
-    def alpha_intelligence(
-        self, symbol: str, function: str = "NEWS_SENTIMENT", return_format: str = "json"
-    ):
+    def alpha_intelligence(self, symbol: str, function: str = "NEWS_SENTIMENT", return_format: str = "json"):
         """Fetch Alpha Intelligence endpoints (news sentiment, analyst upgrades/downgrades).
 
         Args:

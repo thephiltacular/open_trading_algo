@@ -24,18 +24,18 @@ open_trading_algo supports secure API key management using a `.env` file in your
 
 1. Copy `.env.example` to `.env` in your project root:
 
-	```bash
-	cp .env.example .env
-	```
+    ```bash
+    cp .env.example .env
+    ```
 
 2. Edit `.env` and add your API keys:
 
-	```env
-	FINNHUB_API_KEY=your_finnhub_key
-	FMP_API_KEY=your_fmp_key
-	ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key
-	TWELVE_DATA_API_KEY=your_twelve_data_key
-	```
+    ```env
+    FINNHUB_API_KEY=your_finnhub_key
+    FMP_API_KEY=your_fmp_key
+    ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key
+    TWELVE_DATA_API_KEY=your_twelve_data_key
+    ```
 
 3. The code will automatically load the correct key for each data provider. You can also set these as system environment variables if you prefer.
 
