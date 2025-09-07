@@ -196,6 +196,54 @@ class AdvancedModel(BaseTradingModel):
         self.required_indicators = ['sma', 'ema', 'custom_indicator']
 ```
 
+### Integration with Time Series Cache
+
+For automated technical indicator calculation and storage, models can integrate with the InfluxDB-based time series cache:
+
+```python
+from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
+from open_trading_algo.models import MomentumModel
+
+# Initialize time series cache
+cache = TimeSeriesCache()
+
+# Store historical data and calculate indicators automatically
+cache.store_price_data('AAPL', price_data)
+cache.calculate_and_store_metrics('AAPL', indicators=[
+    'sma_20', 'sma_50', 'ema_12', 'rsi_14', 'macd'
+])
+
+# Use pre-calculated metrics in your model
+class CachedMetricsModel(BaseTradingModel):
+    def generate_signals(self, data: pd.DataFrame) -> pd.DataFrame:
+        # Get pre-calculated metrics from cache
+        metrics = cache.get_metrics('AAPL', indicators=['rsi_14', 'macd'])
+
+        signals = pd.DataFrame(index=data.index)
+        signals['signal'] = 0
+
+        # Use cached RSI for oversold signals
+        rsi = metrics['rsi_14']
+        signals.loc[rsi < 30, 'signal'] = 1  # Buy signal
+
+        # Use cached MACD for trend confirmation
+        macd = metrics['macd']
+        signals.loc[(rsi < 30) & (macd > 0), 'signal'] = 1
+
+        return signals
+
+# Batch process multiple tickers
+tickers = ['AAPL', 'GOOGL', 'MSFT']
+cache.populate_metrics_table(tickers, indicators=['sma_20', 'rsi_14', 'macd'])
+
+# Generate signals for all tickers using cached metrics
+for ticker in tickers:
+    metrics = cache.get_metrics(ticker)
+    model = CachedMetricsModel()
+    signals = model.generate_signals_with_cached_metrics(metrics)
+    print(f"{ticker} signals generated: {signals['signal'].sum()}")
+```
+
 ## Configuration
 
 Models support flexible configuration through dictionaries:

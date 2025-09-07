@@ -99,6 +99,67 @@ williams_r = calculate_williams_r(df["High"], df["Low"], df["Close"])
 print(f"Williams %R: {williams_r.iloc[-1]:.2f}")
 ```
 
+## Time Series Caching with Automated Metrics
+
+### Setup InfluxDB (One-time setup)
+
+```bash
+# Install and start InfluxDB
+python open_trading_algo/cache/setup_influxdb.py
+```
+
+### Store and Analyze Historical Data
+
+```python
+from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
+
+# Initialize cache
+cache = TimeSeriesCache()
+
+# Store historical price data
+cache.store_price_data('AAPL', df)
+
+# Automatically calculate and store technical indicators
+cache.calculate_and_store_metrics('AAPL', indicators=['sma_20', 'rsi_14', 'macd'])
+
+# Retrieve specific metrics
+metrics = cache.get_metrics('AAPL', indicators=['rsi_14', 'macd'])
+print("Latest RSI:", metrics['rsi_14'].iloc[-1])
+print("Latest MACD:", metrics['macd'].iloc[-1])
+
+# Get comprehensive metrics summary
+summary = cache.get_metrics_summary('AAPL')
+print(f"Available indicators: {len(summary['available_metrics'])}")
+print(f"Data points: {summary['data_points']}")
+
+# Query historical data with date ranges
+historical_data = cache.get_price_data('AAPL', start='2023-01-01', end='2023-12-31')
+historical_metrics = cache.get_metrics('AAPL', start='2023-01-01', end='2023-12-31')
+```
+
+### Batch Processing Multiple Tickers
+
+```python
+# Process multiple tickers at once
+tickers = ['AAPL', 'GOOGL', 'MSFT', 'TSLA']
+
+# Store price data for all tickers
+for ticker in tickers:
+    ticker_data = yf.Ticker(ticker).history(period="6mo")
+    cache.store_price_data(ticker, ticker_data)
+
+# Calculate metrics for all tickers
+cache.populate_metrics_table(tickers, indicators=['sma_20', 'rsi_14', 'macd', 'volatility_20'])
+
+# Get database statistics
+info = cache.get_database_info()
+print(f"Total data points: {info['total_data_points']}")
+print(f"Price data points: {info['price_data_points']}")
+print(f"Metrics data points: {info['metrics_points']}")
+
+cache.close()
+```
+
 ## Signal Generation
 
 ### Long Signals

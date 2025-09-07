@@ -880,6 +880,74 @@ Quad:   -----/\_-----
 - Consider transaction costs when evaluating indicator performance
 - Regular backtesting is essential as market conditions change
 
+## Automated Calculation with Time Series Cache
+
+For automated technical indicator calculation and storage, use the InfluxDB-based time series cache:
+
+```python
+from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
+
+# Initialize cache
+cache = TimeSeriesCache()
+
+# Store price data
+cache.store_price_data('AAPL', price_dataframe)
+
+# Automatically calculate and store multiple indicators
+cache.calculate_and_store_metrics('AAPL', indicators=[
+    'sma_20', 'sma_50',          # Moving averages
+    'ema_12', 'ema_26',          # Exponential moving averages
+    'rsi_14',                     # Momentum oscillator
+    'macd', 'macd_signal',        # MACD indicators
+    'bb_upper', 'bb_middle', 'bb_lower',  # Bollinger Bands
+    'volatility_20',              # Volatility measure
+    'returns'                     # Price returns
+])
+
+# Retrieve calculated indicators
+indicators = cache.get_metrics('AAPL', indicators=['rsi_14', 'macd', 'sma_20'])
+print(f"Current RSI: {indicators['rsi_14'].iloc[-1]:.2f}")
+print(f"Current MACD: {indicators['macd'].iloc[-1]:.4f}")
+
+# Batch process multiple tickers
+tickers = ['AAPL', 'GOOGL', 'MSFT', 'TSLA']
+cache.populate_metrics_table(tickers, indicators=[
+    'sma_20', 'rsi_14', 'macd', 'volatility_20'
+])
+
+# Get summary statistics
+summary = cache.get_metrics_summary('AAPL')
+print(f"Available indicators: {len(summary['available_metrics'])}")
+```
+
+### Benefits of Automated Calculation
+
+- **Performance**: Pre-calculated indicators load instantly
+- **Consistency**: Standardized calculation parameters across all tickers
+- **Storage**: Efficient time series storage with automatic compression
+- **Querying**: Fast retrieval with complex time-based filters
+- **Batch Processing**: Calculate indicators for multiple assets simultaneously
+
+### Supported Indicators
+
+The time series cache automatically calculates:
+
+**Trend Indicators:**
+- `sma_20`, `sma_50`, `sma_200` - Simple Moving Averages
+- `ema_12`, `ema_26`, `ema_50` - Exponential Moving Averages
+
+**Momentum Indicators:**
+- `rsi_14` - Relative Strength Index
+- `macd`, `macd_signal`, `macd_hist` - MACD and signal line
+
+**Volatility Indicators:**
+- `bb_upper`, `bb_middle`, `bb_lower`, `bb_width` - Bollinger Bands
+- `volatility_20`, `volatility_50` - Price volatility
+
+**Price Action:**
+- `returns`, `cumulative_returns` - Return calculations
+- `price_change`, `pct_change` - Price changes
+
 ## References
 
 - [Investopedia Technical Analysis](https://www.investopedia.com/technical-analysis-5188516)

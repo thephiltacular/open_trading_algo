@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Demo script for Time Series Cache using InfluxDB.
+Demo script for Time Series Cache Metrics functionality.
 
-This script demonstrates how to use the TimeSeriesCache class
-for storing and retrieving financial data and trading signals.
+This script demonstrates how to calculate and store technical indicators
+and metrics from price data using the TimeSeriesCache.
 
 Usage:
     python examples/timeseries_cache_demo.py
@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
 
 
-def generate_sample_ohlcv_data(ticker: str, days: int = 100) -> pd.DataFrame:
+def generate_sample_price_data(ticker: str, days: int = 100) -> pd.DataFrame:
     """Generate sample OHLCV data for testing."""
     np.random.seed(42)  # For reproducible results
 
@@ -25,213 +25,258 @@ def generate_sample_ohlcv_data(ticker: str, days: int = 100) -> pd.DataFrame:
     dates = pd.date_range(start=start_date, end=end_date, freq="D")
 
     # Generate realistic price data
-    base_price = 100 + np.random.uniform(-20, 20)
+    base_price = 100.0 + np.random.uniform(-20, 20)
 
-    prices = []
-    current_price = base_price
-
-    for _ in dates:
-        # Random walk with some volatility
+    ohlcv_data = []
+    for i, date in enumerate(dates):
+        # Simulate price movement
         change = np.random.normal(0, 2.0)
-        current_price += change
+        base_price += change
 
-        # Generate OHLC with some spread
-        high = current_price + abs(np.random.normal(0, 1.0))
-        low = current_price - abs(np.random.normal(0, 1.0))
-        open_price = current_price + np.random.normal(0, 0.5)
-        close = current_price + np.random.normal(0, 0.5)
+        open_price = base_price
+        close = base_price + np.random.normal(0, 1.0)
+        high = max(open_price, close) + abs(np.random.normal(0, 0.5))
+        low = min(open_price, close) - abs(np.random.normal(0, 0.5))
+        volume = int(np.random.uniform(100000, 500000))
 
-        # Ensure high >= max(open, close) and low <= min(open, close)
-        high = max(high, open_price, close)
-        low = min(low, open_price, close)
-
-        # Generate volume
-        volume = int(np.random.uniform(100000, 1000000))
-
-        prices.append(
+        ohlcv_data.append(
             {"Open": open_price, "High": high, "Low": low, "Close": close, "Volume": volume}
         )
 
-    df = pd.DataFrame(prices, index=dates)
+    df = pd.DataFrame(ohlcv_data, index=dates)
     return df
 
 
-def generate_sample_signals(ticker: str, dates: pd.DatetimeIndex) -> pd.DataFrame:
-    """Generate sample trading signals."""
-    np.random.seed(123)
+def demo_price_data_storage():
+    """Demonstrate storing price data."""
+    print("📊 Storing Price Data")
+    print("-" * 30)
 
-    signals = []
-    for _ in dates:
-        # Generate random signals (-1, 0, 1)
-        signal_value = np.random.choice([-1, 0, 1], p=[0.3, 0.4, 0.3])
-        signals.append(signal_value)
-
-    df = pd.DataFrame({"signal_value": signals}, index=dates)
-    return df
-
-
-def demo_price_data_operations():
-    """Demonstrate price data storage and retrieval."""
-    print("📊 Demonstrating Price Data Operations")
-    print("-" * 40)
-
-    # Initialize cache
     cache = TimeSeriesCache()
+    ticker = "AAPL"
 
     # Generate sample data
-    ticker = "AAPL"
     print(f"📈 Generating sample OHLCV data for {ticker}...")
-    price_data = generate_sample_ohlcv_data(ticker, days=50)
+    price_data = generate_sample_price_data(ticker, days=50)
     print(f"   Generated {len(price_data)} data points")
 
     # Store data
     print(f"💾 Storing price data for {ticker}...")
     cache.store_price_data(ticker, price_data)
-    print("   ✅ Data stored successfully")
-
-    # Retrieve data
-    print(f"📖 Retrieving price data for {ticker}...")
-    retrieved_data = cache.get_price_data(ticker)
-    print(f"   Retrieved {len(retrieved_data)} data points")
-
-    # Show sample of retrieved data
-    print("\n📋 Sample of retrieved data:")
-    print(retrieved_data.head())
-
-    # Test date range filtering
-    start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
-    print(f"\n📅 Retrieving data from {start_date}...")
-    filtered_data = cache.get_price_data(ticker, start=start_date)
-    print(f"   Retrieved {len(filtered_data)} data points in date range")
-
-    # Check data existence
-    exists = cache.has_data(ticker)
-    print(f"🔍 Data exists for {ticker}: {exists}")
+    print("   ✅ Price data stored successfully")
 
     cache.close()
 
 
-def demo_signals_operations():
-    """Demonstrate signals storage and retrieval."""
-    print("\n📊 Demonstrating Signals Operations")
+def demo_metrics_calculation():
+    """Demonstrate calculating and storing metrics."""
+    print("\n📊 Calculating and Storing Metrics")
     print("-" * 40)
 
-    # Initialize cache
     cache = TimeSeriesCache()
-
-    # Generate sample data
     ticker = "AAPL"
     timeframe = "1d"
-    signal_type = "momentum"
 
-    # Get dates from existing price data
-    price_data = cache.get_price_data(ticker)
-    if price_data.empty:
-        print("   No price data found, generating new signals data...")
-        dates = pd.date_range(
-            start=datetime.now() - timedelta(days=30), end=datetime.now(), freq="D"
-        )
-    else:
-        dates = price_data.index
+    # Calculate and store all available metrics
+    print(f"🧮 Calculating technical indicators for {ticker}...")
+    cache.calculate_and_store_metrics(
+        ticker=ticker,
+        timeframe=timeframe,
+        indicators=[
+            "sma_20",
+            "sma_50",
+            "ema_12",
+            "ema_26",
+            "rsi_14",
+            "macd",
+            "macd_signal",
+            "macd_hist",
+            "bb_upper",
+            "bb_middle",
+            "bb_lower",
+            "volatility_20",
+            "returns",
+        ],
+    )
 
-    print(f"🎯 Generating sample signals for {ticker} ({timeframe}, {signal_type})...")
-    signals_data = generate_sample_signals(ticker, dates)
-    print(f"   Generated {len(signals_data)} signal points")
-
-    # Store signals
-    print(f"💾 Storing signals for {ticker}...")
-    cache.store_signals(ticker, timeframe, signal_type, signals_data)
-    print("   ✅ Signals stored successfully")
-
-    # Retrieve signals
-    print(f"📖 Retrieving signals for {ticker}...")
-    retrieved_signals = cache.get_signals(ticker, timeframe, signal_type)
-    print(f"   Retrieved {len(retrieved_signals)} signal points")
-
-    # Show sample of retrieved signals
-    print("\n📋 Sample of retrieved signals:")
-    print(retrieved_signals.head())
-
-    # Check signals existence
-    exists = cache.has_signals(ticker, timeframe, signal_type)
-    print(f"🔍 Signals exist for {ticker}: {exists}")
+    # Get available metrics
+    print(f"📋 Available metrics for {ticker}:")
+    available_metrics = cache.get_available_metrics(ticker, timeframe)
+    for metric in available_metrics:
+        print(f"   • {metric}")
 
     cache.close()
 
 
-def demo_aggregated_queries():
-    """Demonstrate aggregated data queries."""
-    print("\n📊 Demonstrating Aggregated Queries")
-    print("-" * 40)
+def demo_metrics_retrieval():
+    """Demonstrate retrieving stored metrics."""
+    print("\n📊 Retrieving Metrics Data")
+    print("-" * 30)
 
     cache = TimeSeriesCache()
-
     ticker = "AAPL"
+    timeframe = "1d"
 
-    # Get aggregated data (weekly)
-    print(f"📈 Getting weekly aggregated data for {ticker}...")
-    weekly_data = cache.get_aggregated_data(ticker, aggregation="1w")
-    print(f"   Retrieved {len(weekly_data)} weekly data points")
+    # Retrieve specific metrics
+    metrics_to_get = ["rsi_14", "macd", "sma_20", "bb_upper", "bb_lower"]
+    print(f"📖 Retrieving metrics: {', '.join(metrics_to_get)}")
 
-    if not weekly_data.empty:
-        print("\n📋 Sample of weekly aggregated data:")
-        print(weekly_data.head())
+    metrics_df = cache.get_metrics(
+        ticker=ticker, timeframe=timeframe, metrics=metrics_to_get, start="-30d"  # Last 30 days
+    )
 
-    # Get signal statistics
-    print(f"\n📊 Getting signal statistics for {ticker}...")
-    stats = cache.get_signal_stats(ticker, "1d", "momentum")
-    if stats:
-        print(f"   Total signals: {stats.get('total_signals', 0)}")
-        print(f"   Ticker: {stats.get('ticker')}")
-        print(f"   Timeframe: {stats.get('timeframe')}")
-        print(f"   Signal type: {stats.get('signal_type')}")
+    if not metrics_df.empty:
+        print(f"   Retrieved {len(metrics_df)} data points")
+        print("\n📋 Sample of retrieved metrics:")
+        print(metrics_df.tail())
+
+        # Show latest values
+        print("\n📈 Latest metric values:")
+        latest = metrics_df.iloc[-1]
+        for metric, value in latest.items():
+            if pd.notna(value):
+                print(f"   {metric}: {value:.4f}")
+    else:
+        print("   No metrics data found")
 
     cache.close()
 
 
-def demo_database_info():
-    """Show database information and statistics."""
-    print("\n📊 Database Information")
-    print("-" * 40)
+def demo_metrics_summary():
+    """Demonstrate getting metrics summary statistics."""
+    print("\n📊 Metrics Summary Statistics")
+    print("-" * 35)
+
+    cache = TimeSeriesCache()
+    ticker = "AAPL"
+    timeframe = "1d"
+
+    summary = cache.get_metrics_summary(ticker, timeframe)
+
+    if "error" not in summary:
+        print(f"📊 Summary for {summary['ticker']} ({summary['timeframe']}):")
+        print(f"   Data points: {summary['data_points']}")
+        print(f"   Date range: {summary['date_range']['start']} to {summary['date_range']['end']}")
+        print(f"   Available metrics: {len(summary['available_metrics'])}")
+
+        print("\n📈 Key metrics statistics:")
+        key_metrics = ["rsi_14", "macd", "sma_20"]
+        for metric in key_metrics:
+            if metric in summary["metrics_stats"]:
+                stats = summary["metrics_stats"][metric]
+                print(f"   {metric}:")
+                print(f"     Mean: {stats['mean']:.2f}")
+                print(f"     Std: {stats['std']:.2f}")
+                print(f"     Min: {stats['min']:.2f}")
+                print(f"     Max: {stats['max']:.2f}")
+                print(f"     Last: {stats['last_value']:.2f}")
+    else:
+        print(f"   {summary['error']}")
+
+    cache.close()
+
+
+def demo_batch_metrics_population():
+    """Demonstrate populating metrics for multiple tickers."""
+    print("\n📊 Batch Metrics Population")
+    print("-" * 32)
 
     cache = TimeSeriesCache()
 
+    # List of tickers to process
+    tickers = ["AAPL", "GOOGL", "MSFT", "TSLA"]
+
+    # First, store price data for all tickers
+    print("💾 Storing price data for multiple tickers...")
+    for ticker in tickers:
+        price_data = generate_sample_price_data(ticker, days=30)
+        cache.store_price_data(ticker, price_data)
+        print(f"   ✅ Stored price data for {ticker}")
+
+    # Calculate metrics for all tickers
+    print("\n🧮 Calculating metrics for all tickers...")
+    cache.populate_metrics_table(
+        tickers, timeframe="1d", indicators=["sma_20", "rsi_14", "macd", "volatility_20"]
+    )
+
+    # Show database statistics
+    print("\n📊 Database Statistics:")
     info = cache.get_database_info()
     if info:
-        print(f"🗄️  Database URL: {info.get('database_url')}")
-        print(f"🏢 Organization: {info.get('organization')}")
-        print(f"🪣 Bucket: {info.get('bucket')}")
-        print(f"💰 Price data points: {info.get('price_data_points', 0)}")
-        print(f"🎯 Signals points: {info.get('signals_points', 0)}")
-        print(f"📊 Total data points: {info.get('total_data_points', 0)}")
-    else:
-        print("❌ Could not retrieve database information")
+        print(f"   Price data points: {info.get('price_data_points', 0)}")
+        print(f"   Signals points: {info.get('signals_points', 0)}")
+        print(f"   Metrics points: {info.get('metrics_points', 0)}")
+        print(f"   Total data points: {info.get('total_data_points', 0)}")
+
+    cache.close()
+
+
+def demo_custom_indicators():
+    """Demonstrate calculating custom indicators."""
+    print("\n📊 Custom Indicators Example")
+    print("-" * 32)
+
+    cache = TimeSeriesCache()
+    ticker = "AAPL"
+    timeframe = "1d"
+
+    # Calculate only specific indicators
+    custom_indicators = ["sma_20", "sma_50", "rsi_14", "volatility_20"]
+
+    print(f"🎯 Calculating custom indicators for {ticker}: {custom_indicators}")
+
+    cache.calculate_and_store_metrics(
+        ticker=ticker, timeframe=timeframe, indicators=custom_indicators
+    )
+
+    # Retrieve and display the custom indicators
+    metrics_df = cache.get_metrics(ticker, timeframe, metrics=custom_indicators)
+
+    if not metrics_df.empty:
+        print("\n📋 Custom indicators data:")
+        print(metrics_df.tail(3))
 
     cache.close()
 
 
 def main():
-    """Main demo function."""
-    print("🚀 Time Series Cache Demo")
-    print("=" * 50)
-    print("This demo shows how to use InfluxDB for caching financial time series data.")
+    """Run all metrics demonstrations."""
+    print("🚀 Time Series Cache Metrics Demo")
+    print("=" * 45)
+    print("This demo shows how to calculate and store technical indicators")
+    print("and metrics from price data using InfluxDB.")
     print()
 
     try:
         # Run demonstrations
-        demo_price_data_operations()
-        demo_signals_operations()
-        demo_aggregated_queries()
-        demo_database_info()
+        demo_price_data_storage()
+        demo_metrics_calculation()
+        demo_metrics_retrieval()
+        demo_metrics_summary()
+        demo_batch_metrics_population()
+        demo_custom_indicators()
 
-        print("\n🎉 Demo completed successfully!")
+        print("\n🎉 Metrics demo completed successfully!")
         print("\n💡 Key Features Demonstrated:")
-        print("   • Efficient storage of OHLCV financial data")
-        print("   • Flexible signal storage and retrieval")
-        print("   • Date range filtering")
-        print("   • Aggregated queries (time windows)")
-        print("   • Signal statistics and analytics")
-        print("   • High-performance time series queries")
+        print("   • Automatic calculation of technical indicators")
+        print("   • Storage and retrieval of metrics data")
+        print("   • Batch processing for multiple tickers")
+        print("   • Custom indicator selection")
+        print("   • Metrics summary statistics")
+        print("   • Efficient time series queries")
+
+        print("\n📚 Available Indicators:")
+        indicators = [
+            "sma_20, sma_50 - Simple Moving Averages",
+            "ema_12, ema_26 - Exponential Moving Averages",
+            "rsi_14 - Relative Strength Index",
+            "macd, macd_signal, macd_hist - MACD indicators",
+            "bb_upper, bb_middle, bb_lower - Bollinger Bands",
+            "volatility_20 - 20-day volatility",
+            "returns, cumulative_returns - Return calculations",
+        ]
+        for indicator in indicators:
+            print(f"   • {indicator}")
 
     except Exception as e:
         print(f"\n❌ Demo failed with error: {e}")

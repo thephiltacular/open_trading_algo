@@ -136,7 +136,7 @@ open_trading_algo/
 - **`fin_data_apis/`**: Multi-source financial data fetching with rate limiting
 - **`indicators/`**: 50+ technical indicators and 24 trading metrics
 - **`models/`**: Trading strategy models and machine learning algorithms
-- **`cache/`**: SQLite-based local data storage and optimization
+- **`cache/`**: High-performance time series database (InfluxDB) with automated technical indicator calculations
 - **`backtest/`**: Historical strategy testing and Monte Carlo simulation
 - **`sentiment/`**: Social media and analyst sentiment analysis
 - **`alerts/`**: Real-time signal notifications and alerts
@@ -177,7 +177,9 @@ For high-performance time series data storage and analytics, open_trading_algo a
 
 #### Key Benefits:
 - **Optimized for Time Series**: Columnar storage designed specifically for financial data
-- **High Performance**: Fast queries for OHLCV data and trading signals
+- **Automated Metrics Calculation**: Automatically calculate and store 15+ technical indicators from price data
+- **Multi-Table Architecture**: Separate optimized tables for price data, signals, and calculated metrics
+- **High Performance**: Fast queries for OHLCV data, trading signals, and technical indicators
 - **Advanced Analytics**: Built-in aggregation functions and time-based queries
 - **Scalable**: Handles large volumes of high-frequency financial data
 - **SQL-like Queries**: Use Flux language for complex analytical queries
@@ -192,12 +194,20 @@ python open_trading_algo/cache/setup_influxdb.py
 from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
 
 cache = TimeSeriesCache()
+
+# Store price data
 cache.store_price_data('AAPL', ohlcv_df)
-data = cache.get_price_data('AAPL', start='2023-01-01', end='2023-12-31')
+
+# Automatically calculate and store technical indicators
+cache.calculate_and_store_metrics('AAPL', indicators=['sma_20', 'rsi_14', 'macd'])
+
+# Retrieve metrics
+metrics = cache.get_metrics('AAPL', indicators=['rsi_14', 'macd'])
 
 # 3. Advanced queries
 weekly_data = cache.get_aggregated_data('AAPL', aggregation='1w')
 stats = cache.get_signal_stats('AAPL', '1d', 'momentum')
+summary = cache.get_metrics_summary('AAPL')
 ```
 
 #### Features:

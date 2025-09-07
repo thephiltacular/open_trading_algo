@@ -633,6 +633,111 @@ else:
     print("Cache integrity OK")
 ```
 
+## Time Series Database Cache (InfluxDB)
+
+For high-performance time series data storage and automated technical analysis, open_trading_algo also supports **InfluxDB** as an advanced alternative to SQLite.
+
+### Key Advantages
+
+- **Optimized for Time Series**: Columnar storage designed specifically for financial data
+- **Automated Metrics Calculation**: Automatically calculate and store 15+ technical indicators
+- **Multi-Table Architecture**: Separate optimized tables for price data, signals, and metrics
+- **High Performance**: Fast queries for large datasets with complex aggregations
+- **Advanced Analytics**: Built-in time-based queries and statistical functions
+- **Scalable**: Handles high-frequency financial data efficiently
+
+### Setup InfluxDB
+
+```bash
+# Install Docker if not already installed
+# Then run the setup script
+python open_trading_algo/cache/setup_influxdb.py
+```
+
+### Time Series Cache Usage
+
+```python
+from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
+
+# Initialize time series cache
+ts_cache = TimeSeriesCache()
+
+# Store historical price data
+ts_cache.store_price_data('AAPL', df)
+
+# Automatically calculate and store technical indicators
+ts_cache.calculate_and_store_metrics(
+    'AAPL',
+    indicators=['sma_20', 'rsi_14', 'macd', 'bb_upper', 'bb_lower']
+)
+
+# Retrieve specific metrics
+metrics = ts_cache.get_metrics('AAPL', indicators=['rsi_14', 'macd'])
+print(f"Current RSI: {metrics['rsi_14'].iloc[-1]:.2f}")
+
+# Get comprehensive metrics summary
+summary = ts_cache.get_metrics_summary('AAPL')
+print(f"Available indicators: {summary['available_metrics']}")
+
+# Advanced time-based queries
+weekly_data = ts_cache.get_aggregated_data('AAPL', aggregation='1w')
+recent_metrics = ts_cache.get_metrics('AAPL', start='-30d')  # Last 30 days
+```
+
+### Batch Processing
+
+```python
+# Process multiple tickers efficiently
+tickers = ['AAPL', 'GOOGL', 'MSFT', 'TSLA']
+
+# Store price data for all tickers
+for ticker in tickers:
+    data = yf.Ticker(ticker).history(period="1y")
+    ts_cache.store_price_data(ticker, data)
+
+# Calculate metrics for all tickers at once
+ts_cache.populate_metrics_table(
+    tickers,
+    indicators=['sma_20', 'rsi_14', 'macd', 'volatility_20', 'returns']
+)
+
+# Get database statistics
+info = ts_cache.get_database_info()
+print(f"Total data points: {info['total_data_points']}")
+print(f"Metrics data points: {info['metrics_points']}")
+```
+
+### Available Technical Indicators
+
+The time series cache supports automatic calculation of:
+
+**Trend Indicators:**
+- Simple Moving Averages: `sma_20`, `sma_50`, `sma_200`
+- Exponential Moving Averages: `ema_12`, `ema_26`, `ema_50`
+
+**Momentum Indicators:**
+- RSI (Relative Strength Index): `rsi_14`
+- MACD: `macd`, `macd_signal`, `macd_histogram`
+
+**Volatility Indicators:**
+- Bollinger Bands: `bb_upper`, `bb_middle`, `bb_lower`, `bb_width`
+- Volatility: `volatility_20`, `volatility_50`
+
+**Price Action:**
+- Returns: `returns`, `cumulative_returns`
+- Price Changes: `price_change`, `pct_change`
+
+### Performance Comparison
+
+| Feature | SQLite Cache | InfluxDB Cache |
+|---------|-------------|----------------|
+| Storage Type | Relational | Time Series Optimized |
+| Query Performance | Good for small datasets | Excellent for time series |
+| Metrics Calculation | Manual | Automated |
+| Aggregation | Basic SQL | Advanced time functions |
+| Scalability | Limited | High |
+| Setup Complexity | Simple | Requires Docker |
+
 ## Next Steps
 
 - [Technical Indicators](indicators.md) - Use cached data for analysis

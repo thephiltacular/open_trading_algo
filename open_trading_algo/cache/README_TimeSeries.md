@@ -5,10 +5,22 @@ This directory contains an alternative caching implementation using **InfluxDB**
 ## Overview
 
 The `TimeSeriesCache` class provides:
+## Performance Benefits
 
-- **Optimized Time Series Storage**: InfluxDB is specifically designed for time series data with automatic compression and efficient querying
+Compared to SQLite:
+
+1. **Query Performance**: InfluxDB uses columnar storage optimized for time series queries
+2. **Automated Analytics**: Built-in calculation and storage of technical indicators
+3. **Multi-Table Optimization**: Separate tables for raw data and derived metrics improve query performance
+4. **Compression**: Automatic data compression reduces storage requirements
+5. **Retention Policies**: Automatic data expiration and cleanup
+6. **Concurrent Access**: Better handling of multiple concurrent queries
+7. **Analytics**: Built-in aggregation and analytical functions
+8. **Scalability**: Designed to handle high-frequency financial dataized Time Series Storage**: InfluxDB is specifically designed for time series data with automatic compression and efficient querying
+- **Automated Metrics Calculation**: Automatically calculate and store 15+ technical indicators from price data
+- **Multi-Table Architecture**: Separate tables for price data, signals, and calculated metrics for optimal performance
 - **SQL-like Queries**: Use Flux query language for complex analytics and aggregations
-- **High Performance**: Fast queries for OHLCV data and trading signals
+- **High Performance**: Fast queries for OHLCV data, trading signals, and technical indicators
 - **Scalable**: Handles large volumes of financial data efficiently
 - **Pandas Integration**: Seamless conversion to/from pandas DataFrames and Series
 
@@ -52,34 +64,31 @@ signals = cache.get_signals('AAPL', '1d', 'momentum')
 cache.close()
 ```
 
+### Metrics and Indicators Usage
+
+```python
+# Calculate and store technical indicators
+cache.calculate_and_store_metrics('AAPL', indicators=['sma_20', 'rsi_14', 'macd'])
+
+# Retrieve specific metrics
+metrics = cache.get_metrics('AAPL', indicators=['sma_20', 'rsi_14'])
+
+# Get all metrics for a ticker
+all_metrics = cache.get_metrics('AAPL')
+
+# Batch process metrics for multiple tickers
+cache.populate_metrics_table(['AAPL', 'GOOGL', 'MSFT'])
+
+# Get metrics summary
+summary = cache.get_metrics_summary('AAPL')
+```
+
 ### 3. Run Demo
 
 See the cache in action with sample data:
 
 ```bash
 python examples/timeseries_cache_demo.py
-```
-
-### 4. Run Tests
-
-Verify the implementation with comprehensive tests:
-
-```bash
-python -m pytest tests/test_timeseries_cache.py -v
-```
-
-### 5. Migrate Existing Data
-
-Migrate data from SQLite to InfluxDB:
-
-```bash
-python scripts/migrate_to_timeseries.py
-```
-
-See the cache in action with sample data:
-
-```bash
-python demo_timeseries_cache.py
 ```
 
 ## Configuration
@@ -142,6 +151,31 @@ TimeSeriesCache(url="http://localhost:8086", token="my-token",
 - Check if signals exist
 - Returns boolean
 
+#### Metrics and Indicators Methods
+
+**calculate_and_store_metrics(ticker, timeframe='1d', indicators=None, start=None, end=None)**
+- Calculate technical indicators and store them in the metrics table
+- `timeframe`: Timeframe for calculations (default: '1d')
+- `indicators`: List of indicators to calculate (default: all available)
+- Automatically calculates from existing price data
+
+**get_metrics(ticker, timeframe='1d', indicators=None, start=None, end=None)**
+- Retrieve calculated metrics for a ticker
+- `timeframe`: Timeframe for the metrics (default: '1d')
+- `indicators`: Filter by specific indicators
+- Returns DataFrame with datetime index and indicator columns
+
+**populate_metrics_table(tickers, timeframe='1d', start=None, end=None, indicators=None)**
+- Batch process and populate metrics for multiple tickers
+- `tickers`: List of ticker symbols to process
+- `timeframe`: Timeframe for calculations (default: '1d')
+- `indicators`: List of indicators to calculate
+
+**get_metrics_summary(ticker, timeframe='1d', start=None, end=None)**
+- Get summary statistics for all metrics
+- `timeframe`: Timeframe for the metrics (default: '1d')
+- Returns dictionary with indicator statistics
+
 #### Advanced Queries
 
 **get_aggregated_data(ticker, aggregation="1d", start=None, end=None)**
@@ -179,6 +213,37 @@ TimeSeriesCache(url="http://localhost:8086", token="my-token",
 - **Fields**:
   - `signal_value`: Signal value (-1, 0, 1, or continuous)
 - **Timestamp**: Date/time of the signal
+
+### Metrics Measurement
+- **Measurement**: `metrics`
+- **Tags**:
+  - `ticker`: Ticker symbol
+  - `timeframe`: Timeframe (e.g., '1d', '1h')
+  - `indicator`: Indicator name (e.g., 'sma_20', 'rsi_14', 'macd')
+- **Fields**:
+  - `value`: Indicator value (float)
+  - `signal`: Derived signal (-1, 0, 1) if applicable
+- **Timestamp**: Date/time of the calculation
+
+## Available Indicators
+
+The system supports the following technical indicators:
+
+### Trend Indicators
+- **SMA (Simple Moving Average)**: `sma_20`, `sma_50`, `sma_200`
+- **EMA (Exponential Moving Average)**: `ema_12`, `ema_26`, `ema_50`
+
+### Momentum Indicators
+- **RSI (Relative Strength Index)**: `rsi_14`
+- **MACD (Moving Average Convergence Divergence)**: `macd`, `macd_signal`, `macd_histogram`
+
+### Volatility Indicators
+- **Bollinger Bands**: `bb_upper`, `bb_middle`, `bb_lower`, `bb_width`, `bb_percent`
+- **Volatility**: `volatility_20`, `volatility_50`
+
+### Price Action
+- **Returns**: `daily_return`, `cumulative_return`
+- **Price Changes**: `price_change`, `pct_change`
 
 ## Performance Benefits
 
@@ -248,8 +313,9 @@ open http://localhost:8086
 
 ## Next Steps
 
-1. **Data Migration**: Migrate existing SQLite data to InfluxDB
-2. **Retention Policies**: Configure data retention based on your needs
-3. **Backup Strategy**: Set up regular backups of InfluxDB data
-4. **Monitoring**: Monitor query performance and resource usage
-5. **High Availability**: Consider clustering for production use
+1. **Metrics Population**: Run metrics calculation for existing price data using `populate_metrics_table()`
+2. **Data Migration**: Migrate existing SQLite data to InfluxDB
+3. **Retention Policies**: Configure data retention based on your needs for price, signals, and metrics data
+4. **Backup Strategy**: Set up regular backups of InfluxDB data
+5. **Monitoring**: Monitor query performance and resource usage
+6. **High Availability**: Consider clustering for production use
