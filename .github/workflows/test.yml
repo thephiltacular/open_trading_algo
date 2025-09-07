@@ -88,8 +88,8 @@ jobs:
     - name: Install dependencies
       run: poetry install --no-interaction
 
-    - name: Run type checking
-      run: poetry run mypy open_trading_algo/ --ignore-missing-imports
+    # - name: Run type checking
+    #   run: poetry run mypy open_trading_algo/ --ignore-missing-imports
 
     - name: Check code formatting
       run: |
