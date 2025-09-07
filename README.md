@@ -125,7 +125,12 @@ open_trading_algo/
 │   ├── momentum_model.py # Momentum-based strategies
 │   ├── mean_reversion_model.py # Mean reversion strategies
 │   └── trend_following_model.py # Trend following strategies
-├── 💾 cache/            # High-performance local storage
+├── 💾 cache/            # Multiple caching implementations
+│   ├── data_cache.py     # SQLite-based cache (default)
+│   ├── parquet_cache.py  # Parquet columnar storage
+│   ├── timeseries_cache.py # InfluxDB time series database
+│   ├── setup_influxdb.py # InfluxDB setup utilities
+│   └── README_TimeSeries.md # Time series cache documentation
 ├── 🎯 sentiment/        # Sentiment analysis integration
 ├── ⚖️ risk_management.py # Position sizing and risk controls
 └── 🔄 signal_optimizer.py # Multi-signal optimization
@@ -136,7 +141,7 @@ open_trading_algo/
 - **`fin_data_apis/`**: Multi-source financial data fetching with rate limiting
 - **`indicators/`**: 50+ technical indicators and 24 trading metrics
 - **`models/`**: Trading strategy models and machine learning algorithms
-- **`cache/`**: High-performance time series database (InfluxDB) with automated technical indicator calculations
+- **`cache/`**: Multiple caching implementations (SQLite, Parquet, InfluxDB) for different performance and storage needs
 - **`backtest/`**: Historical strategy testing and Monte Carlo simulation
 - **`sentiment/`**: Social media and analyst sentiment analysis
 - **`alerts/`**: Real-time signal notifications and alerts
@@ -144,12 +149,76 @@ open_trading_algo/
 
 
 
+### Cache System
+
+open_trading_algo provides **three different caching implementations** optimized for different use cases:
+
+#### 1. **SQLite DataCache** (Default - Zero Configuration)
+- **Best for**: Getting started quickly, development, small to medium datasets
+- **Storage**: SQLite database with automatic table creation
+- **Features**: OHLCV data, signals storage, thread-safe operations
+- **Setup**: No additional dependencies required
+- **Performance**: Fast for most use cases, excellent for repeated queries
+
+```python
+from open_trading_algo.cache.data_cache import DataCache
+
+cache = DataCache()  # Uses default SQLite database
+cache.store_price_data('AAPL', ohlcv_df)
+cached_data = cache.get_price_data('AAPL')
+```
+
+#### 2. **Parquet Cache** (Columnar Storage)
+- **Best for**: Analytical workloads, large datasets, research environments
+- **Storage**: Apache Parquet files with partitioning by ticker
+- **Features**: High compression, fast analytical queries, pandas integration
+- **Setup**: Requires `pyarrow` package
+- **Performance**: Superior for complex queries and aggregations
+
+```python
+from open_trading_algo.cache.parquet_cache import ParquetCache
+
+cache = ParquetCache()  # Uses Parquet files
+cache.store_price_data('AAPL', ohlcv_df)
+cached_data = cache.get_price_data('AAPL')
+```
+
+#### 3. **InfluxDB Time Series Cache** (High Performance)
+- **Best for**: Production systems, high-frequency data, real-time analytics
+- **Storage**: InfluxDB time series database with automatic compression
+- **Features**: Automated technical indicator calculation, advanced queries, retention policies
+- **Setup**: Requires Docker and InfluxDB container
+- **Performance**: Optimized for time series queries, handles millions of data points
+
+```python
+from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
+
+cache = TimeSeriesCache()  # Uses InfluxDB
+cache.store_price_data('AAPL', ohlcv_df)
+
+# Automatically calculate and store technical indicators
+cache.calculate_and_store_metrics('AAPL', indicators=['sma_20', 'rsi_14', 'macd'])
+metrics = cache.get_metrics('AAPL')
+```
+
+### Choosing the Right Cache
+
+| Feature | SQLite Cache | Parquet Cache | InfluxDB Cache |
+|---------|-------------|---------------|----------------|
+| **Setup Complexity** | 🟢 None | 🟡 Low | 🔴 Medium |
+| **Performance** | 🟢 Good | 🟡 Very Good | 🟢 Excellent |
+| **Storage Efficiency** | 🟡 Good | 🟢 Excellent | 🟢 Excellent |
+| **Query Flexibility** | 🟢 Good | 🟡 Very Good | 🟢 Excellent |
+| **Time Series Features** | 🔴 Basic | 🟡 Good | 🟢 Excellent |
+| **Technical Indicators** | 🔴 Manual | 🔴 Manual | 🟢 Automatic |
+| **Best Use Case** | Development/Quick Start | Research/Analytics | Production/Real-time |
+
 ### Signal Caching: Avoid Recomputing Signals
 
-open_trading_algo caches all computed signals (long, short, options, sentiment) for each ticker, timeframe, and signal type. This means:
-- Signals are only computed once per unique (ticker, timeframe, signal_type) combination.
-- All signal modules (`long_signals.py`, `short_signals.py`, `options_signals.py`, `sentiment_signals.py`) are integrated with the cache.
-- On repeated runs, signals are loaded instantly from the database.
+All cache types support signal caching to avoid recomputing expensive calculations:
+- Signals are only computed once per unique (ticker, timeframe, signal_type) combination
+- All signal modules are integrated with the cache system
+- On repeated runs, signals are loaded instantly from the database
 
 ### Signal Generation Pipeline
 
@@ -157,7 +226,7 @@ open_trading_algo caches all computed signals (long, short, options, sentiment) 
 # 1. Fetch and cache data
 from open_trading_algo.cache.data_cache import DataCache
 cache = DataCache()
-cache.store_ohlcv("AAPL", "1d", df)
+cache.store_price_data("AAPL", df)
 
 # 2. Generate signals
 from open_trading_algo.indicators.long_signals import compute_and_cache_long_signals
@@ -171,60 +240,44 @@ df = cache.get_signals("AAPL", "1d", "long_trend")
 print(df)
 ```
 
-### Advanced Time Series Database (InfluxDB)
+### Cache Configuration
 
-For high-performance time series data storage and analytics, open_trading_algo also supports **InfluxDB** as an alternative to SQLite:
+All cache types support configuration via `config/db_config.yaml`:
 
-#### Key Benefits:
-- **Optimized for Time Series**: Columnar storage designed specifically for financial data
-- **Automated Metrics Calculation**: Automatically calculate and store 15+ technical indicators from price data
-- **Multi-Table Architecture**: Separate optimized tables for price data, signals, and calculated metrics
-- **High Performance**: Fast queries for OHLCV data, trading signals, and technical indicators
-- **Advanced Analytics**: Built-in aggregation functions and time-based queries
-- **Scalable**: Handles large volumes of high-frequency financial data
-- **SQL-like Queries**: Use Flux language for complex analytical queries
+```yaml
+# SQLite Cache Configuration
+sqlite:
+  db_path: "/path/to/custom/database.db"
+  enable_caching: true
 
-#### Quick Setup:
+# Parquet Cache Configuration
+parquet:
+  cache_dir: "/path/to/parquet/cache"
+  compression: "snappy"
 
-```bash
-# 1. Install and start InfluxDB
-python open_trading_algo/cache/setup_influxdb.py
-
-# 2. Use the time series cache
-from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
-
-cache = TimeSeriesCache()
-
-# Store price data
-cache.store_price_data('AAPL', ohlcv_df)
-
-# Automatically calculate and store technical indicators
-cache.calculate_and_store_metrics('AAPL', indicators=['sma_20', 'rsi_14', 'macd'])
-
-# Retrieve metrics
-metrics = cache.get_metrics('AAPL', indicators=['rsi_14', 'macd'])
-
-# 3. Advanced queries
-weekly_data = cache.get_aggregated_data('AAPL', aggregation='1w')
-stats = cache.get_signal_stats('AAPL', '1d', 'momentum')
-summary = cache.get_metrics_summary('AAPL')
+# InfluxDB Cache Configuration
+influxdb:
+  url: "http://localhost:8086"
+  token: "your-token"
+  org: "trading-org"
+  bucket: "trading-data"
 ```
 
-#### Features:
-- **Automatic Compression**: Efficient storage with built-in compression
-- **Retention Policies**: Configurable data retention (default: 10 years for price data)
-- **Real-time Analytics**: Aggregate data by time windows (hourly, daily, weekly)
-- **Concurrent Access**: Optimized for multiple concurrent queries
-- **Pandas Integration**: Seamless conversion to/from DataFrames
+### Cache Migration
 
-See the [Time Series Cache Documentation](open_trading_algo/cache/README_TimeSeries.md) for complete setup and usage instructions.
+You can easily switch between cache types without changing your application code:
 
-### Notes
+```python
+# Switch from SQLite to InfluxDB
+from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
 
-- The default cache uses SQLite for maximum portability and zero setup
-- InfluxDB provides superior performance for large datasets and complex queries
-- Both cache systems maintain the same API for easy switching
-- For advanced users, you can point `db_path` to a remote or cloud database
+# Your existing code works unchanged
+cache = TimeSeriesCache()
+cache.store_price_data('AAPL', ohlcv_df)
+data = cache.get_price_data('AAPL')
+```
+
+See the [Cache System Documentation](docs/data-cache.md) for complete setup and usage instructions.
 
 ## 🤝 Contributing
 

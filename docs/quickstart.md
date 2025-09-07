@@ -99,6 +99,49 @@ williams_r = calculate_williams_r(df["High"], df["Low"], df["Close"])
 print(f"Williams %R: {williams_r.iloc[-1]:.2f}")
 ```
 
+## Data Caching for Performance
+
+open_trading_algo provides **three different caching implementations** optimized for different use cases:
+
+### Quick Cache Setup (SQLite - Default)
+
+```python
+from open_trading_algo.cache.data_cache import DataCache
+
+# Zero-configuration setup
+cache = DataCache()
+
+# Store and retrieve data
+cache.store_price_data('AAPL', df)
+cached_data = cache.get_price_data('AAPL')
+```
+
+### Advanced Analytics (Parquet Cache)
+
+```python
+from open_trading_algo.cache.parquet_cache import ParquetCache
+
+# Columnar storage for analytics
+cache = ParquetCache()
+
+# Efficient for large datasets and complex queries
+cache.store_price_data('AAPL', df)
+analytics_data = cache.get_price_data('AAPL')
+```
+
+### Production Time Series (InfluxDB Cache)
+
+```python
+from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
+
+# High-performance time series database
+cache = TimeSeriesCache()
+
+# Automated technical indicator calculation
+cache.store_price_data('AAPL', df)
+cache.calculate_and_store_metrics('AAPL', indicators=['sma_20', 'rsi_14'])
+```
+
 ## Time Series Caching with Automated Metrics
 
 ### Setup InfluxDB (One-time setup)

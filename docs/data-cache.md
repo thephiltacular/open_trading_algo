@@ -1,54 +1,140 @@
-# Data Cache System
+# Cache System Documentation
 
-The open_trading_algo cache system provides persistent local storage for financial data, signals, and computed indicators. It uses SQLite for zero-configuration setup while offering enterprise-grade performance and reliability.
+The open_trading_algo cache system provides **three different caching implementations** optimized for different use cases and performance requirements. All cache types provide the same API for seamless switching between implementations.
 
-## Overview
+## Cache Types Overview
 
-The cache system is designed to:
-- **Minimize API calls** by storing data locally
-- **Accelerate repeated analysis** with instant data retrieval
-- **Persist signals** across application restarts
-- **Handle large datasets** efficiently with indexed storage
-- **Provide thread-safe access** for concurrent operations
+### 1. SQLite DataCache (Default)
+**Best for**: Getting started quickly, development, small to medium datasets
+- **Storage**: SQLite database with automatic table creation
+- **Features**: OHLCV data, signals storage, thread-safe operations
+- **Setup**: No additional dependencies required
+- **Performance**: Fast for most use cases, excellent for repeated queries
+- **File**: `open_trading_algo/cache/data_cache.py`
 
-## Basic Usage
+### 2. Parquet Cache
+**Best for**: Analytical workloads, large datasets, research environments
+- **Storage**: Apache Parquet files with partitioning by ticker
+- **Features**: High compression, fast analytical queries, pandas integration
+- **Setup**: Requires `pyarrow` package
+- **Performance**: Superior for complex queries and aggregations
+- **File**: `open_trading_algo/cache/parquet_cache.py`
 
-### Initialize Cache
+### 3. InfluxDB Time Series Cache
+**Best for**: Production systems, high-frequency data, real-time analytics
+- **Storage**: InfluxDB time series database with automatic compression
+- **Features**: Automated technical indicator calculation, advanced queries, retention policies
+- **Setup**: Requires Docker and InfluxDB container
+- **Performance**: Optimized for time series queries, handles millions of data points
+- **File**: `open_trading_algo/cache/timeseries_cache.py`
+
+## Choosing the Right Cache
+
+| Feature | SQLite Cache | Parquet Cache | InfluxDB Cache |
+|---------|-------------|---------------|----------------|
+| **Setup Complexity** | 🟢 None | 🟡 Low | 🔴 Medium |
+| **Performance** | 🟢 Good | 🟡 Very Good | 🟢 Excellent |
+| **Storage Efficiency** | 🟡 Good | 🟢 Excellent | 🟢 Excellent |
+| **Query Flexibility** | 🟢 Good | 🟡 Very Good | 🟢 Excellent |
+| **Time Series Features** | 🔴 Basic | 🟡 Good | 🟢 Excellent |
+| **Technical Indicators** | 🔴 Manual | 🔴 Manual | 🟢 Automatic |
+| **Best Use Case** | Development/Quick Start | Research/Analytics | Production/Real-time |
+
+## Quick Start Examples
+
+### SQLite Cache (Default)
 
 ```python
 from open_trading_algo.cache.data_cache import DataCache
 
-# Use default database location
+# Initialize cache
 cache = DataCache()
 
-# Or specify custom location
-cache = DataCache(db_path="/path/to/custom/database.db")
+# Store and retrieve price data
+cache.store_price_data('AAPL', ohlcv_df)
+cached_data = cache.get_price_data('AAPL')
 
-```python
-import yfinance as yf
-import pandas as pd
-
-# Get historical data
-```python
-# Create config/db_config.yaml
-db_config = """
-
-# Retrieve from cache
-cached_df = cache.get_price_data("AAPL")
-print(f"Cached data shape: {cached_df.shape}")
-"""
-
-with open("config/db_config.yaml", "w") as f:
-    f.write(db_config)
-
-# Cache will automatically use this configuration
-cache = DataCache()
-print(f"Date range: {cached_df.index[0]} to {cached_df.index[-1]}")
-
-# Check if data exists
-has_data = cache.has_price_data("AAPL")
-print(f"Has AAPL data: {has_data}")
+# Store and retrieve signals
+cache.store_signals('AAPL', '1d', 'rsi_oversold', signals_df)
+signals = cache.get_signals('AAPL', '1d', 'rsi_oversold')
 ```
+
+### Parquet Cache
+
+```python
+from open_trading_algo.cache.parquet_cache import ParquetCache
+
+# Initialize cache
+cache = ParquetCache()
+
+# Store and retrieve price data
+cache.store_price_data('AAPL', ohlcv_df)
+cached_data = cache.get_price_data('AAPL')
+
+# Store and retrieve signals
+cache.store_signals('AAPL', '1d', 'rsi_oversold', signals_df)
+signals = cache.get_signals('AAPL', '1d', 'rsi_oversold')
+```
+
+### InfluxDB Time Series Cache
+
+```python
+from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
+
+# Initialize cache
+cache = TimeSeriesCache()
+
+# Store and retrieve price data
+cache.store_price_data('AAPL', ohlcv_df)
+cached_data = cache.get_price_data('AAPL')
+
+# Automatically calculate and store technical indicators
+cache.calculate_and_store_metrics('AAPL', indicators=['sma_20', 'rsi_14', 'macd'])
+metrics = cache.get_metrics('AAPL')
+```
+
+## Configuration
+
+All cache types support configuration via `config/db_config.yaml`:
+
+```yaml
+# SQLite Cache Configuration
+sqlite:
+  db_path: "/path/to/custom/database.db"
+  enable_caching: true
+
+# Parquet Cache Configuration
+parquet:
+  cache_dir: "/path/to/parquet/cache"
+  compression: "snappy"
+
+# InfluxDB Cache Configuration
+influxdb:
+  url: "http://localhost:8086"
+  token: "your-token"
+  org: "trading-org"
+  bucket: "trading-data"
+```
+
+## Cache Migration
+
+You can easily switch between cache types without changing your application code:
+
+```python
+# Switch from SQLite to InfluxDB
+from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
+
+# Your existing code works unchanged
+cache = TimeSeriesCache()
+cache.store_price_data('AAPL', ohlcv_df)
+data = cache.get_price_data('AAPL')
+```
+
+## Detailed Documentation
+
+### SQLite DataCache
+
+The SQLite DataCache is the default caching implementation, providing zero-configuration setup with good performance for most use cases.
 
 ### Store and Retrieve Signals
 
@@ -632,6 +718,94 @@ if issues:
 else:
     print("Cache integrity OK")
 ```
+
+## Parquet Cache
+
+The Parquet Cache provides columnar storage optimized for analytical workloads and large datasets using Apache Parquet files.
+
+### Key Advantages
+
+- **Columnar Storage**: Efficient for analytical queries and aggregations
+- **High Compression**: Significant storage savings with minimal performance impact
+- **Partitioning**: Data partitioned by ticker for optimal query performance
+- **Pandas Integration**: Seamless integration with pandas DataFrames
+- **Scalable**: Handles large datasets efficiently without database overhead
+
+### Setup Parquet Cache
+
+```bash
+# Install required dependency
+pip install pyarrow
+```
+
+### Parquet Cache Usage
+
+```python
+from open_trading_algo.cache.parquet_cache import ParquetCache
+
+# Initialize Parquet cache
+cache = ParquetCache()
+
+# Store price data (automatically partitioned by ticker)
+cache.store_price_data('AAPL', ohlcv_df)
+
+# Retrieve price data
+cached_data = cache.get_price_data('AAPL')
+
+# Store signals
+cache.store_signals('AAPL', '1d', 'rsi_oversold', signals_df)
+
+# Retrieve signals
+signals = cache.get_signals('AAPL', '1d', 'rsi_oversold')
+```
+
+### Parquet Cache Features
+
+#### Automatic Partitioning
+```python
+# Data is automatically partitioned by ticker for optimal performance
+# Files are stored as: cache_dir/price_data/AAPL.parquet
+# Signals stored as: cache_dir/signals/AAPL_1d_rsi_oversold.parquet
+```
+
+#### Compression Options
+```python
+# Configure compression in db_config.yaml
+parquet:
+  cache_dir: "/path/to/parquet/cache"
+  compression: "snappy"  # Options: snappy, gzip, brotli, lz4, zstd
+```
+
+#### Batch Operations
+```python
+# Efficient batch storage for multiple tickers
+tickers_data = {
+    'AAPL': appl_df,
+    'GOOGL': googl_df,
+    'MSFT': msft_df
+}
+
+for ticker, df in tickers_data.items():
+    cache.store_price_data(ticker, df)
+    print(f"Stored {len(df)} rows for {ticker}")
+```
+
+### Performance Comparison
+
+| Operation | SQLite | Parquet | InfluxDB |
+|-----------|--------|---------|----------|
+| **Storage Efficiency** | Good | Excellent | Excellent |
+| **Query Speed** | Good | Very Good | Excellent |
+| **Analytical Queries** | Good | Excellent | Excellent |
+| **Setup Complexity** | None | Low | Medium |
+| **Memory Usage** | Good | Good | Excellent |
+
+### When to Use Parquet Cache
+
+- **Research and Analysis**: When you need fast analytical queries on large datasets
+- **Data Science Workflows**: When working with pandas and need efficient columnar access
+- **Batch Processing**: When processing large volumes of historical data
+- **Storage Optimization**: When storage space is a concern but performance matters
 
 ## Time Series Database Cache (InfluxDB)
 

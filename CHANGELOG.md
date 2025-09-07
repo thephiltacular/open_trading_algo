@@ -2,6 +2,66 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.3] - 2025-09-07
+### Added
+- **Parquet Cache Implementation**: New columnar storage cache optimized for analytical workloads:
+  - **Apache Parquet Integration**: Efficient columnar storage with high compression ratios
+  - **Automatic Partitioning**: Data partitioned by ticker for optimal query performance
+  - **Pandas Integration**: Seamless integration with pandas DataFrames
+  - **Configuration Support**: Configurable compression algorithms (snappy, gzip, brotli, lz4, zstd)
+  - **Batch Operations**: Efficient batch storage and retrieval for multiple tickers
+
+- **InfluxDB Time Series Cache**: High-performance time series database implementation:
+  - **Automated Technical Indicators**: Automatically calculate and store 15+ technical indicators from price data
+  - **Advanced Time Series Queries**: Optimized Flux queries for complex time-based analytics
+  - **Retention Policies**: Configurable data retention (default: 10 years for price data)
+  - **Real-time Analytics**: Built-in aggregation functions and time-based queries
+  - **Docker Integration**: Easy setup with local InfluxDB container
+  - **Production Ready**: Thread-safe operations for concurrent access
+
+- **Enhanced Cache System Architecture**: Comprehensive multi-cache implementation:
+  - **Three Cache Types**: SQLite (default), Parquet (analytics), InfluxDB (production)
+  - **Unified API**: Same interface across all cache implementations for easy migration
+  - **Performance Optimization**: Each cache type optimized for specific use cases
+  - **Configuration Management**: YAML-based configuration for all cache types
+  - **Migration Tools**: Easy switching between cache implementations
+
+### Enhanced
+- **Time Series Cache Interface**: Major improvements to the InfluxDB cache implementation:
+  - **Advanced Query Capabilities**: Complex date range filtering and aggregation
+  - **Technical Indicator Automation**: Built-in calculation and storage of technical indicators
+  - **Error Handling**: Robust error handling for database operations
+  - **Performance Monitoring**: Built-in performance metrics and query optimization
+  - **Data Integrity**: Enhanced data validation and consistency checks
+
+- **Cache Documentation**: Comprehensive documentation updates:
+  - **Multi-Cache Overview**: Detailed comparison of all three cache implementations
+  - **Migration Guide**: Step-by-step instructions for switching between cache types
+  - **Performance Benchmarks**: Comparative performance analysis for different use cases
+  - **Configuration Examples**: Complete configuration examples for all cache types
+  - **Best Practices**: Recommendations for choosing the right cache for specific scenarios
+
+### Fixed
+- **Time Series Cache Tests**: Resolved 9 failing test cases:
+  - **Data Accumulation Issues**: Fixed test isolation by clearing metrics data between tests
+  - **Timezone Comparison**: Resolved timezone handling in date filtering tests
+  - **Metadata Filtering**: Fixed metadata column pollution in query results
+  - **Query Range Optimization**: Updated Flux queries to use dynamic ranges
+  - **Test Data Extension**: Extended test data to support 50-period moving averages
+
+- **Cache System Integration**: Improved compatibility across all cache implementations:
+  - **API Consistency**: Ensured identical APIs across SQLite, Parquet, and InfluxDB caches
+  - **Error Handling**: Standardized error handling and logging across all cache types
+  - **Performance Optimization**: Optimized query patterns for each cache implementation
+
+### Docs
+- **Cache System Documentation**: Complete rewrite of cache documentation:
+  - **Architecture Overview**: Detailed explanation of multi-cache architecture
+  - **Implementation Guides**: Step-by-step setup for each cache type
+  - **API Reference**: Comprehensive API documentation for all cache methods
+  - **Troubleshooting Guide**: Common issues and solutions for cache implementations
+  - **Performance Tuning**: Optimization tips for different cache types
+
 ## [0.1.2] - 2025-09-06
 ### Added
 - **Comprehensive Trading Metrics Module**: Implemented 24 advanced trading metrics with full test coverage:

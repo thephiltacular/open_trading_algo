@@ -11,7 +11,7 @@ Welcome to the comprehensive documentation for open_trading_algo - a robust Pyth
 
 ### Core Modules
 - [Data APIs & Fetchers](data-apis.md) - Financial data retrieval from multiple sources
-- [Data Cache System](data-cache.md) - Local database caching for performance
+- [Data Cache System](data-cache.md) - Multiple caching implementations (SQLite, Parquet, InfluxDB)
 - [Technical Indicators](indicators.md) - Comprehensive technical analysis indicators
 - [Trading Metrics](metrics.md) - Risk, performance, and analytical metrics
 - [Trading Models](models.md) - Modular trading strategy implementations
@@ -91,7 +91,11 @@ open_trading_algo/
 │   │   ├── momentum_model.py  # Momentum strategies
 │   │   ├── mean_reversion_model.py # Mean reversion
 │   │   └── trend_following_model.py # Trend following
-│   ├── cache/                 # Local data caching
+│   ├── cache/                 # Multiple caching implementations
+│   │   ├── data_cache.py      # SQLite-based cache (default)
+│   │   ├── parquet_cache.py   # Parquet columnar storage
+│   │   ├── timeseries_cache.py # InfluxDB time series database
+│   │   └── setup_influxdb.py  # InfluxDB setup utilities
 │   ├── sentiment/             # Sentiment analysis
 │   ├── alerts/                # Signal alerting system
 │   └── backtest/              # Strategy backtesting
