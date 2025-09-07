@@ -201,3 +201,5 @@ secrets.*
 
 # Ignore local sqlite database files
 *.sqlite3
+
+data/

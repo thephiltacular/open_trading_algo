@@ -34,7 +34,10 @@ import yaml
 
 
 def get_config():
-    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "db_config.yaml")
+    # Look for config in the project's config directory
+    config_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config", "db_config.yaml"
+    )
     if os.path.exists(config_path):
         with open(config_path, "r") as f:
             cfg = yaml.safe_load(f)
@@ -52,6 +55,10 @@ def get_db_path():
     db_path = cfg.get("db_path")
     if db_path:
         return db_path
+    # Fallback to sqlite_cache_dir if available
+    sqlite_cache_dir = cfg.get("sqlite_cache_dir")
+    if sqlite_cache_dir:
+        return os.path.join(sqlite_cache_dir, "tv_data_cache.sqlite3")
     return os.path.join(os.path.dirname(__file__), "tv_data_cache.sqlite3")
 
 

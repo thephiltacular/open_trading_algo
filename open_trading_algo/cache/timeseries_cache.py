@@ -47,7 +47,9 @@ import yaml
 
 def get_config():
     """Load configuration from db_config.yaml if it exists."""
-    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "db_config.yaml")
+    config_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config", "db_config.yaml"
+    )
     if os.path.exists(config_path):
         with open(config_path, "r") as f:
             cfg = yaml.safe_load(f)

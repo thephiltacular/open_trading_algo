@@ -76,23 +76,30 @@ setup_config() {
         log_info ".env already exists"
     fi
 
-    # Create data directories
-    mkdir -p data/cache/sqlite
-    mkdir -p data/cache/parquet
-    mkdir -p data/cache/influxdb
+    # Create cache directories for different cache types
+    mkdir -p data/cache/sqlite    # For SQLite cache files/metadata
+    mkdir -p data/cache/parquet   # For Parquet columnar cache files
+    mkdir -p data/cache/influxdb  # For InfluxDB cache metadata
     mkdir -p logs
-    log_success "Data directories created"
+    log_success "Cache directories created"
 }
 
-# Setup SQLite database
+# Setup SQLite database (main database file, not cache files)
 setup_sqlite() {
     log_info "Setting up SQLite database..."
+    # Create the main database file directory if it doesn't exist
+    mkdir -p data
+
     if [ ! -f "data/tv_data_cache.sqlite3" ]; then
+        # Create empty database file
         touch data/tv_data_cache.sqlite3
-        log_success "SQLite database created"
+        log_success "SQLite database file created at data/tv_data_cache.sqlite3"
     else
-        log_info "SQLite database already exists"
+        log_info "SQLite database already exists at data/tv_data_cache.sqlite3"
     fi
+
+    # Note: Actual database table creation happens when DataCache is first used
+    log_info "Database tables will be created automatically on first use"
 }
 
 # Setup InfluxDB
@@ -141,6 +148,12 @@ install_deps() {
 main() {
     echo -e "${BLUE}🚀 Open Trading Algo Setup${NC}"
     echo "=========================="
+    echo "This script sets up the repository with the following structure:"
+    echo "  data/tv_data_cache.sqlite3    - Main SQLite database"
+    echo "  data/cache/sqlite/           - SQLite cache files"
+    echo "  data/cache/parquet/          - Parquet cache files"
+    echo "  data/cache/influxdb/         - InfluxDB cache metadata"
+    echo ""
 
     case "${1:-all}" in
         "venv")
@@ -164,8 +177,8 @@ main() {
         "all")
             setup_venv
             setup_poetry
-            setup_config
-            setup_sqlite
+            setup_config    # Creates cache directories
+            setup_sqlite    # Creates main database file
             setup_influxdb
             install_deps
             log_success "Complete setup finished!"
@@ -177,6 +190,13 @@ main() {
             ;;
         *)
             log_error "Usage: $0 {venv|poetry|config|sqlite|influxdb|deps|all}"
+            echo "  venv     - Setup Python virtual environment"
+            echo "  poetry   - Setup Poetry package manager"
+            echo "  config   - Setup config files and cache directories"
+            echo "  sqlite   - Setup main SQLite database file"
+            echo "  influxdb - Setup InfluxDB (requires Docker)"
+            echo "  deps     - Install Python dependencies"
+            echo "  all      - Complete setup (recommended)"
             exit 1
             ;;
     esac
