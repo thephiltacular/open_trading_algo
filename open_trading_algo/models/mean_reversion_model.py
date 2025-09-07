@@ -76,16 +76,12 @@ class MeanReversionModel(BaseTradingModel):
         # Mean reversion signals
         # Buy when price is below lower BB and RSI is oversold
         buy_condition = (
-            (price < bb_lower)
-            & (rsi < self.config["rsi_oversold"])
-            & (deviation < -self.config["deviation_threshold"])
+            (price < bb_lower) & (rsi < self.config["rsi_oversold"]) & (deviation < -self.config["deviation_threshold"])
         )
 
         # Sell when price is above upper BB and RSI is overbought
         sell_condition = (
-            (price > bb_upper)
-            & (rsi > self.config["rsi_overbought"])
-            & (deviation > self.config["deviation_threshold"])
+            (price > bb_upper) & (rsi > self.config["rsi_overbought"]) & (deviation > self.config["deviation_threshold"])
         )
 
         signals[buy_condition] = 1  # BUY

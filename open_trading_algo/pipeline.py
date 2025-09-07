@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Mapping, Optional
 
-from . import indicators as I
+from . import indicators as ind
 from .indicators import percent_rank as PR
 from .types import AlertsByDay, ColumnAddResult, DataByDay, DayKey
 
@@ -73,7 +73,7 @@ class ModelPipeline:
         try:
             df[out] = (right - left) * -1.0
         except Exception:
-            df[out] = [I.ema_gap(l, r) for l, r in zip(left, right)]
+            df[out] = [ind.ema_gap(left_val, right_val) for left_val, right_val in zip(left, right)]
 
     def compute_percent_rank(self, day: DayKey, in_col: str, out_col: str) -> None:
         """Compute percent-rank for a column within the day's data.

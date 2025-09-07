@@ -386,7 +386,6 @@ class TestSystemIntegration:
     def test_dependency_version_compatibility(self):
         """Test dependency version compatibility."""
         import pandas as pd
-        import numpy as np
 
         # Test that versions are reasonable
         assert pd.__version__ >= "1.0.0"

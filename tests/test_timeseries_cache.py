@@ -139,9 +139,7 @@ def test_data():
         low = min(open_price, close) - abs(np.random.normal(0, 0.5))
         volume = int(np.random.uniform(100000, 500000))
 
-        ohlcv_data.append(
-            {"Open": open_price, "High": high, "Low": low, "Close": close, "Volume": volume}
-        )
+        ohlcv_data.append({"Open": open_price, "High": high, "Low": low, "Close": close, "Volume": volume})
 
     ohlcv_df = pd.DataFrame(ohlcv_data, index=dates)
 
@@ -177,9 +175,7 @@ def create_test_data():
         low = min(open_price, close) - abs(np.random.normal(0, 0.5))
         volume = int(np.random.uniform(100000, 500000))
 
-        ohlcv_data.append(
-            {"Open": open_price, "High": high, "Low": low, "Close": close, "Volume": volume}
-        )
+        ohlcv_data.append({"Open": open_price, "High": high, "Low": low, "Close": close, "Volume": volume})
 
     ohlcv_df = pd.DataFrame(ohlcv_data, index=dates)
 
@@ -303,9 +299,7 @@ class TestTimeSeriesCache:
         assert len(all_metrics.columns) == len(indicators)
 
         # Retrieve specific metrics
-        specific_metrics = cache.get_metrics(
-            ticker, timeframe=timeframe, metrics=["rsi_14", "sma_20"]
-        )
+        specific_metrics = cache.get_metrics(ticker, timeframe=timeframe, metrics=["rsi_14", "sma_20"])
         assert not specific_metrics.empty
         assert list(specific_metrics.columns) == ["rsi_14", "sma_20"]
 
@@ -357,9 +351,7 @@ class TestTimeSeriesCache:
 
         # Store price data and calculate metrics
         cache.store_price_data(ticker, ohlcv_df)
-        cache.calculate_and_store_metrics(
-            ticker, timeframe=timeframe, indicators=["rsi_14", "sma_20"]
-        )
+        cache.calculate_and_store_metrics(ticker, timeframe=timeframe, indicators=["rsi_14", "sma_20"])
 
         # Get metrics summary
         summary = cache.get_metrics_summary(ticker, timeframe=timeframe)
@@ -423,9 +415,7 @@ class TestTimeSeriesCache:
 
         # Verify all expected indicators are present
         for indicator in test_indicators:
-            assert (
-                indicator in metrics.columns
-            ), f"Missing indicator: {indicator}. Available: {list(metrics.columns)}"
+            assert indicator in metrics.columns, f"Missing indicator: {indicator}. Available: {list(metrics.columns)}"
 
             # Verify no NaN values in recent data (should have enough data points)
             recent_metrics = metrics.tail(10)  # Last 10 data points
@@ -496,105 +486,6 @@ class TestTimeSeriesCache:
             metrics = cache.get_metrics(ticker, timeframe=timeframe)
             assert not metrics.empty
 
-    def test_aggregated_queries(self, cache, test_data):
-        """Test aggregated query functionality."""
-        ohlcv_df, _ = test_data
-        ticker = "TEST_AAPL"
-
-        cache.store_price_data(ticker, ohlcv_df)
-
-        # Test weekly aggregation
-        weekly_data = cache.get_aggregated_data(ticker, aggregation="1w")
-        assert isinstance(weekly_data, pd.DataFrame)
-
-    def test_database_info_with_metrics(self, cache, test_data):
-        """Test database info includes metrics data."""
-        ohlcv_df, _ = test_data
-        ticker = "TEST_AAPL"
-
-        # Store data and calculate metrics
-        cache.store_price_data(ticker, ohlcv_df)
-        cache.calculate_and_store_metrics(ticker, indicators=["sma_20"])
-
-        # Get database info
-        info = cache.get_database_info()
-
-        assert isinstance(info, dict)
-        assert "price_data_points" in info
-        assert "signals_points" in info
-        assert "metrics_points" in info
-        assert "total_data_points" in info
-        assert info["metrics_points"] > 0
-
-    def test_error_handling(self, cache):
-        """Test error handling for invalid operations."""
-        # Test non-existent ticker
-        data = cache.get_price_data("NON_EXISTENT_TICKER")
-        assert data.empty
-
-        # Test non-existent metrics
-        metrics = cache.get_metrics("NON_EXISTENT_TICKER")
-        assert metrics.empty
-
-        # Test empty DataFrame handling
-        empty_df = pd.DataFrame()
-        cache.store_price_data("TEST_EMPTY", empty_df)  # Should not raise error
-
-    def test_metrics_with_different_timeframes(self, cache, test_data):
-        """Test metrics calculation for different timeframes."""
-        ohlcv_df, _ = test_data
-        ticker = "TEST_AAPL"
-
-        cache.store_price_data(ticker, ohlcv_df)
-
-        # Calculate metrics for different timeframes
-        timeframes = ["1d", "1h", "1w"]
-        for timeframe in timeframes:
-            cache.calculate_and_store_metrics(ticker, timeframe=timeframe, indicators=["sma_20"])
-
-            # Verify metrics exist for this timeframe
-            assert cache.has_metrics(ticker, timeframe)
-            metrics = cache.get_metrics(ticker, timeframe=timeframe)
-            assert not metrics.empty
-
-    def test_metrics_calculation_edge_cases(self, cache, test_data):
-        """Test metrics calculation with edge cases."""
-        ohlcv_df, _ = test_data
-        ticker = "TEST_AAPL"
-
-        cache.store_price_data(ticker, ohlcv_df)
-
-        # Test with empty indicators list
-        cache.calculate_and_store_metrics(ticker, indicators=[])
-        # Should not raise error and should calculate default indicators
-
-        # Test with single indicator
-        cache.calculate_and_store_metrics(ticker, indicators=["sma_20"])
-        metrics = cache.get_metrics(ticker, metrics=["sma_20"])
-        assert not metrics.empty
-        assert "sma_20" in metrics.columns
-
-    def test_metrics_date_range_filtering(self, cache, test_data):
-        """Test metrics retrieval with complex date range filtering."""
-        ohlcv_df, _ = test_data
-        ticker = "TEST_AAPL"
-
-        cache.store_price_data(ticker, ohlcv_df)
-        cache.calculate_and_store_metrics(ticker, indicators=["sma_20"])
-
-        # Test start and end date filtering
-        start_date = "2023-01-10"
-        end_date = "2023-01-20"
-
-        filtered_metrics = cache.get_metrics(ticker, start=start_date, end=end_date)
-
-        assert not filtered_metrics.empty
-        # Fix timezone comparison issue
-        start_datetime = pd.to_datetime(start_date).tz_localize("UTC")
-        end_datetime = pd.to_datetime(end_date).tz_localize("UTC")
-        assert all(filtered_metrics.index >= start_datetime)
-        assert all(filtered_metrics.index <= end_datetime)
-
     def test_signal_statistics_comprehensive(self, cache, test_data):
         """Test comprehensive signal statistics."""
         _, signals_df = test_data
@@ -632,9 +523,7 @@ class TestTimeSeriesCache:
             low = min(open_price, close) - abs(np.random.normal(0, 0.5))
             volume = int(np.random.uniform(100000, 500000))
 
-            ohlcv_data.append(
-                {"Open": open_price, "High": high, "Low": low, "Close": close, "Volume": volume}
-            )
+            ohlcv_data.append({"Open": open_price, "High": high, "Low": low, "Close": close, "Volume": volume})
 
         large_df = pd.DataFrame(ohlcv_data, index=dates)
         ticker = "TEST_LARGE"
@@ -761,9 +650,7 @@ class TestTimeSeriesCache:
         if "rsi_14" in metrics.columns:
             rsi_values = metrics["rsi_14"].dropna()
             # RSI should be between 0 and 100
-            assert all(
-                0 <= val <= 100 for val in rsi_values
-            ), f"RSI values out of range: {rsi_values.values}"
+            assert all(0 <= val <= 100 for val in rsi_values), f"RSI values out of range: {rsi_values.values}"
 
     def test_metrics_performance(self, cache, test_data):
         """Test performance of metrics operations."""
@@ -808,44 +695,6 @@ class TestTimeSeriesCache:
 
 
 # ===== UTILITY FUNCTIONS =====
-
-
-def create_test_data():
-    """Create test OHLCV and signals data (legacy function for compatibility)."""
-    # Create date range - extended to support sma_50 (needs 50+ data points)
-    dates = pd.date_range(start="2023-01-01", end="2023-03-15", freq="D")
-
-    # Create OHLCV data
-    np.random.seed(42)
-    base_price = 100.0
-
-    ohlcv_data = []
-    for i, date in enumerate(dates):
-        # Simulate price movement
-        change = np.random.normal(0, 2.0)
-        base_price += change
-
-        open_price = base_price
-        close = base_price + np.random.normal(0, 1.0)
-        high = max(open_price, close) + abs(np.random.normal(0, 0.5))
-        low = min(open_price, close) - abs(np.random.normal(0, 0.5))
-        volume = int(np.random.uniform(100000, 500000))
-
-        ohlcv_data.append(
-            {"Open": open_price, "High": high, "Low": low, "Close": close, "Volume": volume}
-        )
-
-    ohlcv_df = pd.DataFrame(ohlcv_data, index=dates)
-
-    # Create signals data
-    signals_data = []
-    for date in dates:
-        signal_value = np.random.choice([-1, 0, 1], p=[0.2, 0.6, 0.2])
-        signals_data.append(signal_value)
-
-    signals_df = pd.DataFrame({"signal_value": signals_data}, index=dates)
-
-    return ohlcv_df, signals_df
 
 
 def validate_indicator_calculation(cache, ticker, indicator_name, expected_range=None):

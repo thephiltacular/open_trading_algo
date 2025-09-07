@@ -91,29 +91,17 @@ class LiveDataFeed:
         while not self._stop.is_set():
             src = self.config.source.lower()
             if src == "yahoo":
-                self.latest_data = fetch_yahoo(
-                    self.config.tickers, self.config.fields, cache=self.cache
-                )
+                self.latest_data = fetch_yahoo(self.config.tickers, self.config.fields, cache=self.cache)
             elif src == "finnhub":
-                self.latest_data = fetch_finnhub_bulk(
-                    self.config.tickers, self.config.fields, self.config.api_key
-                )
+                self.latest_data = fetch_finnhub_bulk(self.config.tickers, self.config.fields, self.config.api_key)
             elif src == "fmp":
-                self.latest_data = fetch_fmp_bulk(
-                    self.config.tickers, self.config.fields, self.config.api_key
-                )
+                self.latest_data = fetch_fmp_bulk(self.config.tickers, self.config.fields, self.config.api_key)
             elif src == "alpha_vantage":
-                self.latest_data = fetch_alpha_vantage_bulk(
-                    self.config.tickers, self.config.fields, self.config.api_key
-                )
+                self.latest_data = fetch_alpha_vantage_bulk(self.config.tickers, self.config.fields, self.config.api_key)
             elif src == "twelve_data":
-                self.latest_data = fetch_twelve_data_bulk(
-                    self.config.tickers, self.config.fields, self.config.api_key
-                )
+                self.latest_data = fetch_twelve_data_bulk(self.config.tickers, self.config.fields, self.config.api_key)
             else:
-                self.latest_data = {
-                    t: {f: None for f in self.config.fields} for t in self.config.tickers
-                }
+                self.latest_data = {t: {f: None for f in self.config.fields} for t in self.config.tickers}
             if self.on_update:
                 self.on_update(self.latest_data)
             time.sleep(self.config.update_rate)

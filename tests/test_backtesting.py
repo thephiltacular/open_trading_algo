@@ -48,9 +48,7 @@ class TestBacktestEngine:
     def test_backtest_initialization(self, sample_backtest_data, sample_signals, sample_portfolio):
         """Test backtest engine initialization."""
         # Mock SignalOptimizer if needed
-        optimizer = SignalOptimizer(
-            data={"AAPL": sample_backtest_data}, indicators={}, signal_generators={}
-        )
+        optimizer = SignalOptimizer(data={"AAPL": sample_backtest_data}, indicators={}, signal_generators={})
 
         # Add signals to the data
         sample_backtest_data["long_signal"] = sample_signals["long_signal"]
@@ -66,9 +64,7 @@ class TestBacktestEngine:
         position_size = sample_portfolio["position_size"]
 
         # Simulate simple long-only strategy
-        positions = (
-            sample_signals["long_signal"] * position_size * capital / sample_backtest_data["close"]
-        )
+        positions = sample_signals["long_signal"] * position_size * capital / sample_backtest_data["close"]
 
         # Calculate portfolio value
         portfolio_value = capital + (positions * sample_backtest_data["close"]).cumsum()
@@ -86,14 +82,10 @@ class TestBacktestEngine:
             signal = sample_signals["long_signal"].iloc[i]
 
             if signal == 1 and position == 0:  # Buy signal
-                trades.append(
-                    {"type": "buy", "price": sample_backtest_data["close"].iloc[i], "index": i}
-                )
+                trades.append({"type": "buy", "price": sample_backtest_data["close"].iloc[i], "index": i})
                 position = 1
             elif signal == -1 and position == 1:  # Sell signal
-                trades.append(
-                    {"type": "sell", "price": sample_backtest_data["close"].iloc[i], "index": i}
-                )
+                trades.append({"type": "sell", "price": sample_backtest_data["close"].iloc[i], "index": i})
                 position = 0
 
         assert isinstance(trades, list)

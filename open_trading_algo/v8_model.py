@@ -140,7 +140,7 @@ class V8Model:
                     df[out] = (df[right] - df[left]) * -1.0
                 except Exception:
                     # fallback row-wise
-                    df[out] = [(r - l) * -1.0 for l, r in zip(df[left], df[right])]
+                    df[out] = [(right_val - left_val) * -1.0 for left_val, right_val in zip(df[left], df[right])]
 
     def _compute_macd_flags(self, day: str) -> None:
         """Compute MACD trend flags for the given day.
@@ -158,7 +158,8 @@ class V8Model:
                 df["MACD TD"] = df["MACD TD"].astype(int)
             except Exception:
                 df["MACD TD"] = [
-                    int((l > 0) and (r < 0) and (abs(r) < l)) for l, r in zip(left, right)
+                    int((left_val > 0) and (right_val < 0) and (abs(right_val) < left_val))
+                    for left_val, right_val in zip(left, right)
                 ]
 
         # TU reuses the same condition but may be named "MACD TU" elsewhere
@@ -170,7 +171,8 @@ class V8Model:
                 df["MACD TU"] = df["MACD TU"].astype(int)
             except Exception:
                 df["MACD TU"] = [
-                    int((l > 0) and (r < 0) and (abs(r) < l)) for l, r in zip(left, right)
+                    int((left_val > 0) and (right_val < 0) and (abs(right_val) < left_val))
+                    for left_val, right_val in zip(left, right)
                 ]
 
     def _compute_all_percent_ranks(self, day: str) -> None:
@@ -210,7 +212,9 @@ class V8Model:
 
         df = self.pipeline.data[day]
         cols = getattr(df, "columns", [])
-        has = lambda c: c in cols
+
+        def has_column(column_name: str) -> bool:
+            return column_name in cols
 
         # Base columns
         VOL = "Volume"
@@ -221,22 +225,22 @@ class V8Model:
         RV = "Relative Volume"
 
         # Compute Volume/x ratios where possible
-        if all(has(c) for c in (VOL, AV10)):
+        if all(has_column(c) for c in (VOL, AV10)):
             try:
                 df["Volume/10"] = df[VOL] / df[AV10]
             except Exception:
                 df["Volume/10"] = [v / a if a else 0.0 for v, a in zip(df[VOL], df[AV10])]
-        if all(has(c) for c in (VOL, AV30)):
+        if all(has_column(c) for c in (VOL, AV30)):
             try:
                 df["Volume/30"] = df[VOL] / df[AV30]
             except Exception:
                 df["Volume/30"] = [v / a if a else 0.0 for v, a in zip(df[VOL], df[AV30])]
-        if all(has(c) for c in (VOL, AV60)):
+        if all(has_column(c) for c in (VOL, AV60)):
             try:
                 df["Volume/60"] = df[VOL] / df[AV60]
             except Exception:
                 df["Volume/60"] = [v / a if a else 0.0 for v, a in zip(df[VOL], df[AV60])]
-        if all(has(c) for c in (VOL, AV90)):
+        if all(has_column(c) for c in (VOL, AV90)):
             try:
                 df["Volume/90"] = df[VOL] / df[AV90]
             except Exception:
@@ -249,39 +253,39 @@ class V8Model:
             except Exception:
                 return 0.0
 
-        if all(has(c) for c in (AV10, AV30)):
+        if all(has_column(c) for c in (AV10, AV30)):
             try:
                 df["Volume 10/30"] = df[AV10] / df[AV30]
             except Exception:
                 df["Volume 10/30"] = [_safe_div(a, b) for a, b in zip(df[AV10], df[AV30])]
-        if all(has(c) for c in (AV10, AV60)):
+        if all(has_column(c) for c in (AV10, AV60)):
             try:
                 df["Volume 10/60"] = df[AV10] / df[AV60]
             except Exception:
                 df["Volume 10/60"] = [_safe_div(a, b) for a, b in zip(df[AV10], df[AV60])]
-        if all(has(c) for c in (AV10, AV90)):
+        if all(has_column(c) for c in (AV10, AV90)):
             try:
                 df["Volume 10/90"] = df[AV10] / df[AV90]
             except Exception:
                 df["Volume 10/90"] = [_safe_div(a, b) for a, b in zip(df[AV10], df[AV90])]
-        if all(has(c) for c in (AV30, AV60)):
+        if all(has_column(c) for c in (AV30, AV60)):
             try:
                 df["Volume 30/60"] = df[AV30] / df[AV60]
             except Exception:
                 df["Volume 30/60"] = [_safe_div(a, b) for a, b in zip(df[AV30], df[AV60])]
-        if all(has(c) for c in (AV30, AV90)):
+        if all(has_column(c) for c in (AV30, AV90)):
             try:
                 df["Volume 30/90"] = df[AV30] / df[AV90]
             except Exception:
                 df["Volume 30/90"] = [_safe_div(a, b) for a, b in zip(df[AV30], df[AV90])]
-        if all(has(c) for c in (AV60, AV90)):
+        if all(has_column(c) for c in (AV60, AV90)):
             try:
                 df["Volume 60/90"] = df[AV60] / df[AV90]
             except Exception:
                 df["Volume 60/90"] = [_safe_div(a, b) for a, b in zip(df[AV60], df[AV90])]
 
         # D-Relative Volume approximation from Relative Volume (RV - 1.0)
-        if has(RV):
+        if has_column(RV):
             try:
                 df["D-Relative Volume"] = df[RV] - 1.0
             except Exception:
@@ -301,19 +305,15 @@ class V8Model:
                 "Volume 60/90",
             ]
             for base in base_cols:
-                if has(base):
+                if has_column(base):
                     try:
                         vu = (df["D-Relative Volume"] >= 0).astype(int)
                         vd = (df["D-Relative Volume"] < 0).astype(int)
                         df[f"{base} VU"] = df[base] * vu
                         df[f"{base} VD"] = df[base] * vd
                     except Exception:
-                        df[f"{base} VU"] = [
-                            b if d >= 0 else 0.0 for b, d in zip(df[base], df["D-Relative Volume"])
-                        ]
-                        df[f"{base} VD"] = [
-                            b if d < 0 else 0.0 for b, d in zip(df[base], df["D-Relative Volume"])
-                        ]
+                        df[f"{base} VU"] = [b if d >= 0 else 0.0 for b, d in zip(df[base], df["D-Relative Volume"])]
+                        df[f"{base} VD"] = [b if d < 0 else 0.0 for b, d in zip(df[base], df["D-Relative Volume"])]
 
     def _compute_band_distances(self, day: str) -> None:
         """Compute band distances and widths for Bollinger and Keltner channels.
@@ -377,19 +377,13 @@ class V8Model:
                     try:
                         df[out] = (df[price] - df[col]) / df[atr]
                     except Exception:
-                        df[out] = [
-                            ((p - c) / a if a else 0.0)
-                            for p, c, a in zip(df[price], df[col], df[atr])
-                        ]
+                        df[out] = [((p - c) / a if a else 0.0) for p, c, a in zip(df[price], df[col], df[atr])]
             for out, col in highs:
                 if col in cols:
                     try:
                         df[out] = (df[col] - df[price]) / df[atr]
                     except Exception:
-                        df[out] = [
-                            ((c - p) / a if a else 0.0)
-                            for p, c, a in zip(df[price], df[col], df[atr])
-                        ]
+                        df[out] = [((c - p) / a if a else 0.0) for p, c, a in zip(df[price], df[col], df[atr])]
 
     def _compute_adx_filtered_flags(self, day: str) -> None:
         """Compute ADX > 25 flag.
@@ -461,24 +455,18 @@ class V8Model:
                 try:
                     df[out] = (df[left] > df[right]).astype(int)
                 except Exception:
-                    df[out] = [int(l > r) for l, r in zip(df[left], df[right])]
+                    df[out] = [int(left_val > right_val) for left_val, right_val in zip(df[left], df[right])]
 
         # Price above Upper bands flags
         price = "Price"
         if price in cols and "Bollinger Upper Band (20)" in cols:
             try:
-                df["Bollinger Price>Upper SU"] = (
-                    df[price] > df["Bollinger Upper Band (20)"]
-                ).astype(int)
+                df["Bollinger Price>Upper SU"] = (df[price] > df["Bollinger Upper Band (20)"]).astype(int)
             except Exception:
-                df["Bollinger Price>Upper SU"] = [
-                    int(p > u) for p, u in zip(df[price], df["Bollinger Upper Band (20)"])
-                ]
+                df["Bollinger Price>Upper SU"] = [int(p > u) for p, u in zip(df[price], df["Bollinger Upper Band (20)"])]
         if price in cols and "Keltner Channels Upper Band (20)" in cols:
             try:
-                df["Keltner CH Price>Upper SU"] = (
-                    df[price] > df["Keltner Channels Upper Band (20)"]
-                ).astype(int)
+                df["Keltner CH Price>Upper SU"] = (df[price] > df["Keltner Channels Upper Band (20)"]).astype(int)
             except Exception:
                 df["Keltner CH Price>Upper SU"] = [
                     int(p > u) for p, u in zip(df[price], df["Keltner Channels Upper Band (20)"])
@@ -584,23 +572,17 @@ class V8Model:
                 try:
                     df[out] = (df[left] < df[right]).astype(int)
                 except Exception:
-                    df[out] = [int(l < r) for l, r in zip(df[left], df[right])]
+                    df[out] = [int(left_val < right_val) for left_val, right_val in zip(df[left], df[right])]
 
         price = "Price"
         if price in cols and "Bollinger Lower Band (20)" in cols:
             try:
-                df["Bollinger Price<Lower SD"] = (
-                    df[price] < df["Bollinger Lower Band (20)"]
-                ).astype(int)
+                df["Bollinger Price<Lower SD"] = (df[price] < df["Bollinger Lower Band (20)"]).astype(int)
             except Exception:
-                df["Bollinger Price<Lower SD"] = [
-                    int(p < l) for p, l in zip(df[price], df["Bollinger Lower Band (20)"])
-                ]
+                df["Bollinger Price<Lower SD"] = [int(p < l) for p, l in zip(df[price], df["Bollinger Lower Band (20)"])]
         if price in cols and "Keltner Channels Lower Band (20)" in cols:
             try:
-                df["Keltner CH Price<Lower SD"] = (
-                    df[price] < df["Keltner Channels Lower Band (20)"]
-                ).astype(int)
+                df["Keltner CH Price<Lower SD"] = (df[price] < df["Keltner Channels Lower Band (20)"]).astype(int)
             except Exception:
                 df["Keltner CH Price<Lower SD"] = [
                     int(p < l) for p, l in zip(df[price], df["Keltner Channels Lower Band (20)"])
@@ -616,12 +598,8 @@ class V8Model:
         cols = getattr(df, "columns", [])
         if "MACD Level (12, 26)" in cols and "MACD Signal (12, 26)" in cols:
             try:
-                df["MACD L>S SU"] = (df["MACD Level (12, 26)"] > df["MACD Signal (12, 26)"]).astype(
-                    int
-                )
-                df["MACD L<S SD"] = (df["MACD Level (12, 26)"] < df["MACD Signal (12, 26)"]).astype(
-                    int
-                )
+                df["MACD L>S SU"] = (df["MACD Level (12, 26)"] > df["MACD Signal (12, 26)"]).astype(int)
+                df["MACD L<S SD"] = (df["MACD Level (12, 26)"] < df["MACD Signal (12, 26)"]).astype(int)
             except Exception:
                 ml = df["MACD Level (12, 26)"]
                 ms = df["MACD Signal (12, 26)"]
@@ -865,7 +843,7 @@ class V8Model:
                 try:
                     df[out] = (df[left] > df[right]).astype(int)
                 except Exception:
-                    df[out] = [int(l > r) for l, r in zip(df[left], df[right])]
+                    df[out] = [int(left_val > right_val) for left_val, right_val in zip(df[left], df[right])]
 
         # Aggregates
         ichi_cols = [
@@ -920,11 +898,7 @@ class V8Model:
                 df["Avg TU"] = [sum(r) / float(len(present_sum)) for r in rows]
 
         # Avg-# Ichi TU
-        avg_hash_cols = [
-            c
-            for c in ("PR-Avg Ichi TU", "PR-#-Ichi TU", "PR-Avg-# Ichi TU")
-            if c in getattr(df, "columns", [])
-        ]
+        avg_hash_cols = [c for c in ("PR-Avg Ichi TU", "PR-#-Ichi TU", "PR-Avg-# Ichi TU") if c in getattr(df, "columns", [])]
         if avg_hash_cols:
             try:
                 df["Avg-# Ichi TU"] = sum(df[c] for c in avg_hash_cols) / float(len(avg_hash_cols))
@@ -963,7 +937,7 @@ class V8Model:
                 try:
                     df[out] = (df[left] > df[right]).astype(int)
                 except Exception:
-                    df[out] = [int(l > r) for l, r in zip(df[left], df[right])]
+                    df[out] = [int(left_val > right_val) for left_val, right_val in zip(df[left], df[right])]
 
         # Averages
         ma_cols = [
@@ -1008,9 +982,7 @@ class V8Model:
 
         # Avg TD from summary PRs when available
         sum_cols = [
-            c
-            for c in ("PR-Avg-# MA TD", "PR-Avg-# Vol TD", "PR-MACD TD", "PR-UO TD")
-            if c in getattr(df, "columns", [])
+            c for c in ("PR-Avg-# MA TD", "PR-Avg-# Vol TD", "PR-MACD TD", "PR-UO TD") if c in getattr(df, "columns", [])
         ]
         if sum_cols:
             try:
@@ -1020,11 +992,7 @@ class V8Model:
                 df["Avg TD"] = [sum(r) / float(len(sum_cols)) for r in rows]
 
         # Avg-# Ichi TD
-        avg_hash_cols = [
-            c
-            for c in ("PR-Avg Ichi TD", "PR-# Ichi TD", "PR-Avg-# Ichi TD")
-            if c in getattr(df, "columns", [])
-        ]
+        avg_hash_cols = [c for c in ("PR-Avg Ichi TD", "PR-# Ichi TD", "PR-Avg-# Ichi TD") if c in getattr(df, "columns", [])]
         if avg_hash_cols:
             try:
                 df["Avg-# Ichi TD"] = sum(df[c] for c in avg_hash_cols) / float(len(avg_hash_cols))

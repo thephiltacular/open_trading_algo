@@ -109,19 +109,13 @@ class SignalOptimizer:
                         entry_price = df["open"].iloc[i]
                         stop_price = stop_loss_prices.iloc[i]
                         stop_distance = abs(entry_price - stop_price)
-                        shares = self.position_size_func(
-                            account_value, risk_per_trade, stop_distance
-                        )
+                        shares = self.position_size_func(account_value, risk_per_trade, stop_distance)
                         in_trade = True
                         entry_idx = i
                     elif in_trade:
                         # Stop-loss triggered
-                        if (
-                            trade_type == "long"
-                            and df["low"].iloc[i] <= stop_loss_prices.iloc[entry_idx]
-                        ) or (
-                            trade_type == "short"
-                            and df["high"].iloc[i] >= stop_loss_prices.iloc[entry_idx]
+                        if (trade_type == "long" and df["low"].iloc[i] <= stop_loss_prices.iloc[entry_idx]) or (
+                            trade_type == "short" and df["high"].iloc[i] >= stop_loss_prices.iloc[entry_idx]
                         ):
                             exit_price = stop_loss_prices.iloc[entry_idx]
                             returns.append(
@@ -195,11 +189,7 @@ class SignalOptimizer:
                 in_trade = True
             elif not signal.iloc[i] and in_trade:
                 exit_price = df["close"].iloc[i]
-                returns.append(
-                    (exit_price - entry_price)
-                    if trade_type == "long"
-                    else (entry_price - exit_price)
-                )
+                returns.append((exit_price - entry_price) if trade_type == "long" else (entry_price - exit_price))
                 in_trade = False
         total_return = sum(returns)
         return {"total_return": total_return, "trades": len(returns)}
@@ -237,9 +227,7 @@ class SignalOptimizer:
                 results.append({"ticker": ticker, "start": start, "end": end, **perf})
         return results
 
-    def monte_carlo_backtest(
-        self, trade_type: str = "long", signal_names: List[str] = None, n_sim: int = 1000
-    ):
+    def monte_carlo_backtest(self, trade_type: str = "long", signal_names: List[str] = None, n_sim: int = 1000):
         """Monte Carlo simulation: randomize trade sequences to estimate risk/return distribution.
 
         Args:
@@ -271,11 +259,7 @@ class SignalOptimizer:
                     in_trade = True
                 elif not combined_signal.iloc[i] and in_trade:
                     exit_price = df["close"].iloc[i]
-                    trade_returns.append(
-                        (exit_price - entry_price)
-                        if trade_type == "long"
-                        else (entry_price - exit_price)
-                    )
+                    trade_returns.append((exit_price - entry_price) if trade_type == "long" else (entry_price - exit_price))
                     in_trade = False
             trade_returns = np.array(trade_returns)
             sim_results = []
@@ -327,9 +311,7 @@ class SignalOptimizer:
             "weights": dict(zip(returns_dict.keys(), weights)),
         }
 
-    def regime_switching_backtest(
-        self, trade_type: str = "long", signal_names: List[str] = None, n_states: int = 2
-    ):
+    def regime_switching_backtest(self, trade_type: str = "long", signal_names: List[str] = None, n_states: int = 2):
         """Regime-switching model for signal backtesting.
 
         Args:
@@ -383,9 +365,7 @@ class SignalOptimizer:
         results = []
         for ticker in self.data:
             df = self.data[ticker]
-            X = pd.DataFrame(
-                {name: self.signal_results[ticker][name].astype(int) for name in signal_names}
-            )
+            X = pd.DataFrame({name: self.signal_results[ticker][name].astype(int) for name in signal_names})
             y = (df["close"].shift(-1) > df["close"]).astype(int)  # next-day up move
             X = X.iloc[:-1]
             y = y.iloc[:-1]
@@ -395,9 +375,7 @@ class SignalOptimizer:
                 model = GradientBoostingClassifier(n_estimators=100, random_state=42)
             model.fit(X, y)
             preds = model.predict(X)
-            perf = self._simple_backtest(
-                df.iloc[:-1], pd.Series(preds.astype(bool), index=X.index), trade_type
-            )
+            perf = self._simple_backtest(df.iloc[:-1], pd.Series(preds.astype(bool), index=X.index), trade_type)
             results.append({"ticker": ticker, "model": model_type, **perf})
         return results
 
@@ -435,11 +413,7 @@ class SignalOptimizer:
                     in_trade = True
                 elif not combined_signal.iloc[i] and in_trade:
                     exit_price = df["close"].iloc[i]
-                    trade_return = (
-                        (exit_price - entry_price)
-                        if trade_type == "long"
-                        else (entry_price - exit_price)
-                    )
+                    trade_return = (exit_price - entry_price) if trade_type == "long" else (entry_price - exit_price)
                     trade_return -= cost_per_trade * entry_price  # subtract cost
                     returns.append(trade_return)
                     in_trade = False

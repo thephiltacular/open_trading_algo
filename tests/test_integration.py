@@ -121,15 +121,11 @@ class TestEndToEndWorkflow:
     def test_data_fetch_to_signal_execution(self, sample_integration_data):
         """Test complete workflow from data fetch to signal execution."""
         # Step 1: Data enrichment
-        enriched_df = enrich_dataframe_for_signals(
-            sample_integration_data.copy(), "AAPL", ["sma_trend", "positive_momentum"]
-        )
+        enriched_df = enrich_dataframe_for_signals(sample_integration_data.copy(), "AAPL", ["sma_trend", "positive_momentum"])
 
         # Step 2: Signal generation
         signals = pd.DataFrame(index=enriched_df.index)
-        signals["sma_signal"] = np.where(
-            enriched_df["close"] > enriched_df["close"].rolling(20).mean(), 1, -1
-        )
+        signals["sma_signal"] = np.where(enriched_df["close"] > enriched_df["close"].rolling(20).mean(), 1, -1)
         signals["momentum_signal"] = np.where(enriched_df["close"].pct_change() > 0, 1, -1)
 
         # Step 3: Portfolio simulation
@@ -163,9 +159,7 @@ class TestEndToEndWorkflow:
         weights = {ticker: 1.0 / len(tickers) for ticker in tickers}
 
         # Calculate portfolio returns
-        portfolio_returns = pd.Series(
-            index=sample_multi_ticker_integration[tickers[0]].index, dtype=float
-        )
+        portfolio_returns = pd.Series(index=sample_multi_ticker_integration[tickers[0]].index, dtype=float)
 
         for ticker in tickers:
             df = sample_multi_ticker_integration[ticker]
@@ -300,9 +294,7 @@ class TestDataValidationIntegration:
     def test_data_consistency_across_modules(self, sample_integration_data):
         """Test data consistency across different modules."""
         # Enrich data
-        enriched = enrich_dataframe_for_signals(
-            sample_integration_data.copy(), "AAPL", ["sma_trend", "positive_momentum"]
-        )
+        enriched = enrich_dataframe_for_signals(sample_integration_data.copy(), "AAPL", ["sma_trend", "positive_momentum"])
 
         # Verify data types are consistent
         numeric_cols = ["open", "high", "low", "close", "volume"]
@@ -328,9 +320,7 @@ class TestDataValidationIntegration:
 
     def test_data_schema_validation(self, sample_integration_data):
         """Test data schema validation."""
-        enriched = enrich_dataframe_for_signals(
-            sample_integration_data.copy(), "AAPL", ["sma_trend", "positive_momentum"]
-        )
+        enriched = enrich_dataframe_for_signals(sample_integration_data.copy(), "AAPL", ["sma_trend", "positive_momentum"])
 
         # Required columns should exist
         expected_cols = ["open", "high", "low", "close", "volume"]

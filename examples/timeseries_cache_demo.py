@@ -39,9 +39,7 @@ def generate_sample_price_data(ticker: str, days: int = 100) -> pd.DataFrame:
         low = min(open_price, close) - abs(np.random.normal(0, 0.5))
         volume = int(np.random.uniform(100000, 500000))
 
-        ohlcv_data.append(
-            {"Open": open_price, "High": high, "Low": low, "Close": close, "Volume": volume}
-        )
+        ohlcv_data.append({"Open": open_price, "High": high, "Low": low, "Close": close, "Volume": volume})
 
     df = pd.DataFrame(ohlcv_data, index=dates)
     return df
@@ -121,9 +119,7 @@ def demo_metrics_retrieval():
     metrics_to_get = ["rsi_14", "macd", "sma_20", "bb_upper", "bb_lower"]
     print(f"📖 Retrieving metrics: {', '.join(metrics_to_get)}")
 
-    metrics_df = cache.get_metrics(
-        ticker=ticker, timeframe=timeframe, metrics=metrics_to_get, start="-30d"  # Last 30 days
-    )
+    metrics_df = cache.get_metrics(ticker=ticker, timeframe=timeframe, metrics=metrics_to_get, start="-30d")  # Last 30 days
 
     if not metrics_df.empty:
         print(f"   Retrieved {len(metrics_df)} data points")
@@ -195,9 +191,7 @@ def demo_batch_metrics_population():
 
     # Calculate metrics for all tickers
     print("\n🧮 Calculating metrics for all tickers...")
-    cache.populate_metrics_table(
-        tickers, timeframe="1d", indicators=["sma_20", "rsi_14", "macd", "volatility_20"]
-    )
+    cache.populate_metrics_table(tickers, timeframe="1d", indicators=["sma_20", "rsi_14", "macd", "volatility_20"])
 
     # Show database statistics
     print("\n📊 Database Statistics:")
@@ -225,9 +219,7 @@ def demo_custom_indicators():
 
     print(f"🎯 Calculating custom indicators for {ticker}: {custom_indicators}")
 
-    cache.calculate_and_store_metrics(
-        ticker=ticker, timeframe=timeframe, indicators=custom_indicators
-    )
+    cache.calculate_and_store_metrics(ticker=ticker, timeframe=timeframe, indicators=custom_indicators)
 
     # Retrieve and display the custom indicators
     metrics_df = cache.get_metrics(ticker, timeframe, metrics=custom_indicators)

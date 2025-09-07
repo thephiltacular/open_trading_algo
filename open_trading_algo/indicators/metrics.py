@@ -83,9 +83,7 @@ def compute_volume_90d_avg(df: pd.DataFrame) -> pd.Series:
 # --- HIGH PRIORITY METRICS ---
 
 
-def compute_volatility_ratio(
-    df: pd.DataFrame, short_window: int = 10, long_window: int = 30
-) -> pd.Series:
+def compute_volatility_ratio(df: pd.DataFrame, short_window: int = 10, long_window: int = 30) -> pd.Series:
     """Compute volatility ratio comparing short-term vs long-term volatility.
 
     Args:
@@ -216,9 +214,7 @@ def compute_vwap(df: pd.DataFrame) -> pd.Series:
 # --- MEDIUM PRIORITY METRICS ---
 
 
-def compute_beta(
-    df: pd.DataFrame, market_df: pd.DataFrame | None = None, window: int = 252
-) -> pd.Series:
+def compute_beta(df: pd.DataFrame, market_df: pd.DataFrame | None = None, window: int = 252) -> pd.Series:
     """Compute beta (market correlation coefficient).
 
     Args:
@@ -337,15 +333,11 @@ def compute_seasonal_strength(df: pd.DataFrame, period: str = "M") -> pd.Series:
     if period == "M":
         seasonal_returns = returns.groupby(returns.index.month).mean()
         current_month = returns.index.month
-        seasonal_expectation = pd.Series(
-            [seasonal_returns[month] for month in current_month], index=returns.index
-        )
+        seasonal_expectation = pd.Series([seasonal_returns[month] for month in current_month], index=returns.index)
     elif period == "Q":
         seasonal_returns = returns.groupby(returns.index.quarter).mean()
         current_quarter = returns.index.quarter
-        seasonal_expectation = pd.Series(
-            [seasonal_returns[quarter] for quarter in current_quarter], index=returns.index
-        )
+        seasonal_expectation = pd.Series([seasonal_returns[quarter] for quarter in current_quarter], index=returns.index)
     else:
         return pd.Series(index=df.index, dtype=float)
 
@@ -475,9 +467,7 @@ def compute_fibonacci_levels(df: pd.DataFrame, lookback: int = 50) -> pd.DataFra
     )
 
 
-def compute_sharpe_ratio(
-    df: pd.DataFrame, risk_free_rate: float = 0.02, window: int = 252
-) -> pd.Series:
+def compute_sharpe_ratio(df: pd.DataFrame, risk_free_rate: float = 0.02, window: int = 252) -> pd.Series:
     """Compute Sharpe ratio (risk-adjusted returns).
 
     Args:

@@ -22,9 +22,7 @@ from typing import Dict
 try:
     import pandas as pd
 except Exception as e:  # pragma: no cover
-    print(
-        "This runner requires pandas. Please install it (e.g., pip install pandas).", file=sys.stderr
-    )
+    print("This runner requires pandas. Please install it (e.g., pip install pandas).", file=sys.stderr)
     raise
 
 from open_trading_algo import ModelPipeline
@@ -47,9 +45,7 @@ def discover_day_files(data_dir: Path) -> Dict[str, list[Path]]:
     return groups
 
 
-def run(
-    input_dir: Path, output_dir: Path, use_v8: bool = False, cols_model_path: Path | None = None
-) -> None:
+def run(input_dir: Path, output_dir: Path, use_v8: bool = False, cols_model_path: Path | None = None) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     day_files = discover_day_files(input_dir)
 

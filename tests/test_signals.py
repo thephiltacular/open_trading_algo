@@ -63,9 +63,7 @@ def sample_signal_generators():
 class TestSignalOptimizer:
     """Test SignalOptimizer class functionality."""
 
-    def test_signal_optimizer_initialization(
-        self, sample_multi_ticker_data, sample_indicators, sample_signal_generators
-    ):
+    def test_signal_optimizer_initialization(self, sample_multi_ticker_data, sample_indicators, sample_signal_generators):
         """Test SignalOptimizer initialization."""
         optimizer = SignalOptimizer(
             data=sample_multi_ticker_data,
@@ -78,9 +76,7 @@ class TestSignalOptimizer:
         assert optimizer.signal_generators == sample_signal_generators
         assert optimizer.results == {}
 
-    def test_compute_indicators(
-        self, sample_multi_ticker_data, sample_indicators, sample_signal_generators
-    ):
+    def test_compute_indicators(self, sample_multi_ticker_data, sample_indicators, sample_signal_generators):
         """Test indicator computation for all tickers."""
         optimizer = SignalOptimizer(
             data=sample_multi_ticker_data,
@@ -103,9 +99,7 @@ class TestSignalOptimizer:
                 assert isinstance(result, pd.Series)
                 assert len(result) == len(sample_multi_ticker_data[ticker])
 
-    def test_generate_signals(
-        self, sample_multi_ticker_data, sample_indicators, sample_signal_generators
-    ):
+    def test_generate_signals(self, sample_multi_ticker_data, sample_indicators, sample_signal_generators):
         """Test signal generation for all tickers."""
         optimizer = SignalOptimizer(
             data=sample_multi_ticker_data,
@@ -129,9 +123,7 @@ class TestSignalOptimizer:
                 assert isinstance(result, pd.Series)
                 assert len(result) == len(sample_multi_ticker_data[ticker])
 
-    def test_backtest_signals(
-        self, sample_multi_ticker_data, sample_indicators, sample_signal_generators
-    ):
+    def test_backtest_signals(self, sample_multi_ticker_data, sample_indicators, sample_signal_generators):
         """Test signal backtesting functionality."""
         optimizer = SignalOptimizer(
             data=sample_multi_ticker_data,

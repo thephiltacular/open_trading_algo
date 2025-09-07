@@ -131,9 +131,7 @@ class BaseTradingModel(ABC):
 
                 if "high" in params and "low" in params and "close" in params:
                     # Multi-series indicator (like ATR, STOCH)
-                    self.indicators_cache[cache_key] = indicator_func(
-                        data["high"], data["low"], data["close"], **kwargs
-                    )
+                    self.indicators_cache[cache_key] = indicator_func(data["high"], data["low"], data["close"], **kwargs)
                 elif "high" in params and "low" in params:
                     # Two-series indicator (like AD)
                     self.indicators_cache[cache_key] = indicator_func(

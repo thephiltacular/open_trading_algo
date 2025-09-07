@@ -37,9 +37,7 @@ def fetch_bulk_finnhub_analyst_sentiment(tickers: list, api_key: str) -> pd.Data
         result = result.set_index([result.index, "ticker"])
         result.index.names = ["date", "ticker"]
         return result
-    return pd.DataFrame(columns=["buy"]).set_index(
-        [pd.Index([], name="date"), pd.Index([], name="ticker")]
-    )
+    return pd.DataFrame(columns=["buy"]).set_index([pd.Index([], name="date"), pd.Index([], name="ticker")])
 
 
 def fetch_bulk_fmp_analyst_price_targets(tickers: list, api_key: str) -> pd.DataFrame:
@@ -68,9 +66,7 @@ def fetch_bulk_fmp_analyst_price_targets(tickers: list, api_key: str) -> pd.Data
         result = result.set_index([result.index, "ticker"])
         result.index.names = ["date", "ticker"]
         return result
-    return pd.DataFrame(columns=["targetMean"]).set_index(
-        [pd.Index([], name="date"), pd.Index([], name="ticker")]
-    )
+    return pd.DataFrame(columns=["targetMean"]).set_index([pd.Index([], name="date"), pd.Index([], name="ticker")])
 
 
 # Example 1: Fetch analyst recommendations from Finnhub (requires API key)

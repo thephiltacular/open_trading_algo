@@ -60,9 +60,7 @@ class MomentumModel(BaseTradingModel):
             data["macd_hist"] = hist
 
         if "stoch_k" not in data.columns:
-            stoch_k, stoch_d = self.get_indicator_value(
-                data, "stoch", fastk_period=14, slowk_period=3, slowd_period=3
-            )
+            stoch_k, stoch_d = self.get_indicator_value(data, "stoch", fastk_period=14, slowk_period=3, slowd_period=3)
             data["stoch_k"] = stoch_k
             data["stoch_d"] = stoch_d
 

@@ -58,46 +58,6 @@ def ema(series: pd.Series, window: int) -> pd.Series:
     return series.ewm(span=window, adjust=False).mean()
 
 
-def sma(series: pd.Series, window: int) -> pd.Series:
-    """Simple Moving Average.
-
-    Calculates the average price over a specified period. Used to identify trends
-    and support/resistance levels.
-
-    Args:
-        series (pd.Series): Input price series.
-        window (int): Number of periods for the calculation.
-
-    Returns:
-        pd.Series: Simple moving average values.
-
-    See Also:
-        indicators.md: [Simple Moving Average](../docs/indicators.md#simple-moving-average-sma)
-            Complete documentation with charts, accuracy data, and usage examples.
-    """
-    return series.rolling(window=window, min_periods=1).mean()
-
-
-def ema(series: pd.Series, window: int) -> pd.Series:
-    """Exponential Moving Average.
-
-    Gives more weight to recent prices, making it more responsive to price changes
-    than SMA.
-
-    Args:
-        series (pd.Series): Input price series.
-        window (int): Number of periods for the calculation.
-
-    Returns:
-        pd.Series: Exponential moving average values.
-
-    See Also:
-        indicators.md: [Exponential Moving Average](../docs/indicators.md#exponential-moving-average-ema)
-            Complete documentation with charts, accuracy data, and usage examples.
-    """
-    return series.ewm(span=window, adjust=False).mean()
-
-
 def wma(series: pd.Series, window: int) -> pd.Series:
     """Weighted Moving Average.
 
@@ -294,9 +254,7 @@ def atr(high: pd.Series, low: pd.Series, close: pd.Series, window: int = 14) -> 
         pd.Series: Average True Range values.
     """
     prev_close = close.shift(1)
-    tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(
-        axis=1
-    )
+    tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(axis=1)
     return tr.rolling(window).mean()
 
 
@@ -334,9 +292,7 @@ def trange(high: pd.Series, low: pd.Series, close: pd.Series) -> pd.Series:
         pd.Series: True Range values.
     """
     prev_close = close.shift(1)
-    tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(
-        axis=1
-    )
+    tr = pd.concat([high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1).max(axis=1)
     return tr
 
 
@@ -356,9 +312,7 @@ def obv(close: pd.Series, volume: pd.Series) -> pd.Series:
     return (volume * direction).cumsum()
 
 
-def mfi(
-    high: pd.Series, low: pd.Series, close: pd.Series, volume: pd.Series, window: int = 14
-) -> pd.Series:
+def mfi(high: pd.Series, low: pd.Series, close: pd.Series, volume: pd.Series, window: int = 14) -> pd.Series:
     """Money Flow Index.
 
     Volume-weighted RSI that measures buying/selling pressure.
@@ -1072,9 +1026,7 @@ def hilbert_transform(series: pd.Series, window: int = 20) -> tuple[pd.Series, p
         Tuple of (in_phase, quadrature) components
     """
     if len(series) < window:
-        return pd.Series([0] * len(series), index=series.index), pd.Series(
-            [0] * len(series), index=series.index
-        )
+        return pd.Series([0] * len(series), index=series.index), pd.Series([0] * len(series), index=series.index)
 
     # Create Hilbert kernel (simplified approximation)
     # In practice, this would use a more sophisticated kernel
@@ -1089,11 +1041,7 @@ def hilbert_transform(series: pd.Series, window: int = 20) -> tuple[pd.Series, p
     in_phase = pd.Series(np.convolve(series.values, kernel, mode="same"), index=series.index)
 
     # Quadrature component (90-degree phase shift)
-    quadrature = (
-        pd.Series(np.convolve(series.values, kernel, mode="same"), index=series.index)
-        .shift(-1)
-        .fillna(0)
-    )
+    quadrature = pd.Series(np.convolve(series.values, kernel, mode="same"), index=series.index).shift(-1).fillna(0)
 
     return in_phase, quadrature
 
@@ -1112,9 +1060,7 @@ def hilbert_sine_wave(series: pd.Series, cycle_period: int = 20) -> tuple[pd.Ser
         Tuple of (sine_wave, lead_sine_wave)
     """
     if len(series) < cycle_period:
-        return pd.Series([0] * len(series), index=series.index), pd.Series(
-            [0] * len(series), index=series.index
-        )
+        return pd.Series([0] * len(series), index=series.index), pd.Series([0] * len(series), index=series.index)
 
     # Get Hilbert components
     in_phase, quadrature = hilbert_transform(series, cycle_period)
@@ -1187,9 +1133,7 @@ def hilbert_cycle_period(series: pd.Series, min_period: int = 10, max_period: in
     return pd.Series(periods, index=series.index)
 
 
-def hilbert_instantaneous_trendline(
-    series: pd.Series, window: int = 20, smoothing: int = 3
-) -> pd.Series:
+def hilbert_instantaneous_trendline(series: pd.Series, window: int = 20, smoothing: int = 3) -> pd.Series:
     """Hilbert Instantaneous Trendline - smoothed trend component.
 
     Extracts the trend component using Hilbert Transform and applies smoothing.
@@ -1231,9 +1175,7 @@ def hilbert_trend_vs_cycle(series: pd.Series, cycle_period: int = 20) -> tuple[p
         Tuple of (trend_component, cycle_component)
     """
     if len(series) < cycle_period:
-        return pd.Series([series.iloc[0]] * len(series), index=series.index), pd.Series(
-            [0] * len(series), index=series.index
-        )
+        return pd.Series([series.iloc[0]] * len(series), index=series.index), pd.Series([0] * len(series), index=series.index)
 
     # Get Hilbert components
     in_phase, quadrature = hilbert_transform(series, cycle_period)

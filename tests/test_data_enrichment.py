@@ -172,9 +172,7 @@ SIGNAL_REQUIREMENTS = {
 }
 
 
-@pytest.mark.parametrize(
-    "signals", [LONG_SIGNALS, SHORT_SIGNALS, SENTIMENT_SIGNALS, OPTIONS_SIGNALS]
-)
+@pytest.mark.parametrize("signals", [LONG_SIGNALS, SHORT_SIGNALS, SENTIMENT_SIGNALS, OPTIONS_SIGNALS])
 def test_enrich_dataframe_for_signals(signals):
     df = TEST_DF.copy()
     df = enrich_dataframe_for_signals(df, TICKER, signals)

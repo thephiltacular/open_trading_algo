@@ -9,9 +9,7 @@ import yaml
 
 def get_config():
     """Load configuration from db_config.yaml if it exists."""
-    config_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config", "db_config.yaml"
-    )
+    config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config", "db_config.yaml")
     if os.path.exists(config_path):
         with open(config_path, "r") as f:
             cfg = yaml.safe_load(f)
@@ -116,9 +114,7 @@ class ParquetCache:
             row_group_size=50000,  # Optimize for time series queries
         )
 
-    def get_price_data(
-        self, ticker: str, start: Optional[str] = None, end: Optional[str] = None
-    ) -> pd.DataFrame:
+    def get_price_data(self, ticker: str, start: Optional[str] = None, end: Optional[str] = None) -> pd.DataFrame:
         """Retrieve price data for a ticker.
 
         Args:

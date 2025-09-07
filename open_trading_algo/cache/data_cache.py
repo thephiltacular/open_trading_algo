@@ -35,9 +35,7 @@ import yaml
 
 def get_config():
     # Look for config in the project's config directory
-    config_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config", "db_config.yaml"
-    )
+    config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "config", "db_config.yaml")
     if os.path.exists(config_path):
         with open(config_path, "r") as f:
             cfg = yaml.safe_load(f)
@@ -124,10 +122,7 @@ class DataCache:
         """
         if df.empty:
             return
-        records = [
-            (ticker, str(idx), timeframe, signal_type, row["signal_value"])
-            for idx, row in df.iterrows()
-        ]
+        records = [(ticker, str(idx), timeframe, signal_type, row["signal_value"]) for idx, row in df.iterrows()]
         c = self.conn.cursor()
         c.executemany(
             """
@@ -218,8 +213,7 @@ class DataCache:
         if df.empty:
             return
         records = [
-            (ticker, str(idx), row["Open"], row["High"], row["Low"], row["Close"], row["Volume"])
-            for idx, row in df.iterrows()
+            (ticker, str(idx), row["Open"], row["High"], row["Low"], row["Close"], row["Volume"]) for idx, row in df.iterrows()
         ]
         c = self.conn.cursor()
         c.executemany(
@@ -231,9 +225,7 @@ class DataCache:
         )
         self.conn.commit()
 
-    def get_price_data(
-        self, ticker: str, start: Optional[str] = None, end: Optional[str] = None
-    ) -> pd.DataFrame:
+    def get_price_data(self, ticker: str, start: Optional[str] = None, end: Optional[str] = None) -> pd.DataFrame:
         """Retrieve price data for a ticker.
 
         Args:

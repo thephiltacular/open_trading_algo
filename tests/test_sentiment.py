@@ -67,9 +67,7 @@ class TestAnalystSentiment:
 
     @patch("open_trading_algo.sentiment.analyst_sentiment.requests.get")
     @patch("open_trading_algo.sentiment.analyst_sentiment.is_caching_enabled", return_value=False)
-    def test_fetch_finnhub_analyst_sentiment_success(
-        self, mock_cache_enabled, mock_get, mock_finnhub_response
-    ):
+    def test_fetch_finnhub_analyst_sentiment_success(self, mock_cache_enabled, mock_get, mock_finnhub_response):
         """Test successful Finnhub analyst sentiment fetch."""
         mock_response = MagicMock()
         mock_response.json.return_value = mock_finnhub_response
@@ -112,9 +110,7 @@ class TestAnalystSentiment:
 
     @patch("open_trading_algo.sentiment.analyst_sentiment.requests.get")
     @patch("open_trading_algo.sentiment.analyst_sentiment.is_caching_enabled", return_value=False)
-    def test_fetch_fmp_analyst_price_targets_success(
-        self, mock_cache_enabled, mock_get, mock_fmp_response
-    ):
+    def test_fetch_fmp_analyst_price_targets_success(self, mock_cache_enabled, mock_get, mock_fmp_response):
         """Test successful FMP analyst price targets fetch."""
         mock_response = MagicMock()
         mock_response.json.return_value = mock_fmp_response
@@ -133,9 +129,7 @@ class TestSocialSentiment:
 
     @patch("open_trading_algo.sentiment.social_sentiment.requests.get")
     @patch("open_trading_algo.sentiment.social_sentiment.is_caching_enabled", return_value=False)
-    def test_fetch_twitter_sentiment_success(
-        self, mock_cache_enabled, mock_get, mock_lunarcrush_response
-    ):
+    def test_fetch_twitter_sentiment_success(self, mock_cache_enabled, mock_get, mock_lunarcrush_response):
         """Test successful Twitter sentiment fetch."""
         mock_response = MagicMock()
         mock_response.json.return_value = mock_lunarcrush_response
@@ -177,9 +171,7 @@ class TestSocialSentiment:
 
     @patch("open_trading_algo.sentiment.social_sentiment.requests.get")
     @patch("open_trading_algo.sentiment.social_sentiment.is_caching_enabled", return_value=False)
-    def test_fetch_reddit_sentiment_success(
-        self, mock_cache_enabled, mock_get, mock_lunarcrush_response
-    ):
+    def test_fetch_reddit_sentiment_success(self, mock_cache_enabled, mock_get, mock_lunarcrush_response):
         """Test successful Reddit sentiment fetch."""
         mock_response = MagicMock()
         mock_response.json.return_value = mock_lunarcrush_response
@@ -198,9 +190,7 @@ class TestSentimentAggregation:
     def test_sentiment_score_normalization(self):
         """Test that sentiment scores are properly normalized."""
         # Create test data with various score ranges
-        test_data = pd.DataFrame(
-            {"social_score": [0, 50, 100, -50, 25], "expected_normalized": [-1, 0, 1, -1, -0.5]}
-        )
+        test_data = pd.DataFrame({"social_score": [0, 50, 100, -50, 25], "expected_normalized": [-1, 0, 1, -1, -0.5]})
 
         # Normalize scores (simple min-max normalization)
         scores = test_data["social_score"]
