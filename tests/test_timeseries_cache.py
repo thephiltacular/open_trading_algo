@@ -94,19 +94,52 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from open_trading_algo.cache.setup_influxdb import check_docker, start_influxdb, wait_for_influxdb
 from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
 
 
 @pytest.fixture(scope="session")
 def influxdb_setup():
     """Ensure InfluxDB is available for testing."""
+    import requests
+
+    # First, try to connect to InfluxDB health endpoint
     try:
-        # Simple connection test
-        test_cache = TimeSeriesCache()
-        test_cache.close()
-        return True
-    except Exception:
-        pytest.skip("InfluxDB not available. Start with: docker start trading-influxdb")
+        response = requests.get("http://localhost:8086/health", timeout=5)
+        if response.status_code == 200:
+            print("✅ InfluxDB is already running")
+            return True
+    except requests.RequestException:
+        pass  # InfluxDB is not running, continue to start it
+
+    print("🔄 InfluxDB not available, attempting to start container automatically...")
+
+    # Check if Docker is available
+    if not check_docker():
+        pytest.skip("Docker not available. Please install Docker to run these tests.")
+        return False
+
+    # Try to start InfluxDB
+    if not start_influxdb():
+        pytest.skip("Failed to start InfluxDB container. Please check Docker setup.")
+        return False
+
+    # Wait for InfluxDB to be ready
+    if not wait_for_influxdb():
+        pytest.skip("InfluxDB failed to start within timeout. Please check Docker logs.")
+        return False
+
+    # Verify connection
+    try:
+        response = requests.get("http://localhost:8086/health", timeout=5)
+        if response.status_code == 200:
+            print("✅ InfluxDB container started and ready for testing!")
+            return True
+        else:
+            pytest.skip(f"InfluxDB health check failed with status: {response.status_code}")
+            return False
+    except requests.RequestException as e:
+        pytest.skip(f"Cannot connect to InfluxDB after starting container: {e}")
         return False
 
 

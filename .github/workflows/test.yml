@@ -38,8 +38,9 @@ jobs:
 
     - name: Install Poetry
       run: |
-        curl -sSL https://install.python-poetry.org | python3 -
+        python -m pip install --user poetry
         echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo "$HOME/.poetry/bin" >> $GITHUB_PATH
 
     - name: Configure Poetry
       run: |
@@ -82,8 +83,9 @@ jobs:
 
     - name: Install Poetry
       run: |
-        curl -sSL https://install.python-poetry.org | python3 -
+        python -m pip install --user poetry
         echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo "$HOME/.poetry/bin" >> $GITHUB_PATH
 
     - name: Install dependencies
       run: poetry install --no-interaction
@@ -110,8 +112,9 @@ jobs:
 
     - name: Install Poetry
       run: |
-        curl -sSL https://install.python-poetry.org | python3 -
+        python -m pip install --user poetry
         echo "$HOME/.local/bin" >> $GITHUB_PATH
+        echo "$HOME/.poetry/bin" >> $GITHUB_PATH
 
     - name: Build package
       run: poetry build
