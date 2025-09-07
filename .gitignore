@@ -203,3 +203,4 @@ secrets.*
 *.sqlite3
 
 data/
+logs/
