@@ -4,7 +4,8 @@ SRC =
 
 .PHONY:	help	clean	lint	format	format_check  compile\
 lint_check_flake8	lint_check_all	format_check_black	format_check_isort	format_check_all  \
-install_poetic	install_depends tests
+install_poetry	install_depends tests setup setup_dev setup_env setup_config setup_db setup_cache \
+setup_influxdb setup_all dev_env clean_setup
 
 # SHELL:=/bin/bash
 
@@ -64,5 +65,186 @@ install_depends:
 	echo "Checking if png folder exists ...."
 	[ -d $(SRC)/$(PNG_DIR) ] && echo "PNG folder exists, skipping unzip" || unzip icons.zip && mv png pyiconlibrary
 
+setup: ## Setup the repository for development (virtual env, dependencies, config)
+	@echo "🚀 Setting up open_trading_algo development environment..."
+	$(MAKE) setup_env
+	$(MAKE) setup_config
+	$(MAKE) setup_db
+	$(MAKE) setup_cache
+	@echo "✅ Setup complete! Run 'make dev_env' to activate the environment."
+
+setup_dev: ## Complete development setup (includes all setup steps)
+	@echo "🚀 Setting up complete development environment..."
+	$(MAKE) setup
+	$(MAKE) install_depends
+	$(MAKE) setup_influxdb
+	@echo "✅ Development environment ready!"
+
+setup_env: ## Create and configure Python virtual environment
+	@echo "🐍 Setting up Python virtual environment..."
+	@if [ ! -d ".venv" ]; then \
+		python3 -m venv .venv; \
+		echo "✅ Virtual environment created"; \
+	else \
+		echo "ℹ️  Virtual environment already exists"; \
+	fi
+	@echo "📦 Installing Poetry if not present..."
+	@if ! command -v poetry &> /dev/null; then \
+		curl -sSL https://install.python-poetry.org | python3 -; \
+		export PATH="$HOME/.local/bin:$PATH"; \
+		echo "✅ Poetry installed"; \
+	else \
+		echo "ℹ️  Poetry already installed"; \
+	fi
+	@echo "🔧 Configuring Poetry for virtual environment..."
+	@poetry config virtualenvs.in-project true
+	@echo "✅ Environment setup complete"
+
+setup_config: ## Setup configuration files from examples
+	@echo "⚙️  Setting up configuration files..."
+	@if [ ! -f "secrets.env" ]; then \
+		cp secrets.env.example secrets.env; \
+		echo "✅ Created secrets.env from template"; \
+		echo "⚠️  Please edit secrets.env and add your API keys"; \
+	else \
+		echo "ℹ️  secrets.env already exists"; \
+	fi
+	@if [ ! -f ".env" ]; then \
+		cp .env.example .env 2>/dev/null || echo "# Add your environment variables here" > .env; \
+		echo "✅ Created .env file"; \
+	else \
+		echo "ℹ️  .env already exists"; \
+	fi
+	@echo "📁 Ensuring data directories exist..."
+	@mkdir -p data
+	@mkdir -p data/cache
+	@mkdir -p data/parquet
+	@mkdir -p logs
+	@echo "✅ Configuration setup complete"
+
+setup_db: ## Setup SQLite database and tables
+	@echo "🗄️  Setting up SQLite database..."
+	@if [ ! -f "data/tv_data_cache.sqlite3" ]; then \
+		touch data/tv_data_cache.sqlite3; \
+		echo "✅ SQLite database created at data/tv_data_cache.sqlite3"; \
+	else \
+		echo "ℹ️  SQLite database already exists"; \
+	fi
+	@echo "📊 Setting up database tables..."
+	@python3 -c "from open_trading_algo.cache.data_cache import DataCache; cache = DataCache(); cache.initialize_db()" 2>/dev/null || echo "⚠️  Could not initialize database tables (dependencies may not be installed yet)"
+	@echo "✅ Database setup complete"
+
+setup_cache: ## Setup cache directories and initial cache files
+	@echo "💾 Setting up cache system..."
+	@mkdir -p data/cache/sqlite
+	@mkdir -p data/cache/parquet
+	@mkdir -p data/cache/influxdb
+	@echo "📁 Cache directories created"
+	@echo "🔧 Testing cache initialization..."
+	@python3 -c "from open_trading_algo.cache.timeseries_cache import TimeSeriesCache; cache = TimeSeriesCache(); print('✅ TimeSeries cache initialized')" 2>/dev/null || echo "⚠️  Could not test cache (dependencies may not be installed yet)"
+	@echo "✅ Cache setup complete"
+
+setup_influxdb: ## Setup InfluxDB for time series data (requires Docker)
+	@echo "📈 Setting up InfluxDB..."
+	@if command -v docker &> /dev/null; then \
+		if [ ! "$(docker ps -q -f name=influxdb)" ]; then \
+			if [ "$(docker ps -aq -f status=exited -f name=influxdb)" ]; then \
+				docker start influxdb; \
+				echo "✅ InfluxDB container started"; \
+			else \
+				docker run -d --name influxdb -p 8086:8086 influxdb:2.0; \
+				echo "✅ InfluxDB container created and started"; \
+				echo "⏳ Waiting for InfluxDB to be ready..."; \
+				sleep 5; \
+			fi \
+		else \
+			echo "ℹ️  InfluxDB container already running"; \
+		fi \
+		echo "🔧 Initializing InfluxDB database..."; \
+		curl -X POST http://localhost:8086/api/v2/setup -H "Content-Type: application/json" -d '{"username": "admin", "password": "password", "org": "trading", "bucket": "market_data", "token": "my-token"}' 2>/dev/null || echo "⚠️  Could not initialize InfluxDB (may already be initialized)"; \
+	else \
+		echo "⚠️  Docker not found. Please install Docker to use InfluxDB cache."; \
+		echo "   Manual setup: docker run -d --name influxdb -p 8086:8086 influxdb:2.0"; \
+	fi
+	@echo "✅ InfluxDB setup complete"
+
+setup_all: ## Complete setup including all optional components
+	@echo "🚀 Setting up everything..."
+	$(MAKE) setup_dev
+	$(MAKE) setup_influxdb
+	@echo "🧪 Running initial tests..."
+	$(MAKE) tests
+	@echo "✅ All setup complete!"
+
+dev_env: ## Activate development environment
+	@echo "🔧 Activating development environment..."
+	@if [ -f ".venv/bin/activate" ]; then \
+		echo "Run: source .venv/bin/activate"; \
+		echo "Then: poetry install"; \
+	else \
+		echo "⚠️  Virtual environment not found. Run 'make setup_env' first."; \
+	fi
+
+clean_setup: ## Clean up setup files and caches
+	@echo "🧹 Cleaning up setup files..."
+	@rm -rf data/cache/*
+	@rm -rf data/parquet/*
+	@rm -f data/tv_data_cache.sqlite3
+	@if [ "$(docker ps -q -f name=influxdb)" ]; then \
+		docker stop influxdb; \
+		docker rm influxdb; \
+		echo "✅ InfluxDB container removed"; \
+	fi
+	@echo "✅ Setup cleanup complete"
+
 tests:
 	python3 tests/test_icon.py
+
+run_model: ## Run the main trading model
+	@echo "🚀 Running trading model..."
+	@python3 run_model.py
+
+cache_demo: ## Run cache demonstration script
+	@echo "💾 Running cache demo..."
+	@python3 scripts/cache_aapl_10y.py
+
+migrate_timeseries: ## Run timeseries migration script
+	@echo "🔄 Running timeseries migration..."
+	@python3 scripts/migrate_to_timeseries.py
+
+check_env: ## Check if environment is properly configured
+	@echo "🔍 Checking environment configuration..."
+	@if [ -f ".venv/bin/activate" ]; then echo "✅ Virtual environment: OK"; else echo "❌ Virtual environment: Missing"; fi
+	@if [ -f "secrets.env" ]; then echo "✅ Secrets file: OK"; else echo "❌ Secrets file: Missing"; fi
+	@if [ -f "data/tv_data_cache.sqlite3" ]; then echo "✅ SQLite database: OK"; else echo "❌ SQLite database: Missing"; fi
+	@if command -v poetry &> /dev/null; then echo "✅ Poetry: OK"; else echo "❌ Poetry: Missing"; fi
+	@if command -v docker &> /dev/null && [ "$(docker ps -q -f name=influxdb)" ]; then echo "✅ InfluxDB: Running"; elif command -v docker &> /dev/null; then echo "⚠️  InfluxDB: Not running (run 'make setup_influxdb')"; else echo "⚠️  InfluxDB: Docker not available"; fi
+
+status: ## Show repository status and configuration
+	@echo "📊 Repository Status:"
+	@echo "===================="
+	@git branch --show-current
+	@git status --porcelain | wc -l | xargs echo "Uncommitted changes:"
+	@echo ""
+	@echo "🔧 Configuration Status:"
+	@echo "========================"
+	$(MAKE) check_env
+	@echo ""
+	@echo "📦 Dependencies:"
+	@echo "==============="
+	@if [ -f "poetry.lock" ]; then echo "✅ Poetry lock file present"; else echo "❌ Poetry lock file missing"; fi
+	@poetry show --tree 2>/dev/null | head -5 || echo "⚠️  Run 'poetry install' to see dependencies"
+
+update_deps: ## Update all dependencies
+	@echo "📦 Updating dependencies..."
+	@poetry update
+	@echo "✅ Dependencies updated"
+
+docs: ## Generate documentation
+	@echo "📚 Generating documentation..."
+	@if command -v mkdocs &> /dev/null; then \
+		mkdocs build; \
+		echo "✅ Documentation built"; \
+	else \
+		echo "⚠️  MkDocs not installed. Install with: pip install mkdocs"; \
+	fi

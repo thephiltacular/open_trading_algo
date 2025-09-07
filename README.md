@@ -50,13 +50,95 @@ This means managing API query rates, storing as much data as possible locally, a
 
 ## Quick Start
 
-### Installation
+### Installation & Setup
+
+#### Option 1: Automated Setup (Recommended)
 
 ```bash
 git clone https://github.com/thephiltacular/open_trading_algo.git
 cd open_trading_algo
-pip install -e .
+
+# Complete automated setup
+make setup_all
+
+# Or use the setup script
+./setup.sh all
 ```
+
+#### Option 2: Manual Setup
+
+```bash
+git clone https://github.com/thephiltacular/open_trading_algo.git
+cd open_trading_algo
+
+# Setup virtual environment and Poetry
+make setup_env
+
+# Setup configuration files
+make setup_config
+
+# Setup databases and caches
+make setup_db
+make setup_cache
+make setup_influxdb
+
+# Install dependencies
+make install_depends
+```
+
+#### Available Setup Commands
+
+| Command | Description |
+|---------|-------------|
+| `make setup` | Basic setup (env, config, db, cache) |
+| `make setup_dev` | Complete development setup |
+| `make setup_env` | Python virtual environment + Poetry |
+| `make setup_config` | Configuration files from templates |
+| `make setup_db` | SQLite database initialization |
+| `make setup_cache` | Cache directories and files |
+| `make setup_influxdb` | InfluxDB container setup (requires Docker) |
+| `make setup_all` | Everything including tests |
+| `make dev_env` | Activate development environment |
+| `make check_env` | Verify environment configuration |
+| `make status` | Show repository and config status |
+
+#### Setup Script Alternative
+
+For users who prefer scripts over Make:
+
+```bash
+# Complete setup
+./setup.sh all
+
+# Individual components
+./setup.sh venv      # Virtual environment
+./setup.sh config    # Configuration files
+./setup.sh deps      # Dependencies
+```
+
+### Configuration
+
+After setup, configure your API keys:
+
+1. Edit `secrets.env` and add your API keys:
+   ```bash
+   FINNHUB_API_KEY=your_finnhub_key
+   FMP_API_KEY=your_fmp_key
+   # ... add other API keys
+   ```
+
+2. Review configuration files in `config/` directory:
+   - `db_config.yaml` - Database settings
+   - `api_config.yaml` - API rate limits and settings
+   - `live_data_config.yaml` - Live data streaming config
+
+#### Cache Systems Setup
+
+The setup automatically configures three cache types:
+
+- **SQLite Cache** (`data/cache/sqlite/`): Default lightweight cache for development
+- **Parquet Cache** (`data/cache/parquet/`): High-performance columnar storage for analytics
+- **InfluxDB Cache** (`data/cache/influxdb/`): Time-series database for high-frequency data
 
 ### Basic Usage
 
