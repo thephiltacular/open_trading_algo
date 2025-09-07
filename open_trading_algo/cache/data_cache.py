@@ -24,12 +24,12 @@ print(df)
 exists = cache.has_signals('AAPL', '1d', 'long_trend')
 print('Signals cached:', exists)
 """
-import sqlite3
-import pandas as pd
+
 import os
+import sqlite3
 from typing import List, Optional
 
-
+import pandas as pd
 import yaml
 
 

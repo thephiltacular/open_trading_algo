@@ -1,60 +1,74 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 
-
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v6.0.0
     hooks:
-      # - id: check-added-large-files
-      #   stages: [commit]
+      - id: check-added-large-files
       - id: check-ast
-        stages: [commit]
       - id: check-case-conflict
-        stages: [commit]
       - id: check-docstring-first
-        stages: [commit]
       - id: check-merge-conflict
-        stages: [commit]
       - id: check-symlinks
-        stages: [commit]
       - id: check-xml
-        stages: [commit]
       - id: check-yaml
-        stages: [commit]
+      - id: check-toml
       - id: debug-statements
-        stages: [commit]
       - id: end-of-file-fixer
-        stages: [commit]
       - id: mixed-line-ending
-        stages: [commit]
       - id: trailing-whitespace
-        stages: [commit]
       - id: fix-byte-order-marker
-        stages: [commit]
 
   - repo: https://github.com/psf/black
-    rev: 22.12.0
+    rev: 25.1.0
     hooks:
       - id: black
-        stages: [commit]
-        args: [".", "--line-length=101"]
-  # - repo: https://github.com/asottile/blacken-docs
-  #   rev: v1.8.0
-  #   hooks:
-  #     - id: blacken-docs
-  #       stages: [commit]
-  #       additional_dependencies: [black==20.8b1]
-  # - repo: https://github.com/asottile/seed-isort-config
-  #   rev: v2.2.0
-  #   hooks:
-  #     - id: seed-isort-config
-  # - repo: https://github.com/pre-commit/mirrors-isort
-  #   rev: v5.4.2
+        args: ["--line-length=101"]
+
+  # - repo: https://github.com/pycqa/isort
+  #   rev: 6.0.1
   #   hooks:
   #     - id: isort
+  #       args: ["--profile", "black", "--line-length=101"]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.2
+    hooks:
+      - id: flake8
+        args: ["--max-line-length=127", "--extend-ignore=E402,F841,F401,E302,E305,E203,W503,C901,W1514,F403"]
+
   - repo: https://github.com/detailyang/pre-commit-shell
     rev: 1.0.5
     hooks:
       - id: shell-lint
-        args: [--format=json, --exclude=SC1091]
+        args: ["--format=json", "--exclude=SC1091"]
+
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.14.1
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: [types-all]
+  #       args: ["--ignore-missing-imports"]
+  #       exclude: ^(docs/|scripts/|tests/|setup.py$)
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: forbid-crlf
+      - id: remove-crlf
+      - id: forbid-tabs
+      - id: remove-tabs
+        exclude: ^Makefile$
+
+  - repo: https://github.com/python-poetry/poetry
+    rev: 2.1.1
+    hooks:
+      - id: poetry-check
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--exclude-files', 'poetry.lock', '--exclude-files', '.*\.lock$']
+        exclude: ^(poetry.lock|.*\.lock|\.secrets\.baseline)$
