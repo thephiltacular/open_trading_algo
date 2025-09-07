@@ -520,7 +520,7 @@ class TimeSeriesCache:
             # Query for basic stats
             price_query = f"""
             from(bucket: "{self.bucket}")
-            |> range(start: -365d)
+            |> range(start: 0, stop: now())
             |> filter(fn: (r) => r["_measurement"] == "price_data")
             |> group()
             |> count()
@@ -529,7 +529,7 @@ class TimeSeriesCache:
 
             signals_query = f"""
             from(bucket: "{self.bucket}")
-            |> range(start: -365d)
+            |> range(start: 0, stop: now())
             |> filter(fn: (r) => r["_measurement"] == "signals")
             |> group()
             |> count()
@@ -538,7 +538,7 @@ class TimeSeriesCache:
 
             metrics_query = f"""
             from(bucket: "{self.bucket}")
-            |> range(start: -365d)
+            |> range(start: 0, stop: now())
             |> filter(fn: (r) => r["_measurement"] == "metrics")
             |> group()
             |> count()
@@ -827,9 +827,18 @@ class TimeSeriesCache:
                 for record in table.records:
                     record_data = {"datetime": record.get_time()}
 
-                    # Add all metric values
+                    # Add all metric values, but filter out metadata columns
                     for key, value in record.values.items():
-                        if key not in ["_time", "_measurement", "ticker", "timeframe"]:
+                        if key not in [
+                            "_time",
+                            "_measurement",
+                            "ticker",
+                            "timeframe",
+                            "result",
+                            "table",
+                            "_start",
+                            "_stop",
+                        ]:
                             record_data[key] = value
 
                     records.append(record_data)
@@ -881,31 +890,17 @@ class TimeSeriesCache:
         Returns:
             List of available metric names
         """
-        query = f"""
-        from(bucket: "{self.bucket}")
-        |> range(start: -365d)
-        |> filter(fn: (r) => r["_measurement"] == "metrics")
-        |> filter(fn: (r) => r["ticker"] == "{ticker}")
-        |> filter(fn: (r) => r["timeframe"] == "{timeframe}")
-        |> group(columns: ["_field"])
-        |> distinct(column: "_field")
-        """
+        # Get metrics data and extract column names
+        metrics_df = self.get_metrics(ticker, timeframe)
 
-        try:
-            result = self.query_api.query(query, org=self.org)
-            metrics = set()
-
-            for table in result:
-                for record in table.records:
-                    field_name = record.values.get("_field")
-                    if field_name and field_name not in ["ticker", "timeframe"]:
-                        metrics.add(field_name)
-
-            return sorted(list(metrics))
-
-        except Exception as e:
-            print(f"Error getting available metrics: {e}")
+        if metrics_df.empty:
             return []
+
+        # Filter out any metadata columns that might remain
+        metadata_columns = ["datetime", "result", "table", "_start", "_stop"]
+        available_metrics = [col for col in metrics_df.columns if col not in metadata_columns]
+
+        return sorted(available_metrics)
 
     def populate_metrics_table(
         self,
@@ -992,6 +987,29 @@ class TimeSeriesCache:
                 }
 
         return summary
+
+    def clear_metrics_data(self, ticker: str, timeframe: str = "1d"):
+        """
+        Clear all metrics data for a specific ticker and timeframe.
+
+        Args:
+            ticker: Ticker symbol
+            timeframe: Timeframe for the metrics
+        """
+        delete_api = self.client.delete_api()
+
+        # Delete all metrics for this ticker and timeframe
+        try:
+            delete_api.delete(
+                start="1970-01-01T00:00:00Z",
+                stop="2030-01-01T00:00:00Z",
+                predicate=f'_measurement="metrics" AND ticker="{ticker}" AND timeframe="{timeframe}"',
+                bucket=self.bucket,
+                org=self.org,
+            )
+            print(f"✅ Cleared metrics data for {ticker} ({timeframe})")
+        except Exception as e:
+            print(f"Error clearing metrics data: {e}")
 
     def close(self):
         """Close the InfluxDB client connection."""
