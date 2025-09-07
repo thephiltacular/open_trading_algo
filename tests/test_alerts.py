@@ -1,13 +1,10 @@
-import pytest
-import pandas as pd
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-from unittest.mock import patch, MagicMock
-from open_trading_algo.alerts.alerts import (
-    extract_ticker,
-    is_positive_alert,
-    is_negative_alert,
-    TickerAlertCounts,
-)
+import pandas as pd
+import pytest
+
+from open_trading_algo.alerts.alerts import TickerAlertCounts, extract_ticker, is_negative_alert, is_positive_alert
 
 
 @pytest.fixture

@@ -5,9 +5,11 @@ This model uses momentum indicators like RSI, MACD, and Stochastic
 to identify trending markets and generate trading signals.
 """
 
-import pandas as pd
-import numpy as np
 from typing import Dict, Optional
+
+import numpy as np
+import pandas as pd
+
 from .base_model import BaseTradingModel
 
 

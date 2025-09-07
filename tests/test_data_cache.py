@@ -1,6 +1,8 @@
 import os
+
 import pandas as pd
-from open_trading_algo.cache.data_cache import DataCache, DB_PATH
+
+from open_trading_algo.cache.data_cache import DB_PATH, DataCache
 
 
 def test_database_setup_and_store():

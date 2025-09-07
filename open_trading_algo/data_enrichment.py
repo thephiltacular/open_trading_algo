@@ -5,10 +5,11 @@ This module provides functions to enrich DataFrames with required columns for si
 using various financial data APIs. It supports caching and bulk requests to minimize API calls.
 """
 
-import pandas as pd
+from typing import Dict, List, Optional
 
+import pandas as pd
 import yfinance as yf
-from typing import List, Dict, Optional
+
 from open_trading_algo.fin_data_apis import fetchers
 
 

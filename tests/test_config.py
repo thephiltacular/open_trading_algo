@@ -1,10 +1,11 @@
-import pytest
 import os
-import yaml
-import pandas as pd
-import numpy as np
-from unittest.mock import patch, MagicMock
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pandas as pd
+import pytest
+import yaml
 
 
 class TestConfigurationLoading:
@@ -76,9 +77,9 @@ class TestDatabaseSetup:
     @patch("open_trading_algo.cache.data_cache.DataCache")
     def test_database_initialization(self, mock_cache):
         """Test database initialization."""
-        import sys
         import os
-        from importlib.util import spec_from_file_location, module_from_spec
+        import sys
+        from importlib.util import module_from_spec, spec_from_file_location
 
         mock_cache_instance = MagicMock()
         mock_cache.return_value = mock_cache_instance
@@ -241,10 +242,10 @@ class TestSetupScripts:
 
     def test_setup_db_script_execution(self):
         """Test database setup script execution."""
-        import sys
         import os
-        from importlib.util import spec_from_file_location, module_from_spec
-        from unittest.mock import patch, MagicMock
+        import sys
+        from importlib.util import module_from_spec, spec_from_file_location
+        from unittest.mock import MagicMock, patch
 
         # Import setup_db module dynamically
         cache_dir = os.path.join(os.path.dirname(__file__), "..", "open_trading_algo", "cache")
@@ -266,9 +267,9 @@ class TestSetupScripts:
 
     def test_setup_script_imports(self):
         """Test that setup scripts can import required modules."""
-        import sys
         import os
-        from importlib.util import spec_from_file_location, module_from_spec
+        import sys
+        from importlib.util import module_from_spec, spec_from_file_location
 
         try:
             # Import setup_db module dynamically
@@ -355,12 +356,12 @@ class TestSystemIntegration:
         # Test that all required modules can be imported
         try:
             import open_trading_algo
-            import open_trading_algo.data_enrichment
-            import open_trading_algo.indicators
-            import open_trading_algo.cache
-            import open_trading_algo.sentiment
             import open_trading_algo.alerts
             import open_trading_algo.backtest
+            import open_trading_algo.cache
+            import open_trading_algo.data_enrichment
+            import open_trading_algo.indicators
+            import open_trading_algo.sentiment
         except ImportError as e:
             pytest.fail(f"System module import failed: {e}")
 

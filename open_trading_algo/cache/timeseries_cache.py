@@ -36,13 +36,14 @@ Usage:
 """
 
 import os
-import pandas as pd
-from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
-from influxdb_client import InfluxDBClient, Point, WritePrecision
-from influxdb_client.client.write_api import SYNCHRONOUS, ASYNCHRONOUS
-from influxdb_client.client.query_api import QueryApi
+from typing import Any, Dict, Optional
+
+import pandas as pd
 import yaml
+from influxdb_client import InfluxDBClient, Point, WritePrecision
+from influxdb_client.client.query_api import QueryApi
+from influxdb_client.client.write_api import ASYNCHRONOUS, SYNCHRONOUS
 
 
 def get_config():

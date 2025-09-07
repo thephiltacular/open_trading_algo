@@ -1,5 +1,6 @@
 # moved from open_trading_algo/live/config.py
 from pathlib import Path
+
 import yaml
 
 

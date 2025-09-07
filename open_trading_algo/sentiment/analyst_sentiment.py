@@ -3,12 +3,14 @@ Methods to fetch and analyze analyst sentiment for specific tickers and ETFs.
 Best practices: Use multiple sources (Yahoo Finance, Finnhub, FMP, etc.), normalize, and track changes over time.
 """
 
-import requests
-from typing import Dict, Any
+from typing import Any, Dict
+
 import pandas as pd
+import requests
+
 from open_trading_algo.cache.data_cache import DataCache, is_caching_enabled
-from open_trading_algo.fin_data_apis.secure_api import get_api_key
 from open_trading_algo.fin_data_apis.rate_limit import rate_limit
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
 
 
 def fetch_bulk_finnhub_analyst_sentiment(tickers: list, api_key: str) -> pd.DataFrame:

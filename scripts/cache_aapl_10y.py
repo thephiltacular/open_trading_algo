@@ -3,8 +3,9 @@ Fetch 10 years of AAPL daily data from yfinance and cache it in the local databa
 Only one request is made; all data is stored for future use.
 """
 
-import yfinance as yf
 import pandas as pd
+import yfinance as yf
+
 from open_trading_algo.cache.data_cache import DataCache
 
 

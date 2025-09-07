@@ -4,8 +4,10 @@ Creates the database and tables if not present, unless a custom path is specifie
 """
 
 import os
-from open_trading_algo.cache.data_cache import DataCache, DB_PATH
+
 import yaml
+
+from open_trading_algo.cache.data_cache import DB_PATH, DataCache
 
 
 def main():

@@ -1,7 +1,9 @@
-import pytest
-import pandas as pd
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-from unittest.mock import patch, MagicMock
+import pandas as pd
+import pytest
+
 from open_trading_algo.backtest.signal_optimizer import SignalOptimizer
 from tests.test_data_enrichment import generate_comprehensive_test_data
 

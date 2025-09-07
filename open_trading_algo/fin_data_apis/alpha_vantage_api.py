@@ -3,8 +3,9 @@ Alpha Vantage API interface for stocks, alpha intelligence, fundamental data, an
 """
 
 import requests
-from open_trading_algo.fin_data_apis.secure_api import get_api_key
+
 from open_trading_algo.fin_data_apis.rate_limit import rate_limit
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
 
 ALPHA_VANTAGE_TECHNICAL_INDICATORS = {
     # Trend indicators

@@ -1,6 +1,8 @@
 import os
-import pytest
 from pathlib import Path
+
+import pytest
+
 from open_trading_algo.fin_data_apis import feed as live_data
 from open_trading_algo.fin_data_apis.secure_api import get_api_key
 

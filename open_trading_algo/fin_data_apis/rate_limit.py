@@ -17,9 +17,10 @@ Functions:
 
 import threading
 import time
-import yaml
 from collections import defaultdict, deque
 from pathlib import Path
+
+import yaml
 
 # Load API rate limit config
 API_CONFIG_PATH = Path(__file__).parent.parent.parent / "config" / "api_config.yaml"

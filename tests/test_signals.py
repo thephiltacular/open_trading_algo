@@ -1,9 +1,11 @@
-import pytest
-import pandas as pd
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-from unittest.mock import patch, MagicMock
+import pandas as pd
+import pytest
+
+from open_trading_algo.indicators.indicators import ema, macd, rsi, sma
 from open_trading_algo.signal_optimizer import SignalOptimizer
-from open_trading_algo.indicators.indicators import sma, ema, rsi, macd
 from tests.test_data_enrichment import generate_comprehensive_test_data
 
 

@@ -9,8 +9,10 @@ Usage:
     python scripts/migrate_to_timeseries.py
 """
 
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+
 from open_trading_algo.cache.data_cache import DataCache
 from open_trading_algo.cache.timeseries_cache import TimeSeriesCache
 

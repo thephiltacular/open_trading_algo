@@ -5,19 +5,21 @@ Bulk and single-ticker data fetchers for various financial data APIs (Yahoo, Fin
 Handles rate limiting, caching, and concurrent requests where appropriate.
 """
 
+import concurrent.futures
 from pathlib import Path
 from typing import Any, Dict, List
-from open_trading_algo.fin_data_apis.secure_api import get_api_key
-import concurrent.futures
+
 import requests
 import yfinance as yf
-from open_trading_algo.cache.data_cache import DataCache
 
-# ...existing fetch_yahoo, fetch_finnhub, fetch_fmp, fetch_alpha_vantage, fetch_twelve_data, and their bulk variants...
-# (To be filled in next step)
+from open_trading_algo.cache.data_cache import DataCache
 
 # --- Live data fetchers and bulk fetchers ---
 from open_trading_algo.fin_data_apis.rate_limit import rate_limit_check
+from open_trading_algo.fin_data_apis.secure_api import get_api_key
+
+# ...existing fetch_yahoo, fetch_finnhub, fetch_fmp, fetch_alpha_vantage, fetch_twelve_data, and their bulk variants...
+# (To be filled in next step)
 
 
 def fetch_finnhub_bulk(tickers: List[str], fields: List[str], api_key: str) -> Dict[str, Dict[str, Any]]:

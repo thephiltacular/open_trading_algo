@@ -1,6 +1,7 @@
+import numpy as np
 import pandas as pd
 import pytest
-import numpy as np
+
 from open_trading_algo.data_enrichment import enrich_dataframe_for_signals
 
 # Example ticker for testing (liquid, lots of data)

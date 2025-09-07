@@ -4,26 +4,25 @@ This module provides a class to populate the database with financial data from v
 handling caching, rate limits, and concurrent fetching.
 """
 
-import yaml
-import pandas as pd
-from pathlib import Path
-from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
+from pathlib import Path
+
+import pandas as pd
+import yaml
+
+from open_trading_algo.cache.data_cache import DataCache
+from open_trading_algo.fin_data_apis.alpha_vantage_api import ALPHA_VANTAGE_TECHNICAL_INDICATORS, AlphaVantageAPI
 from open_trading_algo.fin_data_apis.fetchers import (
-    fetch_yahoo,
+    fetch_alpha_vantage_bulk,
     fetch_finnhub_bulk,
     fetch_fmp_bulk,
-    fetch_alpha_vantage_bulk,
     fetch_twelve_data_bulk,
+    fetch_yahoo,
 )
-from open_trading_algo.fin_data_apis.tradingview_api import TradingViewAPI
 from open_trading_algo.fin_data_apis.polygon_api import PolygonAPI
 from open_trading_algo.fin_data_apis.secure_api import get_api_key
-from open_trading_algo.cache.data_cache import DataCache
-from open_trading_algo.fin_data_apis.alpha_vantage_api import (
-    AlphaVantageAPI,
-    ALPHA_VANTAGE_TECHNICAL_INDICATORS,
-)
+from open_trading_algo.fin_data_apis.tradingview_api import TradingViewAPI
 
 
 class DatabasePopulator:

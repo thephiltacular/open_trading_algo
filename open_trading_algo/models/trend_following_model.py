@@ -5,9 +5,11 @@ This model uses moving averages, ADX, and trend strength indicators
 to identify and follow market trends.
 """
 
-import pandas as pd
-import numpy as np
 from typing import Dict, Optional
+
+import numpy as np
+import pandas as pd
+
 from .base_model import BaseTradingModel
 
 

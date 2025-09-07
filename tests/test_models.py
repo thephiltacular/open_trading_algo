@@ -4,15 +4,11 @@ Tests for trading models.
 Tests the trading models that combine indicators and data sources.
 """
 
-import pytest
-import pandas as pd
 import numpy as np
-from open_trading_algo.models import (
-    BaseTradingModel,
-    MomentumModel,
-    MeanReversionModel,
-    TrendFollowingModel,
-)
+import pandas as pd
+import pytest
+
+from open_trading_algo.models import BaseTradingModel, MeanReversionModel, MomentumModel, TrendFollowingModel
 
 
 @pytest.fixture

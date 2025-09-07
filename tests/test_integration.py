@@ -1,10 +1,12 @@
-import pytest
-import pandas as pd
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-from unittest.mock import patch, MagicMock
+import pandas as pd
+import pytest
+
+from open_trading_algo.cache.data_cache import DataCache
 from open_trading_algo.data_enrichment import enrich_dataframe_for_signals
 from open_trading_algo.signal_optimizer import SignalOptimizer
-from open_trading_algo.cache.data_cache import DataCache
 from tests.test_data_enrichment import generate_comprehensive_test_data
 
 
@@ -35,7 +37,7 @@ class TestDataPipelineIntegration:
         )
 
         # Step 2: Generate signals
-        from open_trading_algo.indicators.indicators import sma, rsi, macd
+        from open_trading_algo.indicators.indicators import macd, rsi, sma
 
         # Add computed indicators
         enriched_df["sma_20"] = sma(enriched_df["close"], window=20)

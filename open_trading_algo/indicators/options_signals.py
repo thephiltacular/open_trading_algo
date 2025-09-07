@@ -4,8 +4,9 @@ Includes technical (volatility), fundamental (event-driven), and sentiment-based
 Each function takes a DataFrame (with required columns) and returns a boolean Series.
 """
 
-from open_trading_algo.cache.data_cache import DataCache, is_caching_enabled
 import pandas as pd
+
+from open_trading_algo.cache.data_cache import DataCache, is_caching_enabled
 
 
 def signal_iv_vs_rv(df: pd.DataFrame) -> pd.Series:

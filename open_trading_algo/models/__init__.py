@@ -6,8 +6,8 @@ data sources, and signals to create complete trading strategies.
 """
 
 from .base_model import BaseTradingModel
-from .momentum_model import MomentumModel
 from .mean_reversion_model import MeanReversionModel
+from .momentum_model import MomentumModel
 from .trend_following_model import TrendFollowingModel
 
 __all__ = [

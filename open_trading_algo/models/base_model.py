@@ -6,24 +6,12 @@ indicators, data sources, and signals into complete trading strategies.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple, Union
-import pandas as pd
 from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Tuple, Union
 
-from ..indicators.indicators import (
-    sma,
-    ema,
-    rsi,
-    macd,
-    bbands,
-    atr,
-    stoch,
-    stochf,
-    stochrsi,
-    ad,
-    adosc,
-    dx,
-)
+import pandas as pd
+
+from ..indicators.indicators import ad, adosc, atr, bbands, dx, ema, macd, rsi, sma, stoch, stochf, stochrsi
 from ..types import AlertsByDay, DataByDay, DayKey
 
 

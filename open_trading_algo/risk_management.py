@@ -3,8 +3,8 @@
 This module provides functions for position sizing, stop-loss logic, and portfolio hedging.
 """
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 
 def calculate_position_size(capital, risk_per_trade, stop_loss_pct):

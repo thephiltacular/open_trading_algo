@@ -1,18 +1,20 @@
-import pytest
-import pandas as pd
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-from unittest.mock import patch, MagicMock
+import pandas as pd
+import pytest
+
 from open_trading_algo.sentiment.analyst_sentiment import (
-    fetch_finnhub_analyst_sentiment,
     fetch_bulk_finnhub_analyst_sentiment,
-    fetch_fmp_analyst_price_targets,
     fetch_bulk_fmp_analyst_price_targets,
+    fetch_finnhub_analyst_sentiment,
+    fetch_fmp_analyst_price_targets,
 )
 from open_trading_algo.sentiment.social_sentiment import (
-    fetch_twitter_sentiment,
+    aggregate_social_sentiment,
     fetch_bulk_twitter_sentiment,
     fetch_reddit_sentiment,
-    aggregate_social_sentiment,
+    fetch_twitter_sentiment,
 )
 
 

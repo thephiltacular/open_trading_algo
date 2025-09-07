@@ -1,39 +1,40 @@
 """Tests for trading metrics functions."""
 
+import sys
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
-import sys
-from pathlib import Path
 
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from open_trading_algo.indicators.metrics import (
     _compute_column_metrics,
+    compute_alpha,
+    compute_autocorrelation,
+    compute_beta,
+    compute_calmar_ratio,
+    compute_correlation_matrix,
+    compute_fibonacci_levels,
+    compute_max_drawdown,
+    compute_monthly_returns,
+    compute_pivot_points,
+    compute_price_acceleration,
+    compute_profit_factor,
+    compute_seasonal_strength,
+    compute_sharpe_ratio,
+    compute_sortino_ratio,
+    compute_trend_strength,
+    compute_volatility_ratio,
     compute_volume_10d_avg,
     compute_volume_30d_avg,
     compute_volume_60d_avg,
     compute_volume_90d_avg,
-    compute_volatility_ratio,
-    compute_trend_strength,
     compute_volume_price_trend,
-    compute_max_drawdown,
     compute_vwap,
-    compute_beta,
-    compute_alpha,
-    compute_price_acceleration,
-    compute_seasonal_strength,
-    compute_monthly_returns,
-    compute_correlation_matrix,
-    compute_autocorrelation,
-    compute_pivot_points,
-    compute_fibonacci_levels,
-    compute_sharpe_ratio,
-    compute_sortino_ratio,
-    compute_calmar_ratio,
     compute_win_rate,
-    compute_profit_factor,
 )
 
 
