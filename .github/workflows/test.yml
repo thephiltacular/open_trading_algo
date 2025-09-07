@@ -50,6 +50,46 @@ jobs:
     - name: Install dependencies
       run: poetry install --no-interaction
 
+    - name: Setup cache system
+      run: |
+        echo "💾 Setting up cache directories..."
+        mkdir -p data/cache/sqlite
+        mkdir -p data/cache/parquet
+        mkdir -p data/cache/influxdb
+        echo "📁 Cache directories created"
+
+    - name: Initialize SQLite database
+      run: |
+        echo "🗄️  Setting up SQLite database..."
+        poetry run python -c "from open_trading_algo.cache.data_cache import DataCache; cache = DataCache(); print('✅ SQLite database initialized')"
+        echo "✅ SQLite setup complete"
+
+    - name: Initialize Parquet cache
+      run: |
+        echo "📦 Setting up Parquet cache..."
+        poetry run python -c "from open_trading_algo.cache.parquet_cache import ParquetCache; cache = ParquetCache(); print('✅ Parquet cache initialized')"
+        echo "✅ Parquet setup complete"
+
+    - name: Initialize InfluxDB cache (if Docker available)
+      run: |
+        echo "📈 Setting up InfluxDB cache..."
+        if command -v docker &> /dev/null; then
+          # Check if InfluxDB container exists
+          if [ ! "$(docker ps -q -f name=trading-influxdb)" ]; then
+            if [ "$(docker ps -aq -f status=exited -f name=trading-influxdb)" ]; then
+              docker start trading-influxdb
+              echo "✅ InfluxDB container started"
+            else
+              echo "ℹ️  InfluxDB container not found, will be started by test fixtures if needed"
+            fi
+          else
+            echo "✅ InfluxDB container already running"
+          fi
+        else
+          echo "⚠️  Docker not available, InfluxDB tests will be skipped"
+        fi
+        echo "✅ InfluxDB setup complete"
+
     - name: Run pre-commit hooks
       run: poetry run pre-commit run --all-files
 
@@ -90,6 +130,20 @@ jobs:
     - name: Install dependencies
       run: poetry install --no-interaction
 
+    - name: Setup cache system
+      run: |
+        echo "💾 Setting up cache directories..."
+        mkdir -p data/cache/sqlite
+        mkdir -p data/cache/parquet
+        mkdir -p data/cache/influxdb
+        echo "📁 Cache directories created"
+
+    - name: Initialize SQLite database
+      run: |
+        echo "🗄️  Setting up SQLite database..."
+        poetry run python -c "from open_trading_algo.cache.data_cache import DataCache; cache = DataCache(); print('✅ SQLite database initialized')"
+        echo "✅ SQLite setup complete"
+
     # - name: Run type checking
     #   run: poetry run mypy open_trading_algo/ --ignore-missing-imports
 
@@ -115,6 +169,20 @@ jobs:
         python -m pip install --user poetry
         echo "$HOME/.local/bin" >> $GITHUB_PATH
         echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+
+    - name: Setup cache system
+      run: |
+        echo "💾 Setting up cache directories..."
+        mkdir -p data/cache/sqlite
+        mkdir -p data/cache/parquet
+        mkdir -p data/cache/influxdb
+        echo "📁 Cache directories created"
+
+    - name: Initialize SQLite database
+      run: |
+        echo "🗄️  Setting up SQLite database..."
+        python -c "from open_trading_algo.cache.data_cache import DataCache; cache = DataCache(); print('✅ SQLite database initialized')"
+        echo "✅ SQLite setup complete"
 
     - name: Build package
       run: poetry build
