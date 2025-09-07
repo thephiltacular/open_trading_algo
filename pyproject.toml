@@ -58,6 +58,7 @@ yfinance = "^0.2.48"
 PyYAML = "^6.0.2"
 pyarrow = "^21.0.0"
 influxdb-client = "^1.49.0"
+python-dotenv = "^1.0.0"
 pytest = "^8.3.3"
 pytest-cov = "^5.0.0"
 
