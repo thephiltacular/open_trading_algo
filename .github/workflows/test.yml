@@ -8,12 +8,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  test-unix:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
         python-version: ['3.9', '3.10', '3.11', '3.12']
 
     steps:
@@ -100,12 +100,105 @@ jobs:
       uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
-        flags: unittests
+        flags: unittests-unix
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  test-windows:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache Poetry virtual environment
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~\AppData\Local\pypoetry\Cache
+          ~\AppData\Roaming\pypoetry
+          .venv
+        key: windows-poetry-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          windows-poetry-${{ matrix.python-version }}-
+          windows-poetry-
+
+    - name: Install Poetry
+      run: |
+        python -m pip install poetry
+        # Add Poetry to PATH for Windows - try multiple possible locations
+        echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH 2>/dev/null || true
+        echo "$USERPROFILE\.poetry\bin" >> $GITHUB_PATH 2>/dev/null || true
+        echo "$HOME/.local/bin" >> $GITHUB_PATH 2>/dev/null || true
+        echo "$HOME/.poetry/bin" >> $GITHUB_PATH 2>/dev/null || true
+        # Verify Poetry is available
+        poetry --version || python -m poetry --version
+      shell: bash
+
+    - name: Configure Poetry
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true || python -m poetry config virtualenvs.create true && python -m poetry config virtualenvs.in-project true
+
+    - name: Install dependencies
+      run: poetry install --no-interaction || python -m poetry install --no-interaction
+
+    - name: Setup cache system
+      run: |
+        echo "💾 Setting up cache directories..."
+        if [ ! -d "data/cache" ]; then
+          mkdir -p data/cache/sqlite
+          mkdir -p data/cache/parquet
+          mkdir -p data/cache/influxdb
+          echo "📁 Cache directories created"
+        else
+          echo "📁 Cache directories already exist"
+        fi
+      shell: bash
+
+    - name: Initialize SQLite database
+      run: |
+        echo "🗄️  Setting up SQLite database..."
+        poetry run python -c "from open_trading_algo.cache.data_cache import DataCache; cache = DataCache(); print('✅ SQLite database initialized')" || python -m poetry run python -c "from open_trading_algo.cache.data_cache import DataCache; cache = DataCache(); print('✅ SQLite database initialized')"
+        echo "✅ SQLite setup complete"
+
+    - name: Initialize Parquet cache
+      run: |
+        echo "📦 Setting up Parquet cache..."
+        poetry run python -c "from open_trading_algo.cache.parquet_cache import ParquetCache; cache = ParquetCache(); print('✅ Parquet cache initialized')" || python -m poetry run python -c "from open_trading_algo.cache.parquet_cache import ParquetCache; cache = ParquetCache(); print('✅ Parquet cache initialized')"
+        echo "✅ Parquet setup complete"
+
+    - name: Skip InfluxDB setup on Windows
+      run: |
+        echo "⚠️  Skipping InfluxDB setup on Windows (Docker not available in GitHub Actions Windows runners)"
+        echo "📝 InfluxDB tests will be skipped automatically by pytest fixtures"
+
+    - name: Run pre-commit hooks
+      run: poetry run pre-commit run --all-files || python -m poetry run pre-commit run --all-files
+
+    - name: Run tests
+      run: poetry run pytest --cov=open_trading_algo --cov-report=xml -k "not test_timeseries_cache" || python -m poetry run pytest --cov=open_trading_algo --cov-report=xml -k "not test_timeseries_cache"
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        flags: unittests-windows
         name: codecov-umbrella
         fail_ci_if_error: false
 
   lint:
     runs-on: ubuntu-latest
+    needs: [test-unix]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -149,12 +242,12 @@ jobs:
 
     - name: Check code formatting
       run: |
-        poetry run black --check --diff --config pyproject.toml open_trading_algo/ tests/ scripts/
+        poetry run black --check --diff --config pyproject.toml open_trading_algo/ tests/ scripts/ || python -m poetry run black --check --diff --config pyproject.toml open_trading_algo/ tests/ scripts/
         # poetry run isort --check-only --diff --settings-path pyproject.toml open_trading_algo/ tests/ scripts/
 
   build:
     runs-on: ubuntu-latest
-    needs: [test, lint]
+    needs: [test-unix, lint]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -185,7 +278,7 @@ jobs:
         echo "✅ SQLite setup complete"
 
     - name: Build package
-      run: poetry build
+      run: poetry build || python -m poetry build
 
     - name: Check package
       run: |
