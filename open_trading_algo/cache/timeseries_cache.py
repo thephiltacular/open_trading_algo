@@ -40,7 +40,7 @@ import pandas as pd
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 from influxdb_client import InfluxDBClient, Point, WritePrecision
-from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client.client.write_api import SYNCHRONOUS, ASYNCHRONOUS
 from influxdb_client.client.query_api import QueryApi
 import yaml
 
@@ -115,28 +115,36 @@ class TimeSeriesCache:
         if df.empty:
             return
 
-        points = []
+        lines = []
 
         for timestamp, row in df.iterrows():
             # Convert timestamp to nanoseconds for InfluxDB
             if isinstance(timestamp, str):
                 timestamp = pd.to_datetime(timestamp)
 
-            point = (
-                Point("price_data")
-                .tag("ticker", ticker)
-                .field("open", float(row.get("Open", row.get("open", 0))))
-                .field("high", float(row.get("High", row.get("high", 0))))
-                .field("low", float(row.get("Low", row.get("low", 0))))
-                .field("close", float(row.get("Close", row.get("close", 0))))
-                .field("volume", float(row.get("Volume", row.get("volume", 0))))
-                .time(timestamp, WritePrecision.NS)
-            )
+            # Convert to nanoseconds since epoch
+            timestamp_ns = int(timestamp.timestamp() * 1e9)
 
-            points.append(point)
+            # Create line protocol string
+            line = f"price_data,ticker={ticker} "
+            fields = []
+            fields.append(f"open={float(row.get('Open', row.get('open', 0)))}")
+            fields.append(f"high={float(row.get('High', row.get('high', 0)))}")
+            fields.append(f"low={float(row.get('Low', row.get('low', 0)))}")
+            fields.append(f"close={float(row.get('Close', row.get('close', 0)))}")
+            fields.append(f"volume={float(row.get('Volume', row.get('volume', 0)))}")
+            line += ",".join(fields)
+            line += f" {timestamp_ns}"
 
-        if points:
-            self.write_api.write(bucket=self.bucket, org=self.org, record=points)
+            lines.append(line)
+
+        if lines:
+            # Write all lines at once
+            self.write_api.write(bucket=self.bucket, org=self.org, record="\n".join(lines))
+            self.write_api.flush()
+            import time
+
+            time.sleep(0.5)  # Longer delay to ensure write completes
 
     def get_price_data(
         self, ticker: str, start: Optional[str] = None, end: Optional[str] = None
@@ -152,15 +160,26 @@ class TimeSeriesCache:
         Returns:
             DataFrame with OHLCV data and datetime index
         """
-        # Build Flux query
-        query = f"""
-        from(bucket: "{self.bucket}")
-        |> range(start: {start or "-365d"}, stop: {end or "now()"})
-        |> filter(fn: (r) => r["_measurement"] == "price_data")
-        |> filter(fn: (r) => r["ticker"] == "{ticker}")
-        |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
-        |> sort(columns: ["_time"])
-        """
+        # Build Flux query - use a wider default range if no dates provided
+        if start is None and end is None:
+            # Query all data if no date range specified
+            query = f"""
+            from(bucket: "{self.bucket}")
+            |> range(start: 0, stop: now())
+            |> filter(fn: (r) => r["_measurement"] == "price_data")
+            |> filter(fn: (r) => r["ticker"] == "{ticker}")
+            |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+            |> sort(columns: ["_time"])
+            """
+        else:
+            query = f"""
+            from(bucket: "{self.bucket}")
+            |> range(start: {start or "-10y"}, stop: {end or "now()"})
+            |> filter(fn: (r) => r["_measurement"] == "price_data")
+            |> filter(fn: (r) => r["ticker"] == "{ticker}")
+            |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+            |> sort(columns: ["_time"])
+            """
 
         try:
             result = self.query_api.query(query, org=self.org)
@@ -191,6 +210,7 @@ class TimeSeriesCache:
 
         except Exception as e:
             print(f"Error querying price data: {e}")
+            return pd.DataFrame()
             return pd.DataFrame()
 
     def has_data(self, ticker: str, start: Optional[str] = None, end: Optional[str] = None) -> bool:
@@ -242,6 +262,9 @@ class TimeSeriesCache:
 
         if points:
             self.write_api.write(bucket=self.bucket, org=self.org, record=points)
+            import time
+
+            time.sleep(0.1)  # Small delay to ensure write completes
 
     def get_signals(
         self,
@@ -264,15 +287,28 @@ class TimeSeriesCache:
         Returns:
             DataFrame with datetime index and 'signal_value' column
         """
-        query = f"""
-        from(bucket: "{self.bucket}")
-        |> range(start: {start or "-365d"}, stop: {end or "now()"})
-        |> filter(fn: (r) => r["_measurement"] == "signals")
-        |> filter(fn: (r) => r["ticker"] == "{ticker}")
-        |> filter(fn: (r) => r["timeframe"] == "{timeframe}")
-        |> filter(fn: (r) => r["signal_type"] == "{signal_type}")
-        |> sort(columns: ["_time"])
-        """
+        # Build Flux query - use a wider default range if no dates provided
+        if start is None and end is None:
+            # Query all data if no date range specified
+            query = f"""
+            from(bucket: "{self.bucket}")
+            |> range(start: 0, stop: now())
+            |> filter(fn: (r) => r["_measurement"] == "signals")
+            |> filter(fn: (r) => r["ticker"] == "{ticker}")
+            |> filter(fn: (r) => r["timeframe"] == "{timeframe}")
+            |> filter(fn: (r) => r["signal_type"] == "{signal_type}")
+            |> sort(columns: ["_time"])
+            """
+        else:
+            query = f"""
+            from(bucket: "{self.bucket}")
+            |> range(start: {start or "-10y"}, stop: {end or "now()"})
+            |> filter(fn: (r) => r["_measurement"] == "signals")
+            |> filter(fn: (r) => r["ticker"] == "{ticker}")
+            |> filter(fn: (r) => r["timeframe"] == "{timeframe}")
+            |> filter(fn: (r) => r["signal_type"] == "{signal_type}")
+            |> sort(columns: ["_time"])
+            """
 
         try:
             result = self.query_api.query(query, org=self.org)
@@ -344,15 +380,28 @@ class TimeSeriesCache:
         Returns:
             Aggregated OHLCV DataFrame
         """
-        query = f"""
-        from(bucket: "{self.bucket}")
-        |> range(start: {start or "-365d"}, stop: {end or "now()"})
-        |> filter(fn: (r) => r["_measurement"] == "price_data")
-        |> filter(fn: (r) => r["ticker"] == "{ticker}")
-        |> aggregateWindow(every: {aggregation}, fn: mean, createEmpty: false)
-        |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
-        |> sort(columns: ["_time"])
-        """
+        # Build Flux query - use a wider default range if no dates provided
+        if start is None and end is None:
+            # Query all data if no date range specified
+            query = f"""
+            from(bucket: "{self.bucket}")
+            |> range(start: 0, stop: now())
+            |> filter(fn: (r) => r["_measurement"] == "price_data")
+            |> filter(fn: (r) => r["ticker"] == "{ticker}")
+            |> aggregateWindow(every: {aggregation}, fn: mean, createEmpty: false)
+            |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+            |> sort(columns: ["_time"])
+            """
+        else:
+            query = f"""
+            from(bucket: "{self.bucket}")
+            |> range(start: {start or "-10y"}, stop: {end or "now()"})
+            |> filter(fn: (r) => r["_measurement"] == "price_data")
+            |> filter(fn: (r) => r["ticker"] == "{ticker}")
+            |> aggregateWindow(every: {aggregation}, fn: mean, createEmpty: false)
+            |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+            |> sort(columns: ["_time"])
+            """
 
         try:
             result = self.query_api.query(query, org=self.org)
@@ -406,17 +455,32 @@ class TimeSeriesCache:
         Returns:
             Dictionary with signal statistics
         """
-        query = f"""
-        from(bucket: "{self.bucket}")
-        |> range(start: {start or "-365d"}, stop: {end or "now()"})
-        |> filter(fn: (r) => r["_measurement"] == "signals")
-        |> filter(fn: (r) => r["ticker"] == "{ticker}")
-        |> filter(fn: (r) => r["timeframe"] == "{timeframe}")
-        |> filter(fn: (r) => r["signal_type"] == "{signal_type}")
-        |> group()
-        |> count()
-        |> yield(name: "count")
-        """
+        # Build Flux query - use a wider default range if no dates provided
+        if start is None and end is None:
+            # Query all data if no date range specified
+            query = f"""
+            from(bucket: "{self.bucket}")
+            |> range(start: 0, stop: now())
+            |> filter(fn: (r) => r["_measurement"] == "signals")
+            |> filter(fn: (r) => r["ticker"] == "{ticker}")
+            |> filter(fn: (r) => r["timeframe"] == "{timeframe}")
+            |> filter(fn: (r) => r["signal_type"] == "{signal_type}")
+            |> group()
+            |> count()
+            |> yield(name: "count")
+            """
+        else:
+            query = f"""
+            from(bucket: "{self.bucket}")
+            |> range(start: {start or "-10y"}, stop: {end or "now()"})
+            |> filter(fn: (r) => r["_measurement"] == "signals")
+            |> filter(fn: (r) => r["ticker"] == "{ticker}")
+            |> filter(fn: (r) => r["timeframe"] == "{timeframe}")
+            |> filter(fn: (r) => r["signal_type"] == "{signal_type}")
+            |> group()
+            |> count()
+            |> yield(name: "count")
+            """
 
         try:
             result = self.query_api.query(query, org=self.org)
@@ -440,7 +504,10 @@ class TimeSeriesCache:
 
     def close(self):
         """Close the InfluxDB client connection."""
-        self.client.close()
+        if hasattr(self, "write_api") and self.write_api:
+            self.write_api.close()
+        if hasattr(self, "client") and self.client:
+            self.client.close()
 
     def get_database_info(self) -> Dict[str, Any]:
         """
@@ -696,6 +763,9 @@ class TimeSeriesCache:
 
         if points:
             self.write_api.write(bucket=self.bucket, org=self.org, record=points)
+            import time
+
+            time.sleep(0.1)  # Small delay to ensure write completes
 
     def get_metrics(
         self,
@@ -724,16 +794,30 @@ class TimeSeriesCache:
             field_filters = [f'r["_field"] == "{metric}"' for metric in metrics]
             field_filter = f'|> filter(fn: (r) => {" or ".join(field_filters)})'
 
-        query = f"""
-        from(bucket: "{self.bucket}")
-        |> range(start: {start or "-365d"}, stop: {end or "now()"})
-        |> filter(fn: (r) => r["_measurement"] == "metrics")
-        |> filter(fn: (r) => r["ticker"] == "{ticker}")
-        |> filter(fn: (r) => r["timeframe"] == "{timeframe}")
-        {field_filter}
-        |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
-        |> sort(columns: ["_time"])
-        """
+        # Build Flux query - use a wider default range if no dates provided
+        if start is None and end is None:
+            # Query all data if no date range specified
+            query = f"""
+            from(bucket: "{self.bucket}")
+            |> range(start: 0, stop: now())
+            |> filter(fn: (r) => r["_measurement"] == "metrics")
+            |> filter(fn: (r) => r["ticker"] == "{ticker}")
+            |> filter(fn: (r) => r["timeframe"] == "{timeframe}")
+            {field_filter}
+            |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+            |> sort(columns: ["_time"])
+            """
+        else:
+            query = f"""
+            from(bucket: "{self.bucket}")
+            |> range(start: {start or "-10y"}, stop: {end or "now()"})
+            |> filter(fn: (r) => r["_measurement"] == "metrics")
+            |> filter(fn: (r) => r["ticker"] == "{ticker}")
+            |> filter(fn: (r) => r["timeframe"] == "{timeframe}")
+            {field_filter}
+            |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+            |> sort(columns: ["_time"])
+            """
 
         try:
             result = self.query_api.query(query, org=self.org)
