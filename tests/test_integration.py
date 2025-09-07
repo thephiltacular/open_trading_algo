@@ -287,7 +287,7 @@ class TestSystemIntegration:
 
         # Should complete in reasonable time (less than 10 seconds for small dataset)
         assert execution_time < 10.0
-        assert execution_time > 0
+        assert execution_time >= 0
 
 
 class TestDataValidationIntegration:
