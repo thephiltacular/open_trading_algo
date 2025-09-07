@@ -154,33 +154,33 @@ jobs:
 
     - name: Setup cache system
       run: |
-        echo "💾 Setting up cache directories..."
+        echo " Setting up cache directories..."
         if [ ! -d "data/cache" ]; then
           mkdir -p data/cache/sqlite
           mkdir -p data/cache/parquet
           mkdir -p data/cache/influxdb
-          echo "📁 Cache directories created"
+          echo " Cache directories created"
         else
-          echo "📁 Cache directories already exist"
+          echo " Cache directories already exist"
         fi
       shell: bash
 
     - name: Initialize SQLite database
       run: |
-        echo "🗄️  Setting up SQLite database..."
-        poetry run python -c "from open_trading_algo.cache.data_cache import DataCache; cache = DataCache(); print('✅ SQLite database initialized')" || python -m poetry run python -c "from open_trading_algo.cache.data_cache import DataCache; cache = DataCache(); print('✅ SQLite database initialized')"
-        echo "✅ SQLite setup complete"
+        echo "  Setting up SQLite database..."
+        poetry run python -c "from open_trading_algo.cache.data_cache import DataCache; cache = DataCache(); print(' SQLite database initialized')" || python -m poetry run python -c "from open_trading_algo.cache.data_cache import DataCache; cache = DataCache(); print(' SQLite database initialized')"
+        echo " SQLite setup complete"
 
     - name: Initialize Parquet cache
       run: |
-        echo "📦 Setting up Parquet cache..."
-        poetry run python -c "from open_trading_algo.cache.parquet_cache import ParquetCache; cache = ParquetCache(); print('✅ Parquet cache initialized')" || python -m poetry run python -c "from open_trading_algo.cache.parquet_cache import ParquetCache; cache = ParquetCache(); print('✅ Parquet cache initialized')"
-        echo "✅ Parquet setup complete"
+        echo "Setting up Parquet cache..."
+        poetry run python -c "from open_trading_algo.cache.parquet_cache import ParquetCache; cache = ParquetCache(); print(' Parquet cache initialized')" || python -m poetry run python -c "from open_trading_algo.cache.parquet_cache import ParquetCache; cache = ParquetCache(); print(' Parquet cache initialized')"
+        echo "Parquet setup complete"
 
     - name: Skip InfluxDB setup on Windows
       run: |
-        echo "⚠️  Skipping InfluxDB setup on Windows (Docker not available in GitHub Actions Windows runners)"
-        echo "📝 InfluxDB tests will be skipped automatically by pytest fixtures"
+        echo "Skipping InfluxDB setup on Windows (Docker not available in GitHub Actions Windows runners)"
+        echo "InfluxDB tests will be skipped automatically by pytest fixtures"
 
     - name: Run pre-commit hooks
       run: poetry run pre-commit run --all-files || python -m poetry run pre-commit run --all-files
