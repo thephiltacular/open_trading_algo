@@ -1,0 +1,104 @@
+name: Branch Health Check
+
+on:
+  schedule:
+    # Run daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  branch-health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Analyze branch health
+        run: |
+          echo "🔍 Analyzing repository branch health..."
+
+          # Get all branches
+          git branch -r | grep -v HEAD | sed 's|origin/||' > all_branches.txt
+
+          # Count total branches
+          TOTAL_BRANCHES=$(wc -l < all_branches.txt)
+          echo "📊 Total branches: $TOTAL_BRANCHES"
+
+          # Count branches by type
+          FEATURE_BRANCHES=$(grep -c "^feature/" all_branches.txt || echo 0)
+          FIX_BRANCHES=$(grep -c "^\(fix\|bug\)/" all_branches.txt || echo 0)
+          DOCS_BRANCHES=$(grep -c "^docs/" all_branches.txt || echo 0)
+          OTHER_BRANCHES=$(grep -v "^\(feature\|feat\|fix\|bug\|docs\|refactor\|chore\|test\|ci\|perf\|style\|hotfix\|main\|develop\|master\|release\)/" all_branches.txt | wc -l || echo 0)
+
+          echo "📈 Branch distribution:"
+          echo "  Features: $FEATURE_BRANCHES"
+          echo "  Fixes: $FIX_BRANCHES"
+          echo "  Docs: $DOCS_BRANCHES"
+          echo "  Other: $OTHER_BRANCHES"
+
+          # Find stale branches (older than 30 days)
+          echo ""
+          echo "⏰ Checking for stale branches..."
+          STALE_BRANCHES=$(git branch -r --sort=-committerdate | grep -v HEAD | head -20 | while read branch; do
+            BRANCH_NAME=$(echo $branch | sed 's|origin/||')
+            LAST_COMMIT=$(git log -1 --format="%ct" origin/$BRANCH_NAME 2>/dev/null || echo 0)
+            DAYS_AGO=$(( ( $(date +%s) - $LAST_COMMIT ) / 86400 ))
+
+            if [[ $DAYS_AGO -gt 30 ]] && [[ "$BRANCH_NAME" != "main" ]] && [[ "$BRANCH_NAME" != "develop" ]] && [[ "$BRANCH_NAME" != "master" ]]; then
+              echo "  $BRANCH_NAME (${DAYS_AGO} days old)"
+            fi
+          done)
+
+          if [[ -n "$STALE_BRANCHES" ]]; then
+            echo "⚠️  Stale branches found:"
+            echo "$STALE_BRANCHES"
+          else
+            echo "✅ No stale branches found"
+          fi
+
+          # Check for branches that don't follow naming conventions
+          echo ""
+          echo "🔍 Checking branch naming compliance..."
+          INVALID_BRANCHES=$(cat all_branches.txt | while read branch; do
+            if [[ "$branch" == "main" ]] || [[ "$branch" == "develop" ]] || [[ "$branch" == "master" ]]; then
+              continue
+            fi
+            if [[ "$branch" =~ ^release/ ]]; then
+              continue
+            fi
+            if [[ ! "$branch" =~ ^(feature|feat|fix|bug|docs|refactor|chore|test|ci|perf|style|hotfix)/.+$ ]]; then
+              echo "  ❌ $branch"
+            fi
+          done)
+
+          if [[ -n "$INVALID_BRANCHES" ]]; then
+            echo "❌ Branches not following naming conventions:"
+            echo "$INVALID_BRANCHES"
+          else
+            echo "✅ All branches follow naming conventions"
+          fi
+
+      - name: Generate branch health report
+        run: |
+          echo "## Branch Health Report" > branch_report.md
+          echo "" >> branch_report.md
+          echo "**Generated:** $(date)" >> branch_report.md
+          echo "" >> branch_report.md
+          echo "### Summary" >> branch_report.md
+          echo "- Total branches: $(wc -l < all_branches.txt)" >> branch_report.md
+          echo "- Feature branches: $(grep -c "^feature/" all_branches.txt 2>/dev/null || echo 0)" >> branch_report.md
+          echo "- Fix branches: $(grep -c "^\(fix\|bug\)/" all_branches.txt 2>/dev/null || echo 0)" >> branch_report.md
+          echo "- Documentation branches: $(grep -c "^docs/" all_branches.txt 2>/dev/null || echo 0)" >> branch_report.md
+          echo "" >> branch_report.md
+          echo "### Recommendations" >> branch_report.md
+          echo "1. Consider deleting stale branches older than 30 days" >> branch_report.md
+          echo "2. Ensure all branches follow naming conventions" >> branch_report.md
+          echo "3. Regularly merge or close completed feature branches" >> branch_report.md
+
+      - name: Upload branch health report
+        uses: actions/upload-artifact@v4
+        with:
+          name: branch-health-report
+          path: branch_report.md

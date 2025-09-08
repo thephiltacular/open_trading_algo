@@ -1,0 +1,142 @@
+name: 'Branch Name Validator'
+description: 'Validates branch names against project conventions'
+inputs:
+  branch-name:
+    description: 'The branch name to validate'
+    required: true
+  allow-protected:
+    description: 'Allow protected branches (main, develop, master)'
+    required: false
+    default: 'true'
+  allow-release:
+    description: 'Allow release branches'
+    required: false
+    default: 'true'
+  allow-hotfix:
+    description: 'Allow hotfix branches'
+    required: false
+    default: 'true'
+  strict-validation:
+    description: 'Enable strict validation (length, characters)'
+    required: false
+    default: 'true'
+
+outputs:
+  is-valid:
+    description: 'Whether the branch name is valid'
+    value: ${{ steps.validate.outputs.is-valid }}
+  branch-type:
+    description: 'The type of branch (feature, fix, etc.)'
+    value: ${{ steps.validate.outputs.branch-type }}
+  suggestion:
+    description: 'Suggested branch name if invalid'
+    value: ${{ steps.validate.outputs.suggestion }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate branch name
+      id: validate
+      shell: bash
+      run: |
+        BRANCH_NAME="${{ inputs.branch-name }}"
+
+        echo "🔍 Validating branch: $BRANCH_NAME"
+
+        # Initialize outputs
+        echo "is-valid=false" >> $GITHUB_OUTPUT
+        echo "branch-type=unknown" >> $GITHUB_OUTPUT
+        echo "suggestion=" >> $GITHUB_OUTPUT
+
+        # Skip validation for protected branches
+        if [[ "${{ inputs.allow-protected }}" == "true" ]]; then
+          if [[ "$BRANCH_NAME" == "main" ]] || [[ "$BRANCH_NAME" == "develop" ]] || [[ "$BRANCH_NAME" == "master" ]]; then
+            echo "✅ Protected branch allowed: $BRANCH_NAME"
+            echo "is-valid=true" >> $GITHUB_OUTPUT
+            echo "branch-type=protected" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+        fi
+
+        # Skip validation for release branches
+        if [[ "${{ inputs.allow-release }}" == "true" ]]; then
+          if [[ "$BRANCH_NAME" =~ ^release/ ]]; then
+            echo "✅ Release branch allowed: $BRANCH_NAME"
+            echo "is-valid=true" >> $GITHUB_OUTPUT
+            echo "branch-type=release" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+        fi
+
+        # Allow hotfix branches
+        if [[ "${{ inputs.allow-hotfix }}" == "true" ]]; then
+          if [[ "$BRANCH_NAME" =~ ^hotfix/ ]]; then
+            echo "✅ Hotfix branch allowed: $BRANCH_NAME"
+            echo "is-valid=true" >> $GITHUB_OUTPUT
+            echo "branch-type=hotfix" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+        fi
+
+        # Validate branch name pattern
+        if [[ ! "$BRANCH_NAME" =~ ^(feature|feat|fix|bug|docs|refactor|chore|test|ci|perf|style)/.+$ ]]; then
+          echo "❌ Invalid branch name pattern: $BRANCH_NAME"
+
+          # Generate suggestion
+          DESCRIPTION="${BRANCH_NAME//[^a-zA-Z0-9]/-}"
+          DESCRIPTION="${DESCRIPTION,,}"  # Convert to lowercase
+
+          if [[ "$BRANCH_NAME" =~ (fix|bug|issue|error|resolve) ]]; then
+            SUGGESTION="fix/$DESCRIPTION"
+            echo "branch-type=fix" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH_NAME" =~ (feature|feat|add|implement|new) ]]; then
+            SUGGESTION="feature/$DESCRIPTION"
+            echo "branch-type=feature" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH_NAME" =~ (doc|readme|guide|update) ]]; then
+            SUGGESTION="docs/$DESCRIPTION"
+            echo "branch-type=docs" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH_NAME" =~ (refactor|clean|optimize|improve) ]]; then
+            SUGGESTION="refactor/$DESCRIPTION"
+            echo "branch-type=refactor" >> $GITHUB_OUTPUT
+          else
+            SUGGESTION="feature/$DESCRIPTION"
+            echo "branch-type=feature" >> $GITHUB_OUTPUT
+          fi
+
+          echo "suggestion=$SUGGESTION" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+        # Extract branch type and description
+        BRANCH_TYPE="${BRANCH_NAME%%/*}"
+        DESCRIPTION="${BRANCH_NAME#*/}"
+
+        echo "branch-type=$BRANCH_TYPE" >> $GITHUB_OUTPUT
+
+        # Strict validation
+        if [[ "${{ inputs.strict-validation }}" == "true" ]]; then
+          # Check description length
+          if [[ ${#DESCRIPTION} -lt 3 ]]; then
+            echo "❌ Description too short: $DESCRIPTION"
+            echo "suggestion=${BRANCH_NAME}-description" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          if [[ ${#DESCRIPTION} -gt 50 ]]; then
+            SHORT_DESC="${DESCRIPTION:0:47}..."
+            echo "❌ Description too long: $DESCRIPTION"
+            echo "suggestion=$BRANCH_TYPE/$SHORT_DESC" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Check for valid characters
+          if [[ ! "$DESCRIPTION" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+            CLEAN_DESC="${DESCRIPTION//[^a-zA-Z0-9]/-}"
+            echo "❌ Invalid characters in description: $DESCRIPTION"
+            echo "suggestion=$BRANCH_TYPE/$CLEAN_DESC" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+        fi
+
+        echo "✅ Branch name validation passed: $BRANCH_NAME"
+        echo "is-valid=true" >> $GITHUB_OUTPUT

@@ -1,0 +1,78 @@
+name: Validate Pull Request Branch
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate-pr-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate PR branch name
+        uses: ./.github/actions/validate-branch
+        id: validation
+        with:
+          branch-name: ${{ github.head_ref }}
+          allow-protected: 'true'
+          allow-release: 'true'
+          allow-hotfix: 'true'
+          strict-validation: 'true'
+
+      - name: Handle validation result
+        if: always()
+        run: |
+          if [[ "${{ steps.validation.outputs.is-valid }}" == "true" ]]; then
+            echo "✅ PR branch validation passed: ${{ github.head_ref }}"
+            echo "Branch type: ${{ steps.validation.outputs.branch-type }}"
+          else
+            echo "❌ PR branch validation failed: ${{ github.head_ref }}"
+            if [[ -n "${{ steps.validation.outputs.suggestion }}" ]]; then
+              echo "💡 Suggested branch name: ${{ steps.validation.outputs.suggestion }}"
+              echo ""
+              echo "To fix this:"
+              echo "1. Rename your branch locally:"
+              echo "   git branch -m ${{ github.head_ref }} ${{ steps.validation.outputs.suggestion }}"
+              echo "2. Push the renamed branch:"
+              echo "   git push origin ${{ steps.validation.outputs.suggestion }}"
+              echo "3. Update your PR to use the new branch"
+              echo "4. Delete the old branch:"
+              echo "   git push origin --delete ${{ github.head_ref }}"
+            fi
+            exit 1
+          fi
+
+      - name: Comment on PR with validation result
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = '${{ github.head_ref }}';
+            const prNumber = context.issue.number;
+            const isValid = '${{ steps.validation.outputs.is-valid }}' === 'true';
+            const suggestion = '${{ steps.validation.outputs.suggestion }}';
+
+            let comment = '';
+            if (isValid) {
+              comment = `✅ **Branch Name Validated**\n\nBranch \`${branchName}\` follows the project's naming conventions.`;
+            } else {
+              comment = `❌ **Branch Name Validation Failed**\n\nBranch \`${branchName}\` doesn't follow the project's naming conventions.\n\n`;
+              if (suggestion) {
+                comment += `💡 **Suggested name:** \`${suggestion}\`\n\n`;
+                comment += `### To fix this:\n`;
+                comment += `1. Rename your branch: \`git branch -m ${branchName} ${suggestion}\`\n`;
+                comment += `2. Push the renamed branch: \`git push origin ${suggestion}\`\n`;
+                comment += `3. Update your PR to use the new branch\n`;
+                comment += `4. Delete the old branch: \`git push origin --delete ${branchName}\`\n\n`;
+              }
+              comment += `📖 See [branch naming guidelines](docs/branch-naming.md) for details.`;
+            }
+
+            github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

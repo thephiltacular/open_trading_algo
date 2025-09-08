@@ -1,0 +1,42 @@
+name: Validate Branch Name
+
+on:
+  create:
+    branches: ['*']
+  push:
+    branches: ['*']
+
+jobs:
+  validate-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate branch name
+        uses: ./.github/actions/validate-branch
+        id: validation
+        with:
+          branch-name: ${{ github.ref_name }}
+          allow-protected: 'true'
+          allow-release: 'true'
+          allow-hotfix: 'true'
+          strict-validation: 'true'
+
+      - name: Branch validation result
+        run: |
+          if [[ "${{ steps.validation.outputs.is-valid }}" == "true" ]]; then
+            echo "✅ Branch validation successful!"
+            echo "Branch type: ${{ steps.validation.outputs.branch-type }}"
+          else
+            echo "❌ Branch validation failed!"
+            if [[ -n "${{ steps.validation.outputs.suggestion }}" ]]; then
+              echo "💡 Suggested name: ${{ steps.validation.outputs.suggestion }}"
+              echo ""
+              echo "To rename your branch:"
+              echo "  git branch -m ${{ github.ref_name }} ${{ steps.validation.outputs.suggestion }}"
+              echo "  git push origin ${{ steps.validation.outputs.suggestion }}"
+              echo "  # Delete the old branch: git push origin --delete ${{ github.ref_name }}"
+            fi
+            exit 1
+          fi
