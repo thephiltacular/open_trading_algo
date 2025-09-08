@@ -5,30 +5,6 @@ A comprehensive Python library for algorithmic trading, technical analysis, and 
 The overall goal is to get as much value as possible without paying for api access ;)
 This means managing API query rates, storing as mSee the [Cache System Documentation](docs/data-cache.md) for complete setup and usage instructions.
 
-## 🔄 CI/CD & Releases
-
-This project uses GitHub Actions for automated testing and publishing:
-
-### 🧪 Continuous Integration
-- **Multi-platform testing**: Ubuntu, macOS, Windows
-- **Multi-Python support**: Python 3.9, 3.10, 3.11, 3.12
-- **Automated testing**: pytest with coverage reporting
-- **Code quality**: Black, isort, flake8, mypy
-- **Security scanning**: detect-secrets
-
-### 🚀 Automated Publishing
-- **Tag-triggered releases**: Push a version tag (`v1.2.3`) to automatically publish to PyPI
-- **Release creation**: GitHub releases automatically trigger PyPI publishing
-- **Quality assurance**: All tests must pass before publishing
-- **Manual publishing**: Use `python3 publish.py` for manual control
-
-### 📦 Release Process
-1. **Update version** in `pyproject.toml`
-2. **Run tests** locally: `poetry run pytest`
-3. **Create GitHub release** or push version tag
-4. **GitHub Actions** handles the rest automatically
-
-See the [Release Process Documentation](docs/RELEASE.md) for detailed instructions.
 
 ## 🤝 Contributing
 
@@ -390,6 +366,31 @@ data = cache.get_price_data('AAPL')
 ```
 
 See the [Cache System Documentation](docs/data-cache.md) for complete setup and usage instructions.
+
+## 🔄 CI/CD & Releases
+
+This project uses GitHub Actions for automated testing and publishing:
+
+### 🧪 Continuous Integration
+- **Multi-platform testing**: Ubuntu, macOS, Windows
+- **Multi-Python support**: Python 3.9, 3.10, 3.11, 3.12
+- **Automated testing**: pytest with coverage reporting
+- **Code quality**: Black, isort, flake8, mypy
+- **Security scanning**: detect-secrets
+
+### 🚀 Automated Publishing
+- **Tag-triggered releases**: Push a version tag (`v1.2.3`) to automatically publish to PyPI
+- **Release creation**: GitHub releases automatically trigger PyPI publishing
+- **Quality assurance**: All tests must pass before publishing
+- **Manual publishing**: Use `python3 publish.py` for manual control
+
+### 📦 Release Process
+1. **Update version** in `pyproject.toml`
+2. **Run tests** locally: `poetry run pytest`
+3. **Create GitHub release** or push version tag
+4. **GitHub Actions** handles the rest automatically
+
+See the [Release Process Documentation](docs/RELEASE.md) for detailed instructions.
 
 ## 🤝 Contributing
 
