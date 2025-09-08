@@ -3,7 +3,7 @@
 A comprehensive Python library for algorithmic trading, technical analysis, and financial data processing. Built for performance, reliability, and ease of use in both research and production environments.
 
 The overall goal is to get as much value as possible without paying for api access ;)
-This means managing API query rates, storing as mSee the [Cache System Documentation](docs/data-cache.md) for complete setup and usage instructions.
+This means managing API query rates, storing as much data as possible locally, and leveraging multiple APIs to get the data we need.
 
 
 ## 🤝 Contributing
