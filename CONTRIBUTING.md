@@ -34,9 +34,21 @@ Thank you for your interest in contributing to open_trading_algo! This document 
 
 ### Development Setup
 
-1. **Fork and Clone**
+1. **Fork and Clone** (Recommended for external contributors)
    ```bash
+   # Fork the repository on GitHub first
+   # Then clone your fork
    git clone https://github.com/YOUR_USERNAME/open_trading_algo.git
+   cd open_trading_algo
+
+   # Set up upstream remote
+   git remote add upstream https://github.com/thephiltacular/open_trading_algo.git
+   git fetch upstream
+   ```
+
+   **Alternative: Direct Clone** (For maintainers with write access)
+   ```bash
+   git clone https://github.com/thephiltacular/open_trading_algo.git
    cd open_trading_algo
    ```
 
@@ -123,6 +135,11 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `chore`
 
 1. **Create a branch** from `main`:
    ```bash
+   git checkout main
+   git pull upstream main  # If using fork workflow
+   # OR
+   git pull origin main    # If using direct clone workflow
+
    git checkout -b feature/your-feature-name
    ```
 
@@ -141,6 +158,43 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `chore`
    ```
 
 5. **Update documentation** if needed
+
+### Submitting Your PR
+
+**For Fork Workflow:**
+```bash
+# Push your branch to your fork
+git push origin feature/your-feature-name
+
+# Create PR from your fork's branch to upstream main
+```
+
+**For Direct Clone Workflow:**
+```bash
+# Push your branch to the main repository
+git push origin feature/your-feature-name
+
+# Create PR from your branch to main
+```
+
+### Branch Naming Conventions
+
+Please follow these naming conventions for your branches:
+
+- **Features**: `feature/description` or `feat/description`
+- **Bug fixes**: `fix/description` or `bug/description`
+- **Documentation**: `docs/description`
+- **Hotfixes**: `hotfix/description`
+- **Refactoring**: `refactor/description`
+
+Examples:
+```bash
+git checkout -b feature/add-rsi-indicator
+git checkout -b fix/resolve-memory-leak
+git checkout -b docs/update-api-reference
+```
+
+See `docs/branch-naming.md` for detailed guidelines.
 
 ### Pull Request Checklist
 
