@@ -6,10 +6,6 @@ The overall goal is to get as much value as possible without paying for api acce
 This means managing API query rates, storing as much data as possible locally, and leveraging multiple APIs to get the data we need.
 
 
-## 🤝 Contributing
-
-We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) for instructions on how to get started, code style, testing, and submitting pull requests.ata as possible locally, and leveraging multiple APIs to get the data we need.
-
 ## 🚀 Quick Links
 
 - **[📚 Complete Documentation](docs/README.md)** - Comprehensive guides and API reference
