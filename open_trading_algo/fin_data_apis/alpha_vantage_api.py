@@ -3,6 +3,7 @@ Alpha Vantage API interface for stocks, alpha intelligence, fundamental data, an
 """
 
 import requests
+import pandas as pd
 
 from open_trading_algo.fin_data_apis.rate_limit import rate_limit
 from open_trading_algo.fin_data_apis.secure_api import get_api_key
@@ -108,7 +109,6 @@ class AlphaVantageAPI:
         Returns:
             dict or pd.DataFrame: Stock time series data.
         """
-        import pandas as pd
 
         function_map = {
             "intraday": "TIME_SERIES_INTRADAY",
@@ -149,7 +149,6 @@ class AlphaVantageAPI:
         Returns:
             dict or pd.DataFrame: Insider transactions data.
         """
-        import pandas as pd
 
         params = {
             "function": "INSIDER_TRADING",
@@ -179,7 +178,6 @@ class AlphaVantageAPI:
         Returns:
             dict or pd.DataFrame: Alpha Intelligence data.
         """
-        import pandas as pd
 
         params = {
             "function": function,
@@ -209,7 +207,6 @@ class AlphaVantageAPI:
         Returns:
             dict or pd.DataFrame: Fundamental data.
         """
-        import pandas as pd
 
         params = {
             "function": function,
@@ -250,7 +247,6 @@ class AlphaVantageAPI:
         Returns:
             dict or pd.DataFrame: Technical indicator data.
         """
-        import pandas as pd
 
         params = {
             "function": indicator,
